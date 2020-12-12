@@ -1,0 +1,11 @@
+auto-save-list
+eln-cache/
+elpa/
+eshell/
+*.elc
+tramp
+init.el
+early-init.el
+etc/.emacs.desktop.lock
+etc/abbrev_defs
+etc/places
