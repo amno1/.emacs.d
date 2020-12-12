@@ -1,0 +1,10 @@
+My current minimal and very fast Emacs setup based on my new [[https://github.com/amno1/emacs-init-generator][init file generator]].
+
+If anyone would like to try it, I hope all needed files are included in 'lisp'
+folder.
+
+To install it, backup your old setup, clone this repo and open file
+init.org in Emacs and let it evaluate the startup code. Run M-x
+generate-init-files and point your Emacs to this directory (if you don't wish to
+keep it in your home or .config folder).
+
