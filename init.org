@@ -1155,10 +1155,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+end_src
 ** helm-lsp
 #+begin_src emacs-lisp
-
-#+end_src
-** helm-lsp
-#+begin_src emacs-lisp
 (with-package helm-lsp
   
   (defun netrom/helm-lsp-workspace-symbol-at-point ()
