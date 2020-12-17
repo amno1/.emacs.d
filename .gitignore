@@ -1,11 +1,16 @@
-auto-save-list
+auto-save-listg
 eln-cache/
 elpa/
 eshell/
 *.elc
+*~
 tramp
 init.el
 early-init.el
+.last-package-update-day
+package-quickstart.el
+helm-adaptive-history
 etc/.emacs.desktop.lock
+etc/emacs-custom.el
 etc/abbrev_defs
 etc/places

@@ -6,6 +6,197 @@
 A personal setup, based on my init file generator tool (generator.org). This is
 included just to show an example of a setup. It is currently missing some files
 for dired, so you should use it just to look at it or to try it temporarily.
+*** Baseline
+time -p emacs -nw -Q -e kill-emacs
+ 2020-12-15 12:17:43 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -Q -e kill-emacs
+real 2,08
+user 0,07
+sys 0,00
+
+ 2020-12-15 12:17:58 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -Q -e kill-emacs
+real 2,08
+user 0,07
+sys 0,01
+
+ 2020-12-15 12:18:03 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -Q -e kill-emacs
+real 2,08
+user 0,07
+sys 0,00
+___________________________________
+
+time -p emacs -Q -e kill-emacs
+ 2020-12-15 12:18:08 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -Q -e kill-emacs
+real 0,24
+user 0,12
+sys 0,01
+
+ 2020-12-15 12:19:20 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -Q -e kill-emacs
+real 0,24
+user 0,11
+sys 0,02
+
+ 2020-12-15 12:19:23 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -Q -e kill-emacs
+real 0,24
+user 0,12
+sys 0,01
+
+*** Timing with package-quickstart
+_________________________________________
+ time -p src/emacs -nw -e kill-emacs
+ 2020-12-15 12:21:14 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,21
+user 0,17
+sys 0,02
+
+ 2020-12-15 12:27:43 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,20
+user 0,15
+sys 0,04
+
+ 2020-12-15 12:27:50 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,21
+user 0,15
+sys 0,04
+_____________________________________________
+
+time -p src/emacs -e kill-emacs 
+2020-12-15 12:27:54 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,39
+user 0,23
+sys 0,04
+
+ 2020-12-15 12:28:44 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,40
+user 0,22
+sys 0,04
+
+ 2020-12-15 12:28:46 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,41
+user 0,22
+sys 0,05
+_______________________________________________
+*** Timing with hacked package-quickstart
+ 2020-12-15 12:51:45 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,21
+user 0,16
+sys 0,03
+
+ 2020-12-15 12:55:26 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,21
+user 0,16
+sys 0,03
+
+ 2020-12-15 12:55:30 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,20
+user 0,17
+sys 0,02
+_______________________________________________________________________
+ 2020-12-15 12:55:34 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,42
+user 0,25
+sys 0,02
+
+ 2020-12-15 12:56:44 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,42
+user 0,24
+sys 0,03
+
+ 2020-12-15 12:56:46 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,40
+user 0,22
+sys 0,04
+
+*** Tming with inlined autoloads
+ 2020-12-15 12:28:48 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,24
+user 0,19
+sys 0,04
+
+ 2020-12-15 12:31:14 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,24
+user 0,20
+sys 0,02
+
+ 2020-12-15 12:31:18 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,24
+user 0,19
+sys 0,03
+_____________________________________________________
+ 2020-12-15 12:31:21 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,42
+user 0,25
+sys 0,04
+
+ 2020-12-15 12:32:57 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,42
+user 0,24
+sys 0,05
+
+ 2020-12-15 12:32:59 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,42
+user 0,26
+sys 0,04
+
+*** Timing with refactored autoloads
+ 2020-12-15 12:33:01 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,24
+user 0,19
+sys 0,03
+
+ 2020-12-15 12:37:04 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,25
+user 0,20
+sys 0,04
+
+ 2020-12-15 12:37:08 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -nw -e kill-emacs
+real 2,25
+user 0,20
+sys 0,03
+____________________________________________________________
+ 2020-12-15 12:37:11 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,47
+user 0,24
+sys 0,05
+
+ 2020-12-15 12:37:42 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,44
+user 0,26
+sys 0,04
+
+ 2020-12-15 12:37:43 ⌚  pascal in ~/repos/emacs
+± |feature/native-comp ✓| → time -p src/emacs -e  kill-emacs
+real 0,44
+user 0,27
+sys 0,02
 
 ** Licence
 Copyright (C) 2020  Arthur Miller
@@ -27,268 +218,382 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 * Generator
 #+NAME: onstartup
 #+begin_src emacs-lisp :results output silent
-    ;; framework
-    (package-initialize)
+;; framework
+(defvar init-file-bake-autoloads nil)
 
-    (defvar org-archive '("org" . "http://orgmode.org/elpa/"))
-    (defvar gnu-archive '("gnu" . "https://elpa.gnu.org/packages/"))
-    (defvar elpa-archive '("elpa" . "https://elpa.gnu.org/packages/"))
-    (defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
-    (defvar melpa-stable-archive '("melpa-stable" . "https://stable.melpa.org/packages/"))
+(package-initialize)
+(setq package-archives nil)
 
-    ;; gnu = elpa is already in the list by default
-    (push melpa-archive package-archives)
-    (push melpa-stable-archive package-archives)
-    (push org-archive package-archives)
-    (setq package-archives (nreverse package-archives))
+(defvar org-archive '("org" . "http://orgmode.org/elpa/"))
+(defvar gnu-archive '("gnu" . "https://elpa.gnu.org/packages/"))
+(defvar elpa-archive '("elpa" . "https://elpa.gnu.org/packages/"))
+(defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
+(defvar melpa-stable-archive '("melpa-stable" . "https://stable.melpa.org/packages/"))
 
-    (unless (boundp 'init-file-hooks)
-      (make-variable-buffer-local 'init-file-hooks))
-    (unless (boundp 'init-file-package-list)
-      (make-variable-buffer-local 'init-file-package-list))
- 
-    (defmacro with-hook (name &rest body)
-      (let (found hook)
-	(setq name (if (string-match "-hook\\'" (symbol-name `,name))
-		       `,name
-		     (intern (concat (symbol-name name) "-hook"))))
-	(setq body (reverse body))
-	(dolist (hook init-file-hooks)
-	  (when (equal (symbol-name (car hook)) (symbol-name name))
-	    (dolist (sexp (reverse (cdr hook)))
-	      (add-to-list 'body sexp))
-	    (setcdr hook body)
-	    (setq found t)))
-	(unless found
-	  (add-to-list 'init-file-hooks (cons name body)))
-	(ignore)))
+;; gnu = elpa is already in the list by default
+(push melpa-archive package-archives)
+(push melpa-stable-archive package-archives)
+(push org-archive package-archives)
+(setq package-archives (nreverse package-archives))
 
-    (defmacro with-package (name &rest body)
-      (let ((package (symbol-name name)))
-	(append-to-init-file
-	 (prin1-to-string
-	  (macroexpand-all
-	   `(with-eval-after-load ,package ,@body))))))
+(unless (boundp 'init-file-hooks)
+  (make-variable-buffer-local 'init-file-hooks))
+(unless (boundp 'init-file-package-list)
+  (make-variable-buffer-local 'init-file-package-list))
 
-    (defmacro with-key-map (mapname &rest body)
-      `(let ((map (eval-and-compile (concat (symbol-name ',mapname) "-map")))
-	     (defs '(,@body)))
-	 (dolist (def defs)
-	   (define-key (symbol-value (intern map))
-	     (if (vectorp (car def)) (car def)
-	       (read-kbd-macro (car def))) (cdr def)))))
+(defun on-buffer-change-hook (beg eng len)
+  (setq init-file-package-list nil))
 
-    (defun emit-keymap (map)
-      (let ((body (cdr map))
-	    (key))
-	(dolist (stm `,@body)
-	  (if (vectorp (eval (car stm)))
-	      (setq key (prin1-to-string (car stm)))
-	    (setq key (concat "(kbd \"" (car stm) "\")")))
-	  (append-to-init-file
-	   (concat "(define-key "
-		   (symbol-name (car map)) "-map "
-		   key " '" (prin1-to-string (cdr stm))
-		   ")")))))
+(add-hook 'after-change-functions 'on-buffer-change-hook)
 
-    ;; tangle init file
-    (defun append-to-init-file (text)
-      (let ((file "init.el") insert-point)
-	(with-current-buffer (get-buffer-create file)
-	  (goto-char (point-max))
-	  (setq insert-point (point))
-	  (insert "\n")
-	  (insert text)
-	  (write-region insert-point (point-max) file t 0))))
+(defmacro with-hook (name &rest body)
+  (let (found hook)
+    (setq name (if (string-match "-hook\\'" (symbol-name `,name))
+		   `,name
+		 (intern (concat (symbol-name name) "-hook"))))
+    (setq body (reverse body))
+    (dolist (hook init-file-hooks)
+      (when (equal (symbol-name (car hook)) (symbol-name name))
+	(dolist (sexp (reverse (cdr hook)))
+	  (add-to-list 'body sexp))
+	(setcdr hook body)
+	(setq found t)))
+    (unless found
+      (add-to-list 'init-file-hooks (cons name body)))
+    (ignore)))
 
-    (defun emit-sexp-to-init-file (sexp)
-     (append-to-init-file (pp sexp)))
-      ;; (if (equal (symbol-name (car sexp)) "with-key-map")
-      ;;     (emit-keymap (cdr sexp))
-      ;;   (append-to-init-file (prin1-to-string sexp))))
+(defun clean-init-file ()
+  (interactive)
+  (with-temp-buffer
+    (insert-file-contents "init.el")
+    (beginning-of-buffer)
+    (while (not (eobp))
+      (when (char-equal (char-after) ?\^M)
+        (delete-char 1))
+      (forward-char 1))
+    (write-region (point-min) (point-max) "init.el")))
 
-    (defun emit-to-init-file (&rest body)
-      (dolist (sexp body)
-	(if (listp (car sexp))
-	    (dolist (s sexp)
-	      (emit-sexp-to-init-file s))
-	  (emit-sexp-to-init-file sexp))))
+(defmacro with-package (name &rest body)
+  (let ((package (symbol-name name)))
+    (append-to-init-file
+     (prin1-to-string
+      (macroexpand-all
+       `(with-eval-after-load ,package ,@body))))))
 
-    (defun tangle-early-init ()
-      (message "Exporting early-init.el ..."
-      (save-excursion
-        (let (start end)
-          (goto-char (point-min))
-          (re-search-forward "^\\*\\* Early init")
-          (re-search-forward "begin_src.*emacs-lisp")
-          (skip-chars-forward "\s\t\n\r")
-          (setq start (point))
-          (re-search-forward "end_src$")
-          (beginning-of-line)
-          (setq end (point))
-          (write-region start end "early-init.el" nil 0)))
-    (message "Wrote early-init.el")))
+(defmacro with-key-map (mapname &rest body)
+  `(let ((map (eval-and-compile (concat (symbol-name ',mapname) "-map")))
+	 (defs '(,@body)))
+     (dolist (def defs)
+       (define-key (symbol-value (intern map))
+	 (if (vectorp (car def)) (car def)
+	   (read-kbd-macro (car def))) (cdr def)))))
 
-    (defun tangle-init-file (&optional file)
-      ;;(message "TANGLE INIT FILE")
-      (unless file
-	  (setq file "init.el"))
-      (if (file-exists-p file)
-	  (delete-file file))
-      (if (file-exists-p (concat file "c"))
-	  (delete-file (concat file "c")))
-      (setq init-file-hooks nil)
-      (let (code-start code-end config-start)
-        (save-excursion
-          (goto-char (point-min))
-	    (setq config-start (re-search-forward "^\\* Packages"))
-	    ;; prolog
-          (message "Emiting prolog.")  
-	    (goto-char (point-min))
-	    (re-search-forward "^\\*\\* Init")
-	    (re-search-forward "begin_src.*emacs-lisp" config-start)
-	    (skip-chars-forward "\s\t\n\r")
-	    (setq code-start (point))
-	    (re-search-forward "end_src")
-	    (beginning-of-line)
-	    (write-region code-start (point) file t 0)
-	    ;; packages
-	    (dolist (p (get-package-list))
-            (message "Emiting package: %s" (aref p 0))
-            (when (package-enabled-p p)
-	        (eval-region (aref p 4) (aref p 5))))
-	    ;; emit hooks
-          (message "Emiting hooks.")  
-	    (dolist (hook init-file-hooks)
-	      (append-to-init-file (concat "(add-hook '"
-	                                    (symbol-name (car hook))
-					   " #'(lambda nil\n"))
-	    (dolist (elt (reverse (cdr hook)))
-	      (emit-to-init-file elt))
-	    (append-to-init-file "))"))
-	    ;; epilog
-          (message "Emiting epilog")
-          (goto-char (point-min))
-	    (re-search-forward "^\\* Epilog")
-	    (re-search-forward "begin_src.*emacs-lisp")
-          (skip-chars-forward "\s\t\n\r")
-	    (setq code-start (point))
-	    (re-search-forward "end_src")
-	    (beginning-of-line)
-	    (write-region code-start (point) file t 0))))
+(defun emit-keymap (map)
+  (let ((body (cdr map))
+	(key))
+    (dolist (stm `,@body)
+      (if (vectorp (eval (car stm)))
+	  (setq key (prin1-to-string (car stm)))
+	(setq key (concat "(kbd \"" (car stm) "\")")))
+      (append-to-init-file
+       (concat "(define-key "
+	       (symbol-name (car map)) "-map "
+	       key " '" (prin1-to-string (cdr stm))
+	       ")")))))
 
-    (defun create-early-init-file ()
-      (interactive)
-      (tangle-early-init)
-      (message "Tangled early init file."))
+(defun append-to-init-file (string-or-buffer)
+  (let ((file "init.el") insert-point)
+    (cond ((stringp string-or-buffer)
+           (write-region string-or-buffer nil file t 0))
+          ((bufferp string-or-buffer)
+	   (with-current-buffer string-or-buffer
+	     (write-region (point-min) (point-max) file t 0))))))
 
-    (defun create-init-file ()
-      (interactive)
-      (message "Exporting init.el ...")
-      (tangle-init-file)
-      (let ((tangled-file "init.el"))
-        (when (featurep 'nativecomp)
-	       (message "Native compiled %s" (native-compile tangled-file)))
-	  ;; always produce elc file
-	  (byte-compile-file tangled-file)
-	  (message "Tangled and compiled %s" tangled-file))
-      (message "Done."))
+;;  (append-to-init-file (pp sexp)))
+(defun emit-sexp-to-init-file (sexp)
+(if (equal (symbol-name (car sexp)) "with-key-map")
+    (emit-keymap (cdr sexp))
+  (append-to-init-file (prin1-to-string sexp))))
 
-    (defun generate-init-files ()
-      (interactive)
-      (create-init-file)
-      (create-early-init-file))
+(defun emit-to-init-file (&rest body)
+  (dolist (sexp body)
+    (if (listp (car sexp))
+	(dolist (s sexp)
+	  (emit-sexp-to-init-file s))
+      (emit-sexp-to-init-file sexp))))
 
-    (defun install-file (file) 
-      (when (file-exists-p file)
-	    (copy-file file user-emacs-directory t)
-        (message "Wrote: %s." file)))
+(defun emit-packages ()
+  (dolist (p (get-package-list))
+    (message "Emiting package: %s" (aref p 0))
+    (when (package-enabled-p p)
+      (eval-region (aref p 4) (aref p 5)))))
 
-    (defun install-init-files ()
-      (interactive)
-      (let ((el "init.el")
-	      (elc "init.elc")
-            (eil "early-init.el"))
-            (install-file el)
-            (install-file elc)
-            (install-file eil)
-	      (unless (file-exists-p elc)
-	        (byte-compile (expand-file-name el)))))
+(defun emit-hooks ()
+  (message "Emiting hooks.")
+  (dolist (hook init-file-hooks)
+    (append-to-init-file (concat "(add-hook '"
+	                         (symbol-name (car hook))
+				 " #'(lambda nil\n"))
+    (dolist (elt (nreverse (cdr hook)))
+      (emit-to-init-file elt))
+    (append-to-init-file "))")))
 
-    (defun get-package-list ()
-      (setq init-file-package-list nil)
-      (save-excursion
-        (goto-char (point-min))
-        (let ((bound (re-search-forward "^\\* Epilog"))
-               package packages start end)
-	         (goto-char (point-min))
-	         (re-search-forward "^\\* Packages")
-	         (while (re-search-forward "^\\*\\* " bound t)
-                 (setq package (vector nil t t "" 0 0)
-	                 start (point) end (line-end-position))
-                 ;; package name
-                 (when (re-search-forward ":" end t)
-                   (setq end (point)))
-                 (goto-char end)  
-                 (skip-chars-backward ":\s\t\r\n")
-	           (aset package 0 (intern (buffer-substring-no-properties
-	                                    start (point))))
-                 (goto-char start)
-                 ;; enabled?
-	           (when (search-forward ":disable" (line-end-position) t)
-                   (aset package 1 nil))
-	             (goto-char start)
-                 ;; not installable?
-	           (when (search-forward ":pseudo" (line-end-position) t)
-                   (aset package 2 nil))
-	             (goto-char start)
-                 ;; pinned to repository?
-                 (dolist (repo package-archives)
-                   (when (re-search-forward (concat ":" (car repo)) (line-end-position) t)
-                   (aset package 3 (car repo))))
-                 ;; code start
-	             (re-search-forward "begin_src.*emacs-lisp" bound t)
-                 (aset package 4 (point))
-	             (re-search-forward "end_src$" bound t)
-                 (beginning-of-line)
-                 (aset package 5 (point))
-                 (push package init-file-package-list)
-                 (setq init-file-package-list (nreverse init-file-package-list)))))
-                 init-file-package-list)
+(defun get-load-paths()
+  (let ((elpa (expand-file-name "elpa" user-emacs-directory))
+        (archives (expand-file-name "elpa/archives" user-emacs-directory)) 
+        package-paths)
+    (dolist (path (directory-files elpa t directory-files-no-dot-files-regexp))
+      (when (file-directory-p path)
+        (unless (string= path archives)
+          (push path package-paths))))
+    package-paths))
 
-    ;; Install packages
-    (defun ensure-package (package)
-      (let ((p (aref package 0)))
-        (unless (package-installed-p p)
-          (message "Installing package: %s" p)
-          (package-install p))))
+(defun emit-load-paths ()
+  (let ((lp (get-load-paths)))
+    (message "Emitting load-path")
+    (append-to-init-file
+     (concat "\n(setq load-path (append \n'"
+             (prin1-to-string lp)
+             " load-path))\n"))))
 
-    (defun package-enabled-p (package)
-        (aref package 1))
-      
-    (defun package-installable-p (package)
-      (and (aref package 1) (aref package 2)))
-
-    (defun install-packages (&optional packages)
-      (interactive)
-      (package-initialize)
-      (package-refresh-contents)
-      (unless packages
-        (setq packages (get-package-list)))
-	  (dolist (p packages)
-          (when (package-installable-p p)
-	      (ensure-package p))))
-
-    (defun add-package (package)
-      ""
-      (interactive "sPackage name: ")
+(defun emit-autoloads-file ()
+  (message "Emiting autoloads")
+  (package-quickstart-refresh)
+  (let ((al "autoloads.el")
+        (pp (get-load-paths))
+        (pq (expand-file-name "package-quickstart.el"
+                              user-emacs-directory)))
+    (with-temp-file al
+      (insert-file-contents pq)
       (goto-char (point-min))
-      (when (re-search-forward "^* Packages")
-	(forward-line 1)
-	(insert (concat "** " package
-			"\n#+begin_src emacs-lisp\n"
-			"\n#+end_src\n"))
-	(forward-line -2)))
+      (kill-line 3)
+      (insert (concat "\n(setq load-path (append \n'"
+                      (prin1-to-string pp)
+                      " load-path))\n"))
+      (while (not (eobp))
+        (when (char-equal (char-after) ?\^L)
+          (delete-char 1))
+        (forward-line 1))
+      (goto-char (point-max))
+      (kill-line -5)
+      (goto-char (point-min))
+      (while (not (eobp))
+        (when (re-search-forward "^(add-to-list" (line-end-position) t)
+          (forward-line -1)
+          (kill-line 3))
+        (beginning-of-line)
+        (forward-line 1))
+      (goto-char (point-min))
+      (while (not (eobp))
+        (replace-string "\n\n\n" "\n")
+        (forward-line 1)))))
+
+(defun tangle-early-init ()
+  (message "Exporting early-init.el ..."
+           (save-excursion
+             (let (start end)
+               (goto-char (point-min))
+               (re-search-forward "^\\*\\* Early init")
+               (re-search-forward "begin_src.*emacs-lisp")
+               (skip-chars-forward "\s\t\n\r")
+               (setq start (point))
+               (re-search-forward "end_src$")
+               (beginning-of-line)
+               (setq end (point))
+               (write-region start end "early-init.el" nil 0)))
+           (message "Wrote early-init.el")))
+
+(defun tangle-init-file (&optional file)
+  ;;(message "TANGLE INIT FILE")
+  (unless file
+    (setq file "init.el"))
+  (if (file-exists-p file)
+      (delete-file file))
+  (if (file-exists-p (concat file "c"))
+      (delete-file (concat file "c")))
+  (setq init-file-hooks nil)
+  (let (code-start config-start)
+    (save-excursion
+      (goto-char (point-min))
+      (setq config-start (re-search-forward "^\\* Packages"))
+      ;; prolog
+      (message "Emiting prolog.")  
+      (goto-code-start "^\\*\\* Init")
+      (setq code-start (point))
+      (goto-code-end)
+      (write-region code-start (point) file t 0)
+      ;; emit paths
+      ;;(emit-load-paths)
+      (emit-autoloads-file)
+      (when init-file-bake-autoloads
+        (with-temp-buffer
+          (insert-file-contents-literally "autoloads.el")
+          (write-region (point-min) (point-max) "init.el" t 0)))
+      ;; generate stuff
+      (emit-packages)
+      (emit-hooks) ;; must be done after emiting packages
+      ;; epilog
+      (message "Emiting epilog")
+      (goto-code-start "^\\* Epilog")
+      (setq code-start (point))
+      (goto-code-end)
+      (write-region code-start (point) file t 0)))
+  (clean-init-file))
+
+(defun goto-code-start (section)
+  (goto-char (point-min))
+  (re-search-forward section)
+  (re-search-forward "begin_src.*emacs-lisp")
+  (skip-chars-forward "\s\t\n\r"))
+
+(defun goto-code-end ()
+  (re-search-forward "end_src")
+  (beginning-of-line))
+
+(defun create-early-init-file ()
+  (interactive)
+  (tangle-early-init)
+  (message "Tangled early init file."))
+
+(defun create-init-file ()
+  (interactive)
+  (message "Exporting init.el ...")
+  (tangle-init-file)
+  (let ((tangled-file "init.el"))
+    ;; always produce elc file
+    (byte-compile-file tangled-file)
+    (when (featurep 'nativecomp)
+      (message "Native compiled %s" (native-compile tangled-file)))
+    (message "Tangled and compiled %s" tangled-file))
+  (message "Done."))
+
+(defun generate-init-files ()
+  (interactive)
+  (create-init-file)
+  (create-early-init-file))
+
+(defun install-file (file)
+  (when (file-exists-p file)
+    (copy-file file user-emacs-directory t)
+    (message "Wrote: %s." file)))
+
+(defun install-init-files ()
+  (interactive)
+  (let ((i "init.el")
+	  (ic "init.elc")
+        (ei "early-init.el")
+        (al "autoloads.el")
+        (pq "package-quickstart.el")
+        (pqc "package-quickstart.elc"))
+    (install-file i)
+    (install-file ei)
+    (unless (file-exists-p ic)
+      (byte-compile (expand-file-name el)))
+    (install-file ic)
+    (unless init-file-bake-autoloads
+      (when (file-exists-p al)
+        (rename-file al pq t)
+        (install-file pq)
+        (unless (file-exists-p pqc)
+          (byte-compile pq))
+        (install-file pqc)))
+    (when init-file-bake-autoloads
+      ;; remove package-quickstart files from .emacs.d
+      (when (file-exists-p (expand-file-name pq user-emacs-directory))
+        (delete-file (expand-file-name pq user-emacs-directory)))
+      (when (file-exists-p (expand-file-name pqc user-emacs-directory))
+        (delete-file (expand-file-name pqc user-emacs-directory))))))
+
+(defun get-package-list ()
+  (when (buffer-modified-p)
+    (setq init-file-package-list nil))
+  (unless init-file-package-list
+    (save-excursion
+      (goto-char (point-min))
+      (let ((bound (re-search-forward "^\\* Epilog"))
+            package packages start end)
+	(goto-char (point-min))
+	(re-search-forward "^\\* Packages")
+	(while (re-search-forward "^\\*\\* " bound t)
+          (setq package (vector nil t t "" 0 0)
+	        start (point) end (line-end-position))
+          ;; package name
+          (when (re-search-forward ":" end t)
+            (setq end (point)))
+          (goto-char end)
+          (skip-chars-backward ":\s\t\r\n")
+	  (aset package 0 (intern (buffer-substring-no-properties
+	                           start (point))))
+          (goto-char start)
+          ;; enabled?
+	  (when (search-forward ":disable" (line-end-position) t)
+            (aset package 1 nil))
+	  (goto-char start)
+          ;; installable?
+	  (when (search-forward ":pseudo" (line-end-position) t)
+            (aset package 2 nil))
+	  (goto-char start)
+          ;; pinned to repository?
+          (dolist (repo package-archives)
+            (when (re-search-forward (concat ":" (car repo)) (line-end-position) t)
+              (aset package 3 (car repo))))
+          ;; code start
+	  (re-search-forward "begin_src.*emacs-lisp" bound t)
+          (aset package 4 (point))
+	  (re-search-forward "end_src$" bound t)
+          (beginning-of-line)
+          (aset package 5 (point))
+          (push package init-file-package-list)
+          (setq init-file-package-list (nreverse init-file-package-list))))))
+  init-file-package-list)
+
+;; Install packages
+(defun ensure-package (package)
+  (let ((p (aref package 0)))
+    (unless (package-installed-p p)
+      (message "Installing package: %s" p)
+      (package-install p))))
+
+(defun package-pseudo-p (package)
+  (not (aref package 2)))
+
+(defun package-enabled-p (package)
+  (aref package 1))
+
+(defun package-installable-p (package)
+  (and (aref package 1) (aref package 2)))
+
+(defun install-packages (&optional packages)
+  (interactive)
+  (package-initialize)
+  (package-refresh-contents)
+  (unless packages
+    (setq packages (get-package-list)))
+  (dolist (p packages)
+    (when (package-installable-p p)
+      (ensure-package p))))
+
+(defun add-package (package)
+  ""
+  (interactive "sPackage name: ")
+  (goto-char (point-min))
+  (when (re-search-forward "^* Packages")
+    (forward-line 1)
+    (insert (concat "** " package
+		    "\n#+begin_src emacs-lisp\n"
+		    "\n#+end_src\n"))
+    (forward-line -2)))
+
+(defun add-pseudo-package (package)
+  ""
+  (interactive "sPackage name: ")
+  (goto-char (point-min))
+  (when (re-search-forward "^* Packages")
+    (forward-line 1)
+    (insert (concat "** " package "\t\t:pseudo"
+		    "\n#+begin_src emacs-lisp\n"
+		    "\n#+end_src\n"))
+    (forward-line -2)))
 #+end_src
 * Prolog
 ** Early init
@@ -328,7 +633,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (custom-set-faces '(default ((t (:height 140)))))
 
 (unless (eq system-type 'darwin)
-  (setq command-line-ns-option-alist nil))
+(setq command-line-ns-option-alist nil))
 ;;; early-init.el ends here
 #+end_src
 ** Init
@@ -346,7 +651,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       (normal-top-level-add-subdirs-to-load-path))
 
     (setq load-prefer-newer t
-          package-quickstart t        
+          package-quickstart t
           package-enable-at-startup nil
           package--init-file-ensured t)
 
@@ -357,6 +662,82 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (global-unset-key (kbd "C-v"))
 #+end_src
 * Packages
+** org-noter-pdftools
+#+begin_src emacs-lisp
+(with-package pdf-annot
+    (add-hook 'pdf-annot-activate-handler-functions
+       #'org-noter-pdftools-jump-to-note))
+#+end_src
+** org-pdftools
+#+begin_src emacs-lisp
+(with-hook org-load
+  (org-pdftools-setup-link))
+#+end_src
+** pdf-tools
+#+begin_src emacs-lisp
+(with-package pdf-tools
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-page)
+
+  
+  (defhydra hydra-pdftools (:color blue :hint nil)
+        "
+                                                                      ╭───────────┐
+       Move  History   Scale/Fit     Annotations  Search/Link    Do   │ PDF Tools │
+   ╭──────────────────────────────────────────────────────────────────┴───────────╯
+         ^^_g_^^      _B_    ^↧^    _+_    ^ ^     [_al_] list    [_s_] search    [_u_] revert buffer
+         ^^^↑^^^      ^↑^    _H_    ^↑^  ↦ _W_ ↤   [_am_] markup  [_o_] outline   [_i_] info
+         ^^_p_^^      ^ ^    ^↥^    _0_    ^ ^     [_at_] text    [_F_] link      [_d_] dark mode
+         ^^^↑^^^      ^↓^  ╭─^─^─┐  ^↓^  ╭─^ ^─┐   [_ad_] delete  [_f_] search link
+    _h_ ←pag_e_→ _l_  _N_  │ _P_ │  _-_    _b_     [_aa_] dired
+         ^^^↓^^^      ^ ^  ╰─^─^─╯  ^ ^  ╰─^ ^─╯   [_y_]  yank
+         ^^_n_^^      ^ ^  _r_eset slice box
+         ^^^↓^^^
+         ^^_G_^^
+   --------------------------------------------------------------------------------
+        "
+        ("\\" hydra-master/body "back")
+        ("<ESC>" nil "quit")
+        ("al" pdf-annot-list-annotations)
+        ("ad" pdf-annot-delete)
+        ("aa" pdf-annot-attachment-dired)
+        ("am" pdf-annot-add-markup-annotation)
+        ("at" pdf-annot-add-text-annotation)
+        ("y"  pdf-view-kill-ring-save)
+        ("+" pdf-view-enlarge :color red)
+        ("-" pdf-view-shrink :color red)
+        ("0" pdf-view-scale-reset)
+        ("H" pdf-view-fit-height-to-window)
+        ("W" pdf-view-fit-width-to-window)
+        ("P" pdf-view-fit-page-to-window)
+        ("n" pdf-view-next-page-command :color red)
+        ("p" pdf-view-previous-page-command :color red)
+        ("d" pdf-view-dark-minor-mode)
+        ("b" pdf-view-set-slice-from-bounding-box)
+        ("r" pdf-view-reset-slice)
+        ("g" pdf-view-first-page)
+        ("G" pdf-view-last-page)
+        ("e" pdf-view-goto-page)
+        ("o" pdf-outline)
+        ("s" pdf-occur)
+        ("i" pdf-misc-display-metadata)
+        ("u" pdf-view-revert-buffer)
+        ("F" pdf-links-action-perfom)
+        ("f" pdf-links-isearch-link)
+        ("B" pdf-history-backward :color red)
+        ("N" pdf-history-forward :color red)
+        ("l" image-forward-hscroll :color red)
+        ("h" image-backward-hscroll :color red)))
+#+end_src
+** oauth2 :disable
+#+begin_src emacs-lisp
+
+#+end_src
+** nov
+#+begin_src emacs-lisp
+(with-hook after-init
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+#+end_src
 ** async
 #+begin_src emacs-lisp
 (with-package async
@@ -378,6 +759,86 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 (with-hook after-init
            (beacon-mode t))
+#+end_src
+** company
+#+begin_src emacs-lisp
+(with-package company 
+  (require 'company-capf)
+  (require 'company-files)
+  (setq company-idle-delay            0
+        company-require-match         nil
+        company-minimum-prefix-length 2
+        company-show-numbers          t
+        company-tooltip-limit         20
+        company-async-timeout         6
+        company-dabbrev-downcase      nil
+        tab-always-indent 'complete
+        company-global-modes '(not term-mode)
+        company-backends (delete 'company-semantic company-backends))
+        (define-key company-mode-map [remap indent-for-tab-command]
+        'company-indent-or-complete-common)
+        (add-to-list 'company-backends 'company-cmake)
+        (add-to-list 'company-backends 'company-capf)
+        (add-to-list 'company-backends 'company-files)
+  (add-hook 'emacs-lisp-mode-hook 'company-mode))
+
+(with-hook company-mode
+  (diminish 'company-mode)
+  (with-key-map company-active-map
+    ("C-n" . company-select-next)
+    ("C-p" . company-select-previous)))
+
+(with-hook emacs-lisp-mode
+  (setq fill-column 80)
+  (define-key emacs-lisp-mode-map (kbd "\C-c r") 'fc-eval-and-replace)
+  (define-key emacs-lisp-mode-map (kbd "\C-c s") 'eval-surrounding-sexp)
+  (define-key emacs-lisp-mode-map (kbd "\C-c l") 'eval-last-sexp)
+  (define-key emacs-lisp-mode-map (kbd "\C-c n") 'eval-next-sexp)
+  (define-key emacs-lisp-mode-map (kbd "\C-c d") 'eval-defun))
+#+end_src
+** company-c-headers
+#+begin_src emacs-lisp
+(with-hook company-mode
+  (add-to-list 'company-backends 'company-c-headers))
+(with-hook company-c-headers-mode
+  (diminish 'company-c-headers-mode))
+#+end_src
+** company-lsp
+#+begin_src emacs-lisp
+(with-package company-lsp
+  (push 'company-lsp company-backends)
+  (setq company-transformers nil
+        company-lsp-async t
+        company-lsp-cache-candidates nil))
+
+(with-hook company-lsp-mode
+  (diminish 'company-lsp-mode))
+#+end_src
+** company-math
+#+begin_src emacs-lisp
+(with-hook company-mode
+  (diminish 'company-math-mode)
+  (add-to-list 'company-backends 'company-math-symbols-latex)
+  (add-to-list 'company-backends 'company-math-symbols-unicode))
+#+end_src
+** company-quickhelp
+#+begin_src emacs-lisp
+(with-hook company-mode
+  (add-hook 'global-company-mode-hook 'company-quickhelp-mode))
+(with-hook company-quickhelp-mode
+  (diminish 'company-quickhelp-mode))
+#+end_src
+** c++                                                                    :pseudo
+#+begin_src emacs-lisp
+(with-hook c-initialization-hook
+  (require 'c++-setup))
+
+(with-hook after-init
+  (add-to-list 'auto-mode-alist '("\\.c\\'" . c-mode))
+  (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
+  (setq auto-mode-alist (append
+              (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
+              auto-mode-alist)))
 #+end_src
 ** diminish
 #+begin_src emacs-lisp
@@ -666,6 +1127,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-hook expand-region-mode
            (diminish 'expand-region-mode))
 #+end_src
+** flycheck
+#+begin_src emacs-lisp
+
+#+end_src
 ** gnus                                                                    :pseudo
 #+begin_src emacs-lisp
 (with-hook after-init
@@ -724,6 +1189,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
            (setq gnus-topic-alist '(("live.com")
                                     ;;("Reddit")
                                     ("Gnus"))))
+#+end_src
+** google-c-style
+#+begin_src emacs-lisp
+(with-hook google-c-style-mode
+  (diminish 'google-c-style-mode))
 #+end_src
 ** helm
 #+begin_src emacs-lisp
@@ -876,9 +1346,62 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+end_src
 ** helm-lsp
 #+begin_src emacs-lisp
+
+#+end_src
+** helm-lsp
+#+begin_src emacs-lisp
 (with-package helm-lsp
-              (define-key lsp-mode-map [remap xref-find-apropos]
-                #'helm-lsp-workspace-symbol))
+  
+  (defun netrom/helm-lsp-workspace-symbol-at-point ()
+    (interactive)
+    (let ((current-prefix-arg t))
+    (call-interactively 'helm-lsp-workspace-symbol)))
+
+  (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
+    (interactive)
+    (let ((current-prefix-arg t))
+    (call-interactively 'helm-lsp-global-workspace-symbol)))
+
+  (setq netrom--general-lsp-hydra-heads
+        '(;; Xref
+          ("d" xref-find-definitions "Definitions" :column "Xref")
+          ("D" xref-find-definitions-other-window "-> other win")
+          ("r" xref-find-references "References")
+          ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
+          ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
+
+          ;; Peek
+          ("C-d" lsp-ui-peek-find-definitions "Definitions" :column "Peek")
+          ("C-r" lsp-ui-peek-find-references "References")
+          ("C-i" lsp-ui-peek-find-implementation "Implementation")
+
+          ;; LSP
+          ("p" lsp-describe-thing-at-point "Describe at point" :column "LSP")
+          ("C-a" lsp-execute-code-action "Execute code action")
+          ("R" lsp-rename "Rename")
+          ("t" lsp-goto-type-definition "Type definition")
+          ("i" lsp-goto-implementation "Implementation")
+          ("f" helm-imenu "Filter funcs/classes (Helm)")
+          ("C-c" lsp-describe-session "Describe session")
+
+          ;; Flycheck
+          ("l" lsp-ui-flycheck-list "List errs/warns/notes" :column "Flycheck"))
+
+        netrom--misc-lsp-hydra-heads
+        '(;; Misc
+          ("q" nil "Cancel" :column "Misc")
+          ("b" pop-tag-mark "Back")))
+
+  ;; Create general hydra.
+  (eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
+           ,@(append
+              netrom--general-lsp-hydra-heads
+              netrom--misc-lsp-hydra-heads))))
+
+(with-hook helm-lsp-mode
+  (with-key-map lsp-mode-map
+    ([remap xref-find-apropos] . #'helm-lsp-workspace-symbol)
+    ("C-c C-l" . 'netrom/lsp-hydra/body)))
 #+end_src
 ** helm-make
 #+begin_src emacs-lisp
@@ -913,9 +1436,121 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       ("C-h u" . helpful-command)))
 #+end_src
 
+** hydra
+#+begin_src emacs-lisp
+(with-package hydra
+  (with-key-map global
+    ("C-x t" .
+      (defhydra toggle (:color blue)
+                "toggle"
+                ("a" abbrev-mode "abbrev")
+                ("s" flyspell-mode "flyspell")
+                ("d" toggle-debug-on-error "debug")
+                ("c" fci-mode "fCi")
+                ("f" auto-fill-mode "fill")
+                ("t" toggle-truncate-lines "truncate")
+                ("w" whitespace-mode "whitespace")
+                ("q" nil "cancel")))
+    ("C-x j" .
+      (defhydra gotoline
+                ( :pre (linum-mode 1)
+                :post (linum-mode -1))
+                "goto"
+                ("t" (lambda () (interactive)(move-to-window-line-top-bottom 0)) "top")
+                ("b" (lambda () (interactive)(move-to-window-line-top-bottom -1)) "bottom")
+                ("m" (lambda () (interactive)(move-to-window-line-top-bottom)) "middle")
+                ("e" (lambda () (interactive)(goto-char (point-max)) "end"))
+                ("c" recenter-top-bottom "recenter")
+                ("n" next-line "down")
+                ("p" (lambda () (interactive) (forward-line -1))  "up")
+                ("g" goto-line "goto-line")
+                ))
+    ("C-c t" .
+      (defhydra hydra-global-org (:color blue)
+                "Org"
+                ("t" org-timer-start "Start Timer")
+                ("s" org-timer-stop "Stop Timer")
+                ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
+                ("p" org-timer "Print Timer") ; output timer value to buffer
+                ("w" (org-clock-in '(4)) "Clock-In") ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
+                ("o" org-clock-out "Clock-Out") ; you might also want (setq org-log-note-clock-out t)
+                ("j" org-clock-goto "Clock Goto") ; global visit the clocked task
+                ("c" org-capture "Capture") ; Dont forget to define the captures you want http://orgmode.org/manual/Capture.html
+                ("l" (or )rg-capture-goto-last-stored "Last Capture")))))
+#+end_src
 ** imenu-anywhere
 #+begin_src emacs-lisp
 
+#+end_src
+** lisp & elisp                                                          :pseudo
+#+begin_src emacs-lisp
+(with-hook after-init
+  (set-default 'auto-mode-alist
+    (append '(("\\.lisp$" . lisp-mode)
+              ("\\.lsp$" . lisp-mode)
+              ("\\.cl$" . lisp-mode))
+              auto-mode-alist)))
+#+end_src
+** lsp-mode
+#+begin_src emacs-lisp
+(with-package lsp-mode
+      (setq lsp-diagnostic-provider :none
+            lsp-keymap-prefix "C-f"
+            lsp-completion-provider t
+            lsp-enable-xref t
+            lsp-auto-configure t
+            lsp-auto-guess-root t
+            ;;lsp-inhibit-message t
+            lsp-enable-snippet t
+            lsp-restart 'interactive
+            lsp-log-io nil
+            lsp-enable-links nil
+            lsp-enable-symbol-highlighting nil
+            lsp-keep-workspace-alive t
+            lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error")
+            ;; python
+            ;; lsp-python-executable-cmd "python3"
+            ;; lsp-python-ms-executable "~/repos/python-language-server/output/bin/Release/osx-x64/publish/Microsoft.Python.LanguageServer"
+            lsp-enable-completion-enable t)
+
+      (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+      (add-hook 'lsp-managed-mode-hook (lambda () (setq-local company-backends
+      '(company-capf)))))
+
+(with-hook lsp-mode
+      (diminish 'lsp-mode))
+#+end_src
+** lsp-ui
+#+begin_src emacs-lisp
+(with-package lsp-ui
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+  (setq lsp-ui-doc-enable t
+        lsp-ui-doc-header t
+        lsp-ui-doc-include-signature t
+        lsp-ui-doc-position 'top
+        lsp-ui-doc-border (face-foreground 'default)
+        lsp-ui-sideline-enable nil
+        lsp-ui-sideline-ignore-duplicate t
+        lsp-ui-sideline-show-code-actions nil
+        lsp-ui-sideline-ignore-duplicate t
+        ;; Use lsp-ui-doc-webkit only in GUI
+        lsp-ui-doc-use-webkit t
+        ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
+        ;; https://github.com/emacs-lsp/lsp-ui/issues/243
+        mode-line-format nil)
+        (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)))
+
+(with-hook lsp-ui
+  (diminish 'lsp-ui-mode)
+  (with-key-map lsp-ui-mode
+    ([remap xref-find-references] . lsp-ui-peek-find-references)
+    ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+    ("C-c u" . lsp-ui-imenu)))
+#+end_src
+** modern-cpp-font-lock
+#+begin_src emacs-lisp
+(with-hook modern-cpp-font-lock-mode
+  (diminish 'modern-cpp-font-lock-mode))
 #+end_src
 ** org                                                                      :pseudo
 #+begin_src emacs-lisp
@@ -1002,4 +1637,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ;; eval: (progn (org-babel-goto-named-src-block "onstartup") (org-babel-execute-src-block) (outline-hide-sublevels 2))
 ;; End:
 #+end_src
+
+#+RESULTS:
 
