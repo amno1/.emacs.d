@@ -23,8 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 * Generator
 #+NAME: onstartup
 #+begin_src emacs-lisp :results output silent
-;; framework
-(defvar init-file-bake-autoloads nil)
+(defvar init-file-bake-autoloads t)
 (defvar init-file-unroll-key-bindings t)
 
 (package-initialize)
@@ -196,19 +195,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         (forward-line 1)))))
 
 (defun tangle-early-init ()
-  (message "Exporting early-init.el ..."
-           (save-excursion
-             (let (start end)
-               (goto-char (point-min))
-               (re-search-forward "^\\*\\* Early init")
-               (re-search-forward "begin_src.*emacs-lisp")
-               (skip-chars-forward "\s\t\n\r")
-               (setq start (point))
-               (re-search-forward "end_src$")
-               (beginning-of-line)
-               (setq end (point))
-               (write-region start end "early-init.el" nil 0)))
-           (message "Wrote early-init.el")))
+  (message "Exporting early-init.el ...")
+  (save-excursion
+    (let (start end)
+      (goto-char (point-min))
+      ;; are we baking quickstart file?
+      (re-search-forward "^\\*\\* Early Init")
+      (re-search-forward "package-quickstart ")
+      (kill-word 1)
+      (if init-file-bake-autoloads
+          (insert "t")
+        (insert "nil"))
+      (goto-char (point-min))
+      (re-search-forward "^\\*\\* Early init")
+      (re-search-forward "begin_src.*emacs-lisp")
+      (skip-chars-forward "\s\t\n\r")
+      (setq start (point))
+      (re-search-forward "end_src$")
+      (beginning-of-line)
+      (setq end (point))
+      (write-region start end "early-init.el" nil 0)))
+  (message "Wrote early-init.el"))
 
 (defun tangle-init-file (&optional file)
   ;;(message "TANGLE INIT FILE")
@@ -234,6 +241,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       (emit-autoloads-file)
       (when init-file-bake-autoloads
         (with-temp-buffer
+          (when init-file-bake-autoloads
+            (insert "(defvar package-activated-list nil)"))
           (insert-file-contents-literally "autoloads.el")
           (write-region (point-min) (point-max) "init.el" t 0)))
       ;; generate stuff
@@ -421,7 +430,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       show-paren-delay 0
       use-dialog-box nil
       visible-bell nil
-      ring-bell-function 'ignore)
+      ring-bell-function 'ignore
+      load-prefer-newer t
+      package-quickstart t
+      package-enable-at-startup nil
+      package--init-file-ensured t)
 
 (setq-default abbrev-mode t
               indent-tabs-mode nil
@@ -456,11 +469,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (let ((default-directory  (expand-file-name "lisp" user-emacs-directory)))
       (normal-top-level-add-to-load-path '("."))
       (normal-top-level-add-subdirs-to-load-path))
-
-    (setq load-prefer-newer t
-          package-quickstart t
-          package-enable-at-startup nil
-          package--init-file-ensured t)
 
 (define-prefix-command 'C-z-map)
 (global-set-key (kbd "C-z") 'C-z-map)
