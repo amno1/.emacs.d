@@ -80,8 +80,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 (defmacro with-package (name &rest body)
   (let ((package (symbol-name name)))
-    (append-to-init-file
-      (prin1-to-string (macroexpand-all with-eval-after-load)))
+    (append-to-init-file "\n(with-eval-after-load ")
     (append-to-init-file (concat "\"" package "\"\n"))
      (emit-to-init-file body)
     (append-to-init-file ")\n")))
