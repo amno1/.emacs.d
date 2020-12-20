@@ -23,401 +23,401 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 * Generator
 #+NAME: onstartup
 #+begin_src emacs-lisp :results output silent
-(defvar init-file-bake-autoloads t)
-(defvar init-file-unroll-key-bindings t)
+  (defvar init-file-bake-autoloads t)
+  (defvar init-file-unroll-key-bindings t)
 
-(package-initialize)
-(setq package-archives nil)
-
-(defvar org-archive '("org" . "http://orgmode.org/elpa/"))
-(defvar gnu-archive '("gnu" . "https://elpa.gnu.org/packages/"))
-(defvar elpa-archive '("elpa" . "https://elpa.gnu.org/packages/"))
-(defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
-(defvar melpa-stable-archive '("melpa-stable" . "https://stable.melpa.org/packages/"))
-
-(push elpa-archive package-archives)
-(push melpa-archive package-archives)
-(push melpa-stable-archive package-archives)
-(push org-archive package-archives)
-(setq package-archives (nreverse package-archives))
-
-(unless (boundp 'init-file-hooks)
-  (make-variable-buffer-local 'init-file-hooks))
-(unless (boundp 'init-file-package-list)
-  (make-variable-buffer-local 'init-file-package-list))
-
-(defun on-buffer-change-hook (beg eng len)
-  (setq init-file-package-list nil))
-
-(add-hook 'after-change-functions 'on-buffer-change-hook)
-
-(defmacro with-hook (name &rest body)
-  (let (found hook)
-    (setq name (if (string-match "-hook\\'" (symbol-name `,name))
-		   `,name
-		 (intern (concat (symbol-name name) "-hook"))))
-    (setq body (reverse body))
-    (dolist (hook init-file-hooks)
-      (when (equal (symbol-name (car hook)) (symbol-name name))
-	(dolist (sexp (reverse (cdr hook)))
-	  (add-to-list 'body sexp))
-	(setcdr hook body)
-	(setq found t)))
-    (unless found
-      (add-to-list 'init-file-hooks (cons name body)))
-    (ignore)))
-
-(defun clean-init-file ()
-  (interactive)
-  (with-temp-buffer
-    (insert-file-contents "init.el")
-    (beginning-of-buffer)
-    (while (not (eobp))
-      (when (char-equal (char-after) ?\^M)
-        (delete-char 1))
-      (forward-char 1))
-    (write-region (point-min) (point-max) "init.el")))
-
-(defmacro with-package (name &rest body)
-  (let ((package (symbol-name name)))
-    (append-to-init-file "(with-eval-after-load ")
-    (append-to-init-file (concat "\"" package "\"\n"))
-    (emit-to-init-file body)
-    (append-to-init-file ")\n")))
-
-(defmacro with-key-map (mapname &rest body)
-  `(let ((map (eval-and-compile (concat (symbol-name ',mapname) "-map")))
-	 (defs '(,@body)))
-     (dolist (def defs)
-       (define-key (symbol-value (intern map))
-	 (if (vectorp (car def)) (car def)
-	   (read-kbd-macro (car def))) (cdr def)))))
-
-(defun emit-keymap (map)
-  (let ((body (cdr map))
-	(key))
-    (dolist (stm `,@body)
-      (if (vectorp (eval (car stm)))
-	  (setq key (prin1-to-string (car stm)))
-	(setq key (concat "(kbd \"" (car stm) "\")")))
-      (append-to-init-file
-       (concat "(define-key "
-	       (symbol-name (car map)) "-map "
-	       key " '" (prin1-to-string (cdr stm))
-	       ")")))))
-
-(defun append-to-init-file (string-or-buffer)
-  (let ((file "init.el") insert-point)
-    (cond ((stringp string-or-buffer)
-           (write-region string-or-buffer nil file t 0))
-          ((bufferp string-or-buffer)
-	   (with-current-buffer string-or-buffer
-	     (write-region (point-min) (point-max) file t 0))))))
-
-(defun emit-sexp-to-init-file (sexp)
-  (if init-file-unroll-key-bindings
-      (if (equal (symbol-name (car sexp)) "with-key-map")
-          (emit-keymap (cdr sexp))
-        (append-to-init-file (prin1-to-string sexp)))
-    (append-to-init-file (pp sexp))))
-
-(defun emit-to-init-file (&rest body)
-  (dolist (sexp body)
-    (if (listp (car sexp))
-	(dolist (s sexp)
-	  (emit-sexp-to-init-file s))
-      (emit-sexp-to-init-file sexp))))
-
-(defun emit-packages ()
-  (dolist (p (get-package-list))
-    (message "Emiting package: %s" (aref p 0))
-    (when (package-enabled-p p)
-      (eval-region (aref p 4) (aref p 5)))))
-
-(defun emit-hooks ()
-  (message "Emiting hooks.")
-  (dolist (hook init-file-hooks)
-    (append-to-init-file (concat "(add-hook '"
-	                         (symbol-name (car hook))
-				 " #'(lambda nil\n"))
-    (dolist (elt (nreverse (cdr hook)))
-      (emit-to-init-file elt))
-    (append-to-init-file "))")))
-
-(defun get-load-paths()
-  (let ((elpa (expand-file-name "elpa" user-emacs-directory))
-        (archives (expand-file-name "elpa/archives" user-emacs-directory)) 
-        package-paths)
-    (dolist (path (directory-files elpa t directory-files-no-dot-files-regexp))
-      (when (file-directory-p path)
-        (unless (string= path archives)
-          (push path package-paths))))
-    package-paths))
-
-(defun emit-load-paths ()
-  (let ((lp (get-load-paths)))
-    (message "Emitting load-path")
-    (append-to-init-file
-     (concat "\n(nconc load-path \n'"
-             (prin1-to-string lp)
-             ")\n"))))
-
-(defun emit-autoloads-file ()
-  (message "Emiting autoloads")
-  (package-quickstart-refresh)
-  (let ((al "autoloads.el")
-        (pp (get-load-paths))
-        (pq (expand-file-name "package-quickstart.el"
-                              user-emacs-directory)))
-    (with-temp-file al
-      (insert-file-contents pq)
-      (goto-char (point-min))
-      (kill-line 3)
-      (insert (concat "\n(setq load-path (append \n'"
-                      (prin1-to-string pp)
-                      " load-path))\n"))
-      (while (not (eobp))
-        (when (char-equal (char-after) ?\^L)
-          (delete-char 1))
-        (forward-line 1))
-      (goto-char (point-max))
-      (kill-line -5)
-      (goto-char (point-min))
-      (while (not (eobp))
-        (when (re-search-forward "^(add-to-list" (line-end-position) t)
-          (forward-line -1)
-          (kill-line 3))
-        (beginning-of-line)
-        (forward-line 1))
-      (goto-char (point-min))
-      (while (not (eobp))
-        (replace-string "\n\n\n" "\n")
-        (forward-line 1)))))
-
-(defun tangle-early-init ()
-  (message "Exporting early-init.el ...")
-  (save-excursion
-    (let (start end)
-      (goto-char (point-min))
-      ;; are we baking quickstart file?
-      (re-search-forward "^\\*\\* Early Init")
-      (re-search-forward "package-quickstart ")
-      (kill-word 1)
-      (if init-file-bake-autoloads
-          (insert "t")
-        (insert "nil"))
-      (goto-char (point-min))
-      (re-search-forward "^\\*\\* Early init")
-      (re-search-forward "begin_src.*emacs-lisp")
-      (skip-chars-forward "\s\t\n\r")
-      (setq start (point))
-      (re-search-forward "end_src$")
-      (beginning-of-line)
-      (setq end (point))
-      (write-region start end "early-init.el" nil 0)))
-  (message "Wrote early-init.el"))
-
-(defun tangle-init-file (&optional file)
-  ;;(message "TANGLE INIT FILE")
-  (unless file
-    (setq file "init.el"))
-  (if (file-exists-p file)
-      (delete-file file))
-  (if (file-exists-p (concat file "c"))
-      (delete-file (concat file "c")))
-  (setq init-file-hooks nil)
-  (let (code-start config-start)
-    (save-excursion
-      (goto-char (point-min))
-      (setq config-start (re-search-forward "^\\* Packages"))
-      ;; prolog
-      (message "Emiting prolog.")  
-      (goto-code-start "^\\*\\* Init")
-      (setq code-start (point))
-      (goto-code-end)
-      (write-region code-start (point) file t 0)
-      ;; emit paths
-      ;;(emit-load-paths)
-      (emit-autoloads-file)
-      (when init-file-bake-autoloads
-        (with-temp-buffer
-          (when init-file-bake-autoloads
-            (insert "(defvar package-activated-list nil)"))
-          (insert-file-contents-literally "autoloads.el")
-          (write-region (point-min) (point-max) "init.el" t 0)))
-      ;; generate stuff
-      (emit-packages)
-      (emit-hooks) ;; must be done after emiting packages
-      ;; epilog
-      (message "Emiting epilog")
-      (goto-code-start "^\\* Epilog")
-      (setq code-start (point))
-      (goto-code-end)
-      (write-region code-start (point) file t 0)))
-  (clean-init-file))
-
-(defun goto-code-start (section)
-  (goto-char (point-min))
-  (re-search-forward section)
-  (re-search-forward "begin_src.*emacs-lisp")
-  (skip-chars-forward "\s\t\n\r"))
-
-(defun goto-code-end ()
-  (re-search-forward "end_src")
-  (beginning-of-line))
-
-(defun create-early-init-file ()
-  (interactive)
-  (tangle-early-init)
-  (message "Tangled early init file."))
-
-(defun create-init-file ()
-  (interactive)
-  (message "Exporting init.el ...")
-  (tangle-init-file)
-  (let ((tangled-file "init.el"))
-    ;; always produce elc file
-    (byte-compile-file tangled-file)
-    (when (featurep 'nativecomp)
-      (message "Native compiled %s" (native-compile tangled-file)))
-    (message "Tangled and compiled %s" tangled-file))
-  (message "Done."))
-
-(defun generate-init-files ()
-  (interactive)
-  (create-init-file)
-  (create-early-init-file))
-
-(defun install-file (file)
-  (when (file-exists-p file)
-    (copy-file file user-emacs-directory t)
-    (message "Wrote: %s." file)))
-
-(defun install-init-files ()
-  (interactive)
-  (let ((i "init.el")
-	  (ic "init.elc")
-        (ei "early-init.el")
-        (al "autoloads.el")
-        (pq "package-quickstart.el")
-        (pqc "package-quickstart.elc"))
-    (install-file i)
-    (install-file ei)
-    (unless (file-exists-p ic)
-      (byte-compile (expand-file-name el)))
-    (install-file ic)
-    (unless init-file-bake-autoloads
-      (when (file-exists-p al)
-        (rename-file al pq t)
-        (install-file pq)
-        (unless (file-exists-p pqc)
-          (byte-compile pq))
-        (install-file pqc)))
-    (when init-file-bake-autoloads
-      ;; remove package-quickstart files from .emacs.d
-      (when (file-exists-p (expand-file-name pq user-emacs-directory))
-        (delete-file (expand-file-name pq user-emacs-directory)))
-      (when (file-exists-p (expand-file-name pqc user-emacs-directory))
-        (delete-file (expand-file-name pqc user-emacs-directory))))))
-
-(defun get-package-list ()
-  (when (buffer-modified-p)
-    (setq init-file-package-list nil))
-  (unless init-file-package-list
-    (save-excursion
-      (goto-char (point-min))
-      (let ((bound (re-search-forward "^\\* Epilog"))
-            package packages start end)
-	(goto-char (point-min))
-	(re-search-forward "^\\* Packages")
-	(while (re-search-forward "^\\*\\* " bound t)
-          (setq package (vector nil t t "" 0 0)
-	        start (point) end (line-end-position))
-          ;; package name
-          (when (re-search-forward ":" end t)
-            (setq end (point)))
-          (goto-char end)
-          (skip-chars-backward ":\s\t\r\n")
-	  (aset package 0 (intern (buffer-substring-no-properties
-	                           start (point))))
-          (goto-char start)
-          ;; enabled?
-	  (when (search-forward ":disable" (line-end-position) t)
-            (aset package 1 nil))
-	  (goto-char start)
-          ;; installable?
-	  (when (search-forward ":pseudo" (line-end-position) t)
-            (aset package 2 nil))
-	  (goto-char start)
-          ;; pinned to repository?
-          (dolist (repo package-archives)
-            (when (re-search-forward (concat ":" (car repo)) (line-end-position) t)
-              (aset package 3 (car repo))))
-          ;; code start
-	  (re-search-forward "begin_src.*emacs-lisp" bound t)
-          (aset package 4 (point))
-	  (re-search-forward "end_src$" bound t)
-          (beginning-of-line)
-          (aset package 5 (point))
-          (push package init-file-package-list)
-          (setq init-file-package-list (nreverse init-file-package-list))))))
-  init-file-package-list)
-
-;; Install packages
-(defun ensure-package (package)
-  (let ((p (aref package 0)))
-    (unless (package-installed-p p)
-      (message "Installing package: %s" p)
-      (package-install p))))
-
-(defun package-pseudo-p (package)
-  (not (aref package 2)))
-
-(defun package-enabled-p (package)
-  (aref package 1))
-
-(defun package-installable-p (package)
-  (and (aref package 1) (aref package 2)))
-
-(defun install-packages (&optional packages)
-  (interactive)
   (package-initialize)
-  (package-refresh-contents)
-  (unless packages
-    (setq packages (get-package-list)))
-  (dolist (p packages)
-    (when (package-installable-p p)
-      (ensure-package p))))
+  (package-quickstart-refresh)
+  (setq package-archives nil)
 
-(defun add-package (package)
-  ""
-  (interactive "sPackage name: ")
-  (goto-char (point-min))
-  (when (re-search-forward "^* Packages")
-    (forward-line 1)
-    (insert (concat "** " package
-		    "\n#+begin_src emacs-lisp\n"
-		    "\n#+end_src\n"))
-    (forward-line -2)))
+  (defvar org-archive '("org" . "http://orgmode.org/elpa/"))
+  (defvar gnu-archive '("gnu" . "https://elpa.gnu.org/packages/"))
+  (defvar elpa-archive '("elpa" . "https://elpa.gnu.org/packages/"))
+  (defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
+  (defvar melpa-stable-archive '("melpa-stable" . "https://stable.melpa.org/packages/"))
 
-(defun add-pseudo-package (package)
-  ""
-  (interactive "sPackage name: ")
-  (goto-char (point-min))
-  (when (re-search-forward "^* Packages")
-    (forward-line 1)
-    (insert (concat "** " package "\t\t:pseudo"
-		    "\n#+begin_src emacs-lisp\n"
-		    "\n#+end_src\n"))
-    (forward-line -2)))
+  (push elpa-archive package-archives)
+  (push melpa-archive package-archives)
+  (push melpa-stable-archive package-archives)
+  (push org-archive package-archives)
+  (setq package-archives (nreverse package-archives))
+
+  (setq init-file-bake-autoloads t)
+  (defvar init-file-unroll-key-bindings t)
+
+  (unless (boundp 'init-file-hooks)
+    (make-variable-buffer-local 'init-file-hooks))
+  (unless (boundp 'init-file-package-list)
+    (make-variable-buffer-local 'init-file-package-list))
+
+  (defun on-buffer-change-hook (beg eng len)
+    (setq init-file-package-list nil))
+
+  (add-hook 'after-change-functions 'on-buffer-change-hook)
+
+  (defmacro with-hook (name &rest body)
+    (let (found hook)
+      (setq name (if (string-match "-hook\\'" (symbol-name `,name))
+		     `,name
+		   (intern (concat (symbol-name name) "-hook"))))
+      (setq body (reverse body))
+      (dolist (hook init-file-hooks)
+	(when (equal (symbol-name (car hook)) (symbol-name name))
+	  (dolist (sexp (reverse (cdr hook)))
+	    (add-to-list 'body sexp))
+	  (setcdr hook body)
+	  (setq found t)))
+      (unless found
+	(add-to-list 'init-file-hooks (cons name body)))
+      (ignore)))
+
+  (defun clean-init-file ()
+    (interactive)
+    (with-temp-buffer
+      (insert-file-contents "init.el")
+      (beginning-of-buffer)
+      (while (not (eobp))
+	(when (char-equal (char-after) ?\^M)
+	  (delete-char 1))
+	(forward-char 1))
+      (write-region (point-min) (point-max) "init.el")))
+
+  (defmacro with-package (name &rest body)
+    (let ((package (symbol-name name)))
+      (append-to-init-file "(with-eval-after-load ")
+      (append-to-init-file (concat "\"" package "\"\n"))
+      (emit-to-init-file body)
+      (append-to-init-file ")\n")))
+
+  (defmacro with-key-map (mapname &rest body)
+    `(let ((map (eval-and-compile (concat (symbol-name ',mapname) "-map")))
+	   (defs '(,@body)))
+       (dolist (def defs)
+	 (define-key (symbol-value (intern map))
+	   (if (vectorp (car def)) (car def)
+	     (read-kbd-macro (car def))) (cdr def)))))
+
+  (defun emit-keymap (map)
+    (let ((body (cdr map))
+	  (key))
+      (dolist (stm `,@body)
+	(if (vectorp (eval (car stm)))
+	    (setq key (prin1-to-string (car stm)))
+	  (setq key (concat "(kbd \"" (car stm) "\")")))
+	(append-to-init-file
+	 (concat "(define-key "
+		 (symbol-name (car map)) "-map "
+		 key " '" (prin1-to-string (cdr stm))
+		 ")")))))
+  (defun append-to-init-file (string-or-buffer)
+    (let ((file "init.el") insert-point)
+      (cond ((stringp string-or-buffer)
+	     (write-region string-or-buffer nil file t 0))
+	    ((bufferp string-or-buffer)
+	     (with-current-buffer string-or-buffer
+	       (write-region (point-min) (point-max) file t 0))))))
+
+  (defun emit-sexp-to-init-file (sexp)
+    (if init-file-unroll-key-bindings
+	(if (equal (symbol-name (car sexp)) "with-key-map")
+	    (emit-keymap (cdr sexp))
+	  (append-to-init-file (prin1-to-string sexp)))
+      (append-to-init-file (pp sexp))))
+
+  (defun emit-to-init-file (&rest body)
+    (dolist (sexp body)
+      (if (listp (car sexp))
+	  (dolist (s sexp)
+	    (emit-sexp-to-init-file s))
+	(emit-sexp-to-init-file sexp))))
+
+  (defun emit-packages ()
+    (dolist (p (get-package-list))
+      (message "Emiting package: %s" (aref p 0))
+      (when (package-enabled-p p)
+	(eval-region (aref p 4) (aref p 5)))))
+
+  (defun emit-hooks ()
+    (message "Emiting hooks.")
+    (dolist (hook init-file-hooks)
+      (append-to-init-file (concat "(add-hook '"
+				   (symbol-name (car hook))
+				   " #'(lambda nil\n"))
+      (dolist (elt (nreverse (cdr hook)))
+	(emit-to-init-file elt))
+      (append-to-init-file "))")))
+
+  (defun get-load-paths()
+    (let ((elpa (expand-file-name "elpa" user-emacs-directory))
+	  (archives (expand-file-name "elpa/archives" user-emacs-directory)) 
+	  package-paths)
+      (dolist (path (directory-files elpa t directory-files-no-dot-files-regexp))
+	(when (file-directory-p path)
+	  (unless (string= path archives)
+	    (push path package-paths))))
+      package-paths))
+
+  (defun emit-load-paths ()
+    (let ((lp (get-load-paths)))
+      (message "Emitting load-path")
+      (append-to-init-file
+       (concat "\n(nconc load-path \n'"
+	       (prin1-to-string lp)
+	       ")\n"))))
+
+  (defun emit-autoloads-file ()
+    (message "Emiting autoloads")
+    (let ((al "autoloads.el")
+	  (pp (get-load-paths))
+	  (pq (expand-file-name "package-quickstart.el"
+				user-emacs-directory)))
+      (unless pq
+	(package-quickstart-refresh))
+      (with-temp-file al
+	(insert-file-contents pq)
+	(goto-char (point-min))
+	(kill-line 3)
+	(insert (concat "\n(setq load-path (append \n'"
+			(prin1-to-string pp)
+			" load-path))\n"))
+	(while (not (eobp))
+	  (when (char-equal (char-after) ?\^L)
+	    (delete-char 1))
+	  (forward-line 1))
+	(goto-char (point-max))
+	(kill-line -5)
+	(goto-char (point-min))
+	(while (not (eobp))
+	  (when (re-search-forward "^(add-to-list" (line-end-position) t)
+	    (forward-line -1)
+	    (kill-line 3))
+	  (beginning-of-line)
+	  (forward-line 1))
+	(goto-char (point-min))
+	(while (not (eobp))
+	  (replace-string "\n\n\n" "\n")
+	  (forward-line 1)))))
+
+  (defun tangle-early-init ()
+    (message "Exporting early-init.el ...")
+      (save-excursion
+	(let (start end r)
+	  (goto-char (point-min))
+	  (re-search-forward "^\\*\\* Early init")
+	  (re-search-forward "begin_src.*emacs-lisp")
+	  (skip-chars-forward "\s\t\n\r")
+	  (setq start (point))
+	  (re-search-forward "end_src$")
+	  (beginning-of-line)
+	  (setq end (point))
+	  (setq r (buffer-substring-no-properties start end))
+	  (with-temp-file "early-init.el"
+	    (insert r)
+	    (goto-char (point-min))
+	    (forward-line 1)
+	    (insert ";; This file is machine generated by init-file generator, don't edit\n")
+	    (insert ";; manually, edit instead file init.org and generate new init file from it")
+	    ;; are we baking quickstart file?
+	    (if init-file-bake-autoloads
+	      (insert "\n(setq package-quickstart nil package-enable-at-startup nil package--init-file-ensured t)\n")))
+	    (message "Wrote early-init.el"))))
+
+  (defun tangle-init-file (&optional file)
+    ;;(message "TANGLE INIT FILE")
+    (unless file
+      (setq file "init.el"))
+    (if (file-exists-p file)
+	(delete-file file))
+    (if (file-exists-p (concat file "c"))
+	(delete-file (concat file "c")))
+    (setq init-file-hooks nil)
+    (let (code-start config-start)
+      (save-excursion
+	(goto-char (point-min))
+	(setq config-start (re-search-forward "^\\* Packages"))
+	;; prolog
+	(message "Emiting prolog.")  
+	(goto-code-start "^\\*\\* Init")
+	(setq code-start (point))
+	(goto-code-end)
+	(write-region code-start (point) file t 0)
+	;; emit paths
+	;;(emit-load-paths)
+	(emit-autoloads-file)
+	(if init-file-bake-autoloads
+	  (with-temp-buffer
+	    (insert "(defvar package-activated-list nil)")
+	    (insert-file-contents-literally "autoloads.el")
+	    (write-region (point-min) (point-max) "init.el" t 0))
+	  (append-to-init-file "(package-activate-all)"))
+	;; generate stuff
+	(emit-packages)
+	(emit-hooks) ;; must be done after emiting packages
+	;; epilog
+	(message "Emiting epilog")
+	(goto-code-start "^\\* Epilog")
+	(setq code-start (point))
+	(goto-code-end)
+	(write-region code-start (point) file t 0)))
+    (clean-init-file))
+
+  (defun goto-code-start (section)
+    (goto-char (point-min))
+    (re-search-forward section)
+    (re-search-forward "begin_src.*emacs-lisp")
+    (skip-chars-forward "\s\t\n\r"))
+
+  (defun goto-code-end ()
+    (re-search-forward "end_src")
+    (beginning-of-line))
+
+  (defun create-early-init-file ()
+    (interactive)
+    (let ((ei (expand-file-name "early-init.el")))
+      (when (file-exists-p ei)
+	(delete-file ei))
+      (tangle-early-init)
+      (message "Tangled early init file.")))
+
+  (defun create-init-file ()
+    (interactive)
+    (message "Exporting init.el ...")
+    (tangle-init-file)
+    (let ((tangled-file "init.el"))
+      ;; always produce elc file
+      (byte-compile-file tangled-file)
+      (when (featurep 'nativecomp)
+	(message "Native compiled %s" (native-compile tangled-file)))
+      (message "Tangled and compiled %s" tangled-file))
+    (message "Done."))
+
+  (defun generate-init-files ()
+    (interactive)
+    (create-init-file)
+    (create-early-init-file))
+
+  (defun install-file (file)
+    (when (file-exists-p file)
+      (copy-file file user-emacs-directory t)
+      (message "Wrote: %s." file)))
+
+  (defun install-init-files ()
+    (interactive)
+    (let ((i "init.el")
+	    (ic "init.elc")
+	  (ei "early-init.el")
+	  (al "autoloads.el")
+	  (pq (expand-file-name "package-quickstart.el" user-emacs-directory))
+	  (pqc (expand-file-name "package-quickstart.elc" user-emacs-directory)))
+      (install-file i)
+      (install-file ei)
+      (unless (file-exists-p ic)
+	(byte-compile (expand-file-name el)))
+      (install-file ic)
+      (unless init-file-bake-autoloads
+	  (byte-compile pq))
+      (when init-file-bake-autoloads
+	;; remove package-quickstart files from .emacs.d
+	(when (file-exists-p pq)
+	  (delete-file pq))
+	(when (file-exists-p pqc)
+	  (delete-file pqc)))))
+
+  (defun get-package-list ()
+    (when (buffer-modified-p)
+      (setq init-file-package-list nil))
+    (unless init-file-package-list
+      (save-excursion
+	(goto-char (point-min))
+	(let ((bound (re-search-forward "^\\* Epilog"))
+	      package packages start end)
+	  (goto-char (point-min))
+	  (re-search-forward "^\\* Packages")
+	  (while (re-search-forward "^\\*\\* " bound t)
+	    (setq package (vector nil t t "" 0 0)
+		  start (point) end (line-end-position))
+	    ;; package name
+	    (when (re-search-forward ":" end t)
+	      (setq end (point)))
+	    (goto-char end)
+	    (skip-chars-backward ":\s\t\r\n")
+	    (aset package 0 (intern (buffer-substring-no-properties
+				     start (point))))
+	    (goto-char start)
+	    ;; enabled?
+	    (when (search-forward ":disable" (line-end-position) t)
+	      (aset package 1 nil))
+	    (goto-char start)
+	    ;; installable?
+	    (when (search-forward ":pseudo" (line-end-position) t)
+	      (aset package 2 nil))
+	    (goto-char start)
+	    ;; pinned to repository?
+	    (dolist (repo package-archives)
+	      (when (re-search-forward (concat ":" (car repo)) (line-end-position) t)
+		(aset package 3 (car repo))))
+	    ;; code start
+	    (re-search-forward "begin_src.*emacs-lisp" bound t)
+	    (aset package 4 (point))
+	    (re-search-forward "end_src$" bound t)
+	    (beginning-of-line)
+	    (aset package 5 (point))
+	    (push package init-file-package-list)
+	    (setq init-file-package-list (nreverse init-file-package-list))))))
+    init-file-package-list)
+
+  ;; Install packages
+  (defun ensure-package (package)
+    (let ((p (aref package 0)))
+      (unless (package-installed-p p)
+	(message "Installing package: %s" p)
+	(package-install p))))
+
+  (defun package-pseudo-p (package)
+    (not (aref package 2)))
+
+  (defun package-enabled-p (package)
+    (aref package 1))
+
+  (defun package-installable-p (package)
+    (and (aref package 1) (aref package 2)))
+
+  (defun install-packages (&optional packages)
+    (interactive)
+    (package-initialize)
+    (package-refresh-contents)
+    (unless packages
+      (setq packages (get-package-list)))
+    (dolist (p packages)
+      (when (package-installable-p p)
+	(ensure-package p))))
+
+  (defun add-package (package)
+    ""
+    (interactive "sPackage name: ")
+    (goto-char (point-min))
+    (when (re-search-forward "^* Packages")
+      (forward-line 1)
+      (insert (concat "** " package
+		      "\n#+begin_src emacs-lisp\n"
+		      "\n#+end_src\n"))
+      (forward-line -2)))
+
+  (defun add-pseudo-package (package)
+    ""
+    (interactive "sPackage name: ")
+    (goto-char (point-min))
+    (when (re-search-forward "^* Packages")
+      (forward-line 1)
+      (insert (concat "** " package "\t\t:pseudo"
+		      "\n#+begin_src emacs-lisp\n"
+		      "\n#+end_src\n"))
+      (forward-line -2)))
 #+end_src
 * Prolog
 ** Early init
 #+begin_src emacs-lisp
 ;;; early-init.el -*- lexical-binding: t -*-
-;;
-;; This file is machine generated by init-file generator, don't edit
-;; manually, edit instead file init.org and generate new init file from it
 
 (setq gc-cons-threshold most-positive-fixnum
       frame-inhibit-implied-resize t
@@ -431,10 +431,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       use-dialog-box nil
       visible-bell nil
       ring-bell-function 'ignore
-      load-prefer-newer t
-      package-quickstart t
-      package-enable-at-startup nil
-      package--init-file-ensured t)
+      load-prefer-newer t)
 
 (setq-default abbrev-mode t
               indent-tabs-mode nil
@@ -449,13 +446,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-;; (push '(font . "Anonymous Pro-16") default-frame-alist)
+(push '(font . "Anonymous Pro-16") default-frame-alist)
 (custom-set-faces '(default ((t (:height 140)))))
 
 (unless (eq system-type 'darwin)
 (setq command-line-ns-option-alist nil))
 ;;; early-init.el ends here
 #+end_src
+
 ** Init
 #+begin_src emacs-lisp
 ;;; init.el -*- lexical-binding: t; -*-
@@ -876,8 +874,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
            ;;(require 'nnreddit)
 
-           (setq user-mail-address "your-email-address-here"
-                 user-full-name    "your name here")
+           (setq user-mail-address "arthur.miller@live.com"
+                 user-full-name    "Arthur Miller")
            ;; for the outlook
            (setq gnus-select-method '(nnimap "live.com"
                                              (nnimap-address "imap-mail.outlook.com")
@@ -1454,4 +1452,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+end_src
 
 #+RESULTS:
+
+
+
+
+
+
+
+
 
