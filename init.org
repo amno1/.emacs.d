@@ -874,8 +874,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
            ;;(require 'nnreddit)
 
-           (setq user-mail-address "arthur.miller@live.com"
-                 user-full-name    "Arthur Miller")
+           (setq user-mail-address "your email here"
+                 user-full-name    "your name here")
            ;; for the outlook
            (setq gnus-select-method '(nnimap "live.com"
                                              (nnimap-address "imap-mail.outlook.com")
