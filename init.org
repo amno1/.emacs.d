@@ -26,7 +26,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   (defvar init-file-bake-autoloads t)
   (defvar init-file-unroll-key-bindings t)
 
-  (package-initialize)
   (package-quickstart-refresh)
   (setq package-archives nil)
 
@@ -171,32 +170,32 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 	  (pp (get-load-paths))
 	  (pq (expand-file-name "package-quickstart.el"
 				user-emacs-directory)))
-      (unless pq
-	(package-quickstart-refresh))
+      (unless (file-exists-p pq)
+	  (package-quickstart-refresh))
       (with-temp-file al
-	(insert-file-contents pq)
-	(goto-char (point-min))
-	(kill-line 3)
-	(insert (concat "\n(setq load-path (append \n'"
-			(prin1-to-string pp)
-			" load-path))\n"))
-	(while (not (eobp))
-	  (when (char-equal (char-after) ?\^L)
-	    (delete-char 1))
-	  (forward-line 1))
-	(goto-char (point-max))
-	(kill-line -5)
-	(goto-char (point-min))
-	(while (not (eobp))
-	  (when (re-search-forward "^(add-to-list" (line-end-position) t)
-	    (forward-line -1)
-	    (kill-line 3))
-	  (beginning-of-line)
-	  (forward-line 1))
-	(goto-char (point-min))
-	(while (not (eobp))
-	  (replace-string "\n\n\n" "\n")
-	  (forward-line 1)))))
+	  (insert-file-contents pq)
+	  (goto-char (point-min))
+	  (kill-line 3)
+	  (insert (concat "\n(setq load-path (append \n'"
+			  (prin1-to-string pp)
+			  " load-path))\n"))
+	  (while (not (eobp))
+	    (when (char-equal (char-after) ?\^L)
+	      (delete-char 1))
+	    (forward-line 1))
+	  (goto-char (point-max))
+	  (kill-line -5)
+	  (goto-char (point-min))
+	  (while (not (eobp))
+	    (when (re-search-forward "^(add-to-list" (line-end-position) t)
+	      (forward-line -1)
+	      (kill-line 3))
+	    (beginning-of-line)
+	    (forward-line 1))
+	  (goto-char (point-min))
+	  (while (not (eobp))
+	    (replace-string "\n\n\n" "\n")
+	    (forward-line 1)))))
 
   (defun tangle-early-init ()
     (message "Exporting early-init.el ...")
@@ -287,7 +286,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       ;; always produce elc file
       (byte-compile-file tangled-file)
       (when (featurep 'nativecomp)
-	(message "Native compiled %s" (native-compile tangled-file)))
+	  (message "Native compiled %s" (native-compile tangled-file)))
       (message "Tangled and compiled %s" tangled-file))
     (message "Done."))
 
@@ -298,7 +297,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
   (defun install-file (file)
     (when (file-exists-p file)
-      (copy-file file user-emacs-directory t)
+      (unless (equal (file-name-directory buffer-file-name)
+                     (expand-file-name user-emacs-directory))
+        (copy-file file user-emacs-directory t))
       (message "Wrote: %s." file)))
 
   (defun install-init-files ()
@@ -312,16 +313,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       (install-file i)
       (install-file ei)
       (unless (file-exists-p ic)
-	(byte-compile (expand-file-name el)))
+	  (byte-compile (expand-file-name el)))
       (install-file ic)
       (unless init-file-bake-autoloads
 	  (byte-compile pq))
       (when init-file-bake-autoloads
-	;; remove package-quickstart files from .emacs.d
-	(when (file-exists-p pq)
-	  (delete-file pq))
-	(when (file-exists-p pqc)
-	  (delete-file pqc)))))
+	  ;; remove package-quickstart files from .emacs.d
+	  (when (file-exists-p pq)
+	    (delete-file pq))
+	  (when (file-exists-p pqc)
+	    (delete-file pqc)))))
 
   (defun get-package-list ()
     (when (buffer-modified-p)
@@ -475,12 +476,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (global-unset-key (kbd "C-v"))
 #+end_src
 * Packages
+** ace-window
+#+begin_src emacs-lisp
+(with-package ace-window
+ (ace-window-display-mode)
+ (global-set-key [remap other-window] 'ace-window))
+
+(with-hook ace-window
+ (with-key-map ace-window
+  ("C-x O" . other-frame)))
+#+end_src
+** all-the-icons
+#+begin_src emacs-lisp
+(with-package all-the-icons
+ (diminish 'all-the-icons-mode)
+ (setq neo-theme 'arrow)
+ (setq neo-window-fixed-size nil))
+#+end_src
 ** async
 #+begin_src emacs-lisp
 (with-package async
-              (autoload 'dired-async-mode "dired-async.el" nil t)
-              (async-bytecomp-package-mode 1)
-              (diminish 'async-dired-mode))
+ (autoload 'dired-async-mode "dired-async.el" nil t)
+ (async-bytecomp-package-mode 1)
+ (diminish 'async-dired-mode))
 #+end_src
 ** auto-package-update
 #+begin_src emacs-lisp
@@ -495,7 +513,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ** beacon
 #+begin_src emacs-lisp
 (with-hook after-init
-           (beacon-mode t))
+ (beacon-mode t)
+ (diminish 'beacon-mode))
 #+end_src
 ** company
 #+begin_src emacs-lisp
@@ -521,7 +540,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 (with-hook company-mode
   (diminish 'company-mode)
-  (with-key-map company-active-map
+  (with-key-map company-active
     ("C-n" . company-select-next)
     ("C-p" . company-select-previous)))
 
@@ -568,20 +587,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ** c++                                                                    :pseudo
 #+begin_src emacs-lisp
 (with-hook c-initialization-hook
-  (require 'c++-setup))
+  (require 'c++-setup)
+  (my-c++-init))
 
 (with-hook after-init
   (add-to-list 'auto-mode-alist '("\\.c\\'" . c-mode))
   (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-  (setq auto-mode-alist (append
-              (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
-              auto-mode-alist)))
+  (setq auto-mode-alist
+   (append (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
+           auto-mode-alist)))
 #+end_src
 ** diminish
 #+begin_src emacs-lisp
 
 #+end_src
 ** dired-hacks-utils
+#+begin_src emacs-lisp
+
+#+end_src
+** dired-narrow
 #+begin_src emacs-lisp
 
 #+end_src
@@ -664,6 +688,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
              (autoload 'kill-window-right "extras.el" nil t)
              (autoload 'kill-window-above "extras.el" nil t)
              (autoload 'kill-window-below "extras.el" nil t)
+             (autoload 'z-swap-windows "extras.el" nil t)
              (autoload 'sudo-find-file "extras.el" nil t)
              (autoload 'kill-buffer-other-window "extras.el" nil t)
              (autoload 'kill-buffer-but-not-some "extras.el" nil t)
@@ -812,48 +837,102 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ** emms
 #+begin_src emacs-lisp
 (with-package emms
-    (require 'emms-setup)
-    (emms-all)
-    (emms-history-load)
-    (emms-default-players)
-    (require 'emms-player-mpv)
-    (defun emms-mode-line-icon-function ()
-      (concat " "
-              emms-mode-line-icon-before-format
-              (propertize "NP:" display emms-mode-line-icon-image-cache)
-              (format emms-mode-line-format (emms-track-get
-                                             (emms-playlist-current-selected-track)
-                                             info-title))))
-    
-    (setq emms-directory "~/.emacs.d/etc/emms/"
-          emms-playlist-buffer-name "*Music Playlist*"
-          emms-show-format "Playing: %s"
-          ;; Icon setup.
-          emms-mode-line-icon-before-format "["
-          emms-mode-line-format " %s]"
-          emms-playing-time-display-format "%s ]"
-          emms-mode-line-icon-color "lightgrey"
-          global-mode-string '("" emms-mode-line-string " " emms-playing-time-string)
-          ;;emms-player-list (list emms-player-mpv)
-          emms-source-file-default-directory (expand-file-name "~/Musik")
-          emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find
-          emms-browser-covers 'emms-browser-cache-thumbnail)
+ (require 'emms-setup)
+ (emms-all)
+ (emms-history-load)
+ (emms-default-players)
+ (require 'emms-mode-line-cycle)
+ (require 'emms-player-mpv)
+ (helm-mode 1)
+ (emms-mode-line 1)
+ (emms-playing-time 1)
 
-    (add-to-list 'emms-player-list 'emms-player-mpv)
-    (add-to-list 'emms-player-mpv-parameters "--no-audio-display")
-    (add-to-list 'emms-info-functions 'emms-info-cueinfo)
-    
-    (when (executable-find "emms-print-metadata")
-      (require 'emms-info-libtag)
-      (add-to-list 'emms-info-functions 'emms-info-libtag)
-      (delete 'emms-info-ogginfo emms-info-functions)
-      (delete 'emms-info-mp3info emms-info-functions)
-      (add-to-list 'emms-info-functions 'emms-info-ogginfo)
-      (add-to-list 'emms-info-functions 'emms-info-mp3info))
+;;  ;; `emms-mode-line-cycle' can be used with emms-mode-line-icon.
+;;  (require 'emms-mode-line-icon)
 
-    (add-hook 'emms-browser-tracks-added-hook 'z-emms-play-on-add)
-    ;; Show the current track each time EMMS
-    (add-hook 'emms-player-started-hook 'emms-show))
+;; (emms-mode-line-cycle 1)
+
+;; (custom-set-variables
+;;  '(emms-mode-line-cycle-max-width 15)
+;;  '(emms-mode-line-cycle-additional-space-num 4)
+;;  '(emms-mode-line-cycle-use-icon-p t)
+;;  '(emms-mode-line-format " [%s]")
+;;  '(emms-mode-line-cycle-any-width-p t)
+;;  '(emms-mode-line-cycle-velocity 2)
+;;  '(emms-mode-line-cycle-current-title-function
+;;    (lambda ()
+;;      (let ((track (emms-playlist-current-selected-track)))
+;;        (cl-case (emms-track-type track)
+;;          ((streamlist)
+;;           (let ((stream-name (emms-stream-name
+;;                               (emms-track-get track 'metadata))))
+;;             (if stream-name stream-name (emms-track-description track))))
+;;          ((url) (emms-track-description track))
+;;          (t (file-name-nondirectory
+;;              (emms-track-description track)))))))
+;;  '(emms-mode-line-titlebar-function
+;;    (lambda ()
+;;      '(:eval
+;;        (when emms-player-playing-p
+;;          (format " %s %s"
+;;                  (format emms-mode-line-format (emms-mode-line-cycle-get-title))
+;;                  emms-playing-time-string))))))
+
+;;  (custom-set-variables '(emms-mode-line-cycle-use-icon-p t))
+ (defun emms-player-mpv-volume-change (v)
+   "Change the volume by V for mpv."
+   (let ((cmd (format "echo 'add volume %d' > %s" v emms-mpv-input-file)))
+     (call-process-shell-command cmd nil nil nil)))
+
+ (defun emms-player-mpv-volume-set (v)
+   "Set the volume to V for mpv."
+   (interactive "nmpv volume : ")
+   (let ((cmd (format "echo 'set volume %d' > %s" v emms-mpv-input-file)))
+     (call-process-shell-command cmd nil nil nil)))
+ 
+ (defun emms-player-mpv-volume-mute ()
+   "Toggle mute status for mpv."
+   (interactive)
+   (let ((cmd (format "echo 'cycle mute' > %s" emms-mpv-input-file)))
+     (call-process-shell-command cmd nil nil nil)))
+
+ (setq emms-directory (expand-file-name "etc/emms/" user-emacs-directory)
+       emms-cache-file (expand-file-name "cache" emms-directory)
+       emms-history-file (expand-file-name "history" emms-directory)
+       emms-score-file (expand-file-name "scores" emms-directory)
+       emms-stream-bookmark-file (expand-file-name "streams" emms-directory)
+       emms-playlist-buffer-name "*Music Playlist*"
+       emms-show-format "Playing: %s"
+       ;; Icon setup.
+       emms-mode-line-icon-before-format "["
+       emms-mode-line-format " %s]"
+       emms-playing-time-display-format "%s ]"
+       emms-mode-line-icon-color "lightgrey"
+       global-mode-string '("" emms-mode-line-string " " emms-playing-time-string)
+       ;;emms-player-list (list emms-player-mpv)
+       emms-source-file-default-directory (expand-file-name "~/Musik")
+       emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find
+       emms-browser-covers 'emms-browser-cache-thumbnail)
+
+ (add-to-list 'emms-player-list 'emms-player-mpv)
+ (add-to-list 'emms-player-mpv-parameters "--no-audio-display")
+ (add-to-list 'emms-info-functions 'emms-info-cueinfo)
+    
+ (when (executable-find "emms-print-metadata")
+   (require 'emms-info-libtag)
+   (add-to-list 'emms-info-functions 'emms-info-libtag)
+   (delete 'emms-info-ogginfo emms-info-functions)
+   (delete 'emms-info-mp3info emms-info-functions)
+   (add-to-list 'emms-info-functions 'emms-info-ogginfo)
+   (add-to-list 'emms-info-functions 'emms-info-mp3info))
+ 
+;; (add-hook 'emms-browser-tracks-added-hook 'z-emms-play-on-add)
+ ;; Show the current track each time EMMS
+ (add-hook 'emms-player-started-hook 'emms-show))
+#+end_src
+** emms-mode-line-cycle
+#+begin_src emacs-lisp
+
 #+end_src
 ** esup
 #+begin_src emacs-lisp
@@ -868,14 +947,23 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
+** gh
+#+begin_src emacs-lisp
+
+#+end_src
+** gist
+#+begin_src emacs-lisp
+
+#+end_src
 ** gnus                                                                    :pseudo
 #+begin_src emacs-lisp
 (with-hook after-init
 
            ;;(require 'nnreddit)
 
-           (setq user-mail-address "your email here"
-                 user-full-name    "your name here")
+           (setq user-full-name    "your name here"
+                 user-mail-address "your email here")
+           
            ;; for the outlook
            (setq gnus-select-method '(nnimap "live.com"
                                              (nnimap-address "imap-mail.outlook.com")
@@ -1284,6 +1372,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
     ("C-c u" . lsp-ui-imenu)))
 #+end_src
+** marshal
+#+begin_src emacs-lisp
+
+#+end_src
 ** modern-cpp-font-lock
 #+begin_src emacs-lisp
 (with-hook modern-cpp-font-lock-mode
@@ -1421,6 +1513,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ("N" pdf-history-forward :color red)
         ("l" image-forward-hscroll :color red)
         ("h" image-backward-hscroll :color red)))
+#+end_src
+** request
+#+begin_src emacs-lisp
+
 #+end_src
 ** solarized-theme
 #+begin_src emacs-lisp

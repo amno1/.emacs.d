@@ -1,4 +1,5 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
+(require 'recentf)
 
 ;;;###autoload
 (defun only-current-buffer () 

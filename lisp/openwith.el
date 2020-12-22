@@ -1,12 +1,5 @@
 ;;; openwith.el --- Open files with external programs
 
-;; <2020-04-10 fre> A. Miller
-;; Hacked openwith to not be a minor mode.
-;; The handler is now changed to be interactive function so it can be bound
-;; to a key and invoked manually when desired instead of being a global handler.
-;; Assumes invocation from a dired buffer, so the name is changed
-;; to reflect the prefered use case.
-
 ;; Copyright (C) 2007  Markus Triska
 
 ;; Author: Markus Triska <markus.triska@gmx.at>
@@ -29,6 +22,13 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
+
+;; <2020-04-10 fre> A. Miller
+;; Hacked openwith to not be a minor mode.
+;; The handler is now changed to be interactive function so it can be bound
+;; to a key and invoked manually when desired instead of being a global handler.
+;; Assumes invocation from a dired buffer, so the name is changed
+;; to reflect the prefered use case.
 
 ;;; Commentary:
 
