@@ -510,6 +510,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               (setq auto-package-update-delete-old-versions t
                     auto-package-update-interval nil))
 #+end_src
+** auto-yasnippet
+#+begin_src emacs-lisp
+
+#+end_src
 ** beacon
 #+begin_src emacs-lisp
 (with-hook after-init
@@ -673,6 +677,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                  (when (bobp)
                    (dired-next-line 1))
                  (save-excursion (dired-subtree-insert)))))
+#+end_src
+** elisp		:pseudo
+#+begin_src emacs-lisp
+(with-hook elisp-mode
+ (yas-reload-all))
 #+end_src
 ** emacs                                                                 :pseudo
 #+begin_src emacs-lisp
@@ -961,8 +970,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
            ;;(require 'nnreddit)
 
-           (setq user-full-name    "your name here"
-                 user-mail-address "your email here")
+           (setq user-full-name    "Arthur Miller"
+                 user-mail-address "arthur.miller@live.com")
            
            ;; for the outlook
            (setq gnus-select-method '(nnimap "live.com"
@@ -1253,7 +1262,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
   (with-hook after-init
     (with-key-map global
-      ("<f1>"  . helpful-variable)
       ("C-h v" . helpful-variable)
       ("C-h k" . helpful-key)
       ("C-h f" . helpful-callable)
@@ -1514,6 +1522,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ("l" image-forward-hscroll :color red)
         ("h" image-backward-hscroll :color red)))
 #+end_src
+** recentf
+#+begin_src emacs-lisp
+
+#+end_src
 ** request
 #+begin_src emacs-lisp
 
@@ -1534,6 +1546,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  (with-hook after-init
     (wrap-region-global-mode t)
     (diminish 'wrap-region-mode))
+#+end_src
+** yasnippet
+#+begin_src emacs-lisp
+(with-package yasnippet
+ (yas-global-mode 1)             
+ (diminish 'yas-global-mode yas-minor-mode)
+ (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+ (setq yas-key-syntaxes '("w_" "w_." "^ ")
+       yas-snippet-dirs '("~/.emacs.d/snippets")
+       yas-expand-only-for-last-commands nil)
+
+
+        (define-key yas-minor-mode-map (kbd "C-i") nil)
+        (define-key yas-minor-mode-map (kbd "TAB") nil)
+        (define-key yas-minor-mode-map (kbd "<tab>") nil)
+        (define-key yas-minor-mode-map (kbd "C-<return>") 'yas-expand))
+#+end_src
+** yasnippet-snippets
+#+begin_src emacs-lisp
+
 #+end_src
 * Epilog
 #+begin_src emacs-lisp

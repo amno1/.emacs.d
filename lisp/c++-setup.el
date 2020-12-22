@@ -90,7 +90,9 @@
 (defun c-modes-keys ()
   (define-key c-mode-base-map (kbd "C-c C-c") 'compile)
   (define-key c-mode-base-map (kbd "C-c C-r") 'compile-again)
-  (define-key c-mode-base-map (kbd "C-c C-k") 'kill-compilation))
+  (define-key c-mode-base-map (kbd "C-c C-k") 'kill-compilation)
+  (define-key c-mode-base-map (kbd "C-<return>") 'yas-expand)
+  (define-key c-mode-base-map (kbd "M-<return>") 'helm-yas-complete))
 
 (defun my-c++-init ()
   (message "Running c++-init")
@@ -121,6 +123,7 @@
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'c-mode-hook 'c-modes-keys)
   (add-hook 'c-mode-hook 'hs-minor-mode)
+  (add-hook 'c-mode-hook 'yas-minor-mode)
   (add-hook 'c-mode-hook 'hide-ifdef-mode)
   (add-hook 'c-mode-hook 'auto-revert-mode)
   (add-hook 'c-mode-hook 'clanguages-pairs-hook)
