@@ -23,8 +23,7 @@
     If there was no last time, or there is a prefix argument,
     this acts like M-x compile."
   (interactive "p")
-  (if (and (eq pfx 1)
-           compilation-last-buffer)
+  (if (and (eq pfx 1) compilation-last-buffer)
       (progn
         (set-buffer compilation-last-buffer)
         (revert-buffer t t))
@@ -94,6 +93,7 @@
   (define-key c-mode-base-map (kbd "C-c C-k") 'kill-compilation))
 
 (defun my-c++-init ()
+  (message "Running c++-init")
   (require 'member-functions)
   (setq compilation-last-buffer nil
         compilation-read-command nil
@@ -139,7 +139,6 @@
   (add-hook 'c++-mode-hook (lambda () (set (make-local-variable 'compile-command)
                                            (format "make -f %s"
                                                    (get-nearest-compilation-file)))))
-
   (setq indent-tabs-mode nil))
 
   (provide 'c++-setup)
