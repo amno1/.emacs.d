@@ -588,7 +588,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-hook company-quickhelp-mode
   (diminish 'company-quickhelp-mode))
 #+end_src
-** c++                                                                    :pseudo
+** company-statistics
+#+begin_src emacs-lisp
+
+#+end_src
+** company-try-hard
+#+begin_src emacs-lisp
+
+#+end_src
+** company-web
+#+begin_src emacs-lisp
+
+#+end_src
+** c++                                                     :pseudo
 #+begin_src emacs-lisp
 (with-hook c-initialization-hook
   (require 'c++-setup)
@@ -613,7 +625,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
-** dired                                                                   :pseudo
+** dired                                                    :pseudo
 #+begin_src emacs-lisp
    (with-hook dired-mode
            (require 'dired-setup)
@@ -678,12 +690,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                    (dired-next-line 1))
                  (save-excursion (dired-subtree-insert)))))
 #+end_src
-** elisp		:pseudo
+** elisp		                                          :pseudo
 #+begin_src emacs-lisp
 (with-hook elisp-mode
  (yas-reload-all))
 #+end_src
-** emacs                                                                 :pseudo
+** elpy
+#+begin_src emacs-lisp
+(with-package elpy
+ (elpy-enable)
+ (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+ (with-key-map
+  elpy-mode
+  ("C-M-n" . elpy-nav-forward-block)
+  ("C-M-p" . elpy-nav-backward-block)))
+
+(with-hook
+ elpy-mode
+ (flycheck-mode 1)
+ (set (make-local-variable 'company-backends '((elpy-company-backend :with company-yasnippet)))))
+#+end_src
+** emacs                                                  :pseudo
 #+begin_src emacs-lisp
   (with-hook after-init
              (autoload 'term-toggle "term-toggle.el" nil t)
@@ -964,7 +991,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
-** gnus                                                                    :pseudo
+** gnus                                                     :pseudo
 #+begin_src emacs-lisp
 (with-hook after-init
 
@@ -1315,7 +1342,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
-** lisp & elisp                                                          :pseudo
+** lisp & elisp                                             :pseudo
 #+begin_src emacs-lisp
 (with-hook after-init
   (set-default 'auto-mode-alist
@@ -1394,7 +1421,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-hook after-init
   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 #+end_src
-** oauth2 :disable
+** oauth2                                                :disable
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1409,7 +1436,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-hook org-load
   (org-pdftools-setup-link))
 #+end_src
-** org                                                                      :pseudo
+** org                                                      :pseudo
 #+begin_src emacs-lisp
   (with-package org
 
@@ -1522,6 +1549,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ("l" image-forward-hscroll :color red)
         ("h" image-backward-hscroll :color red)))
 #+end_src
+** projectile
+#+begin_src emacs-lisp
+
+#+end_src
+** pyenv-mode
+#+begin_src emacs-lisp
+(with-package pyenv-mode
+ (setq python-shell-interpreter "ipython"
+       python-shell-interpreter-args "-i --simple-prompt"))
+#+end_src
 ** recentf
 #+begin_src emacs-lisp
 
@@ -1534,6 +1571,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 (with-hook after-init
            (load-theme 'solarized-dark t))
+#+end_src
+** sphinx-doc
+#+begin_src emacs-lisp
+
 #+end_src
 ** which-key
 #+begin_src emacs-lisp

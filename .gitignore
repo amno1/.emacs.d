@@ -1,6 +1,7 @@
 auto-save-listg
 eln-cache/
 elpa/
+elpy/
 eshell/
 *.elc
 *~
