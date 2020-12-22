@@ -2,12 +2,7 @@
 ;;; This format is meant to be slightly human-readable;
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
-(("emacs-work-source"
- (filename . "~/repos/emacs-related/emacssrc/emacs/")
- (front-context-string)
- (rear-context-string . "18 00:21 README\n")
- (position . 2930))
-#1=(#("Downloads" 0 9
+(#1=(#("Downloads" 0 9
       (bmkp-full-record #1#))
     (filename . "~/Downloads/")
     (front-context-string . "Majorinc_Kazimir")
@@ -25,12 +20,6 @@
     (front-context-string . "**  [[http://pra")
     (rear-context-string . "5-10\n#+END_SRC\n\n")
     (position . 25293))
-#1=(#("qtemp" 0 5
-      (bmkp-full-record #1#))
-    (filename . "~/Downloads/qtemp/")
-    (front-context-string)
-    (rear-context-string . "020-08-22 08:37 ")
-    (position . 133))
 #1=(#("nb" 0 2
       (bmkp-full-record #1#))
     (buffer-name . "qtemp")
@@ -87,12 +76,6 @@
     (front-context-string . "9menu\n  drwxr-xr")
     (rear-context-string . "96 15 okt 00.11 ")
     (position . 4517))
-#1=(#("books" 0 5
-      (bmkp-full-record #1#))
-    (filename . "/s/books/")
-    (front-context-string . "Architecture\n  d")
-    (rear-context-string . "020-09-17 15:35 ")
-    (position . 112))
 #1=(#("docs" 0 4
       (bmkp-full-record #1#))
     (filename . "/s/it/")
