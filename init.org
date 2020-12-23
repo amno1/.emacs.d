@@ -620,6 +620,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
+** dired-git-info
+#+begin_src emacs-lisp
+(with-package dired-git-info
+  (setq dgi-auto-hide-details-p nil)
+  (define-key dired-mode-map ")" 'dired-git-info-mode))
+
+(with-hook after-init
+  (add-hook 'dired-after-readin-hook 'dired-git-info-auto-enable))
+#+end_src
 ** dired-hacks-utils
 #+begin_src emacs-lisp
 
