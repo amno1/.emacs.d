@@ -514,6 +514,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
+** avy
+#+BEGIN_SRC emacs-lisp
+(with-package avy
+  (with-key-map avy-mode
+    ("C-v a" . avy-goto-char)
+    ("C-v v" . avy-goto-word-1)
+    ("C-v w" . avy-goto-word-0)
+    ("C-v g" . avy-goto-line)))
+#+END_SRC
 ** beacon
 #+begin_src emacs-lisp
 (with-hook after-init
