@@ -1,3 +1,5 @@
+.#*
+*#
 auto-save-listg
 eln-cache/
 elpa/
@@ -20,4 +22,3 @@ etc/places
 etc/emms/
 network-security.data
 nov-places
-
