@@ -176,9 +176,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 	  (insert-file-contents pq)
 	  (goto-char (point-min))
 	  (kill-line 3)
-	  (insert (concat "\n(setq load-path (append \n'"
+	  (insert (concat "\n(nconc load-path \n'"
 			  (prin1-to-string pp)
-			  " load-path))\n"))
+			  ")\n"))
 	  (while (not (eobp))
 	    (when (char-equal (char-after) ?\^L)
 	      (delete-char 1))
@@ -525,6 +525,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-package company 
   (require 'company-capf)
   (require 'company-files)
+  
   (setq company-idle-delay            0
         company-require-match         nil
         company-minimum-prefix-length 2
@@ -535,11 +536,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         tab-always-indent 'complete
         company-global-modes '(not term-mode)
         company-backends (delete 'company-semantic company-backends))
-        (define-key company-mode-map [remap indent-for-tab-command]
-        'company-indent-or-complete-common)
-        (add-to-list 'company-backends 'company-cmake)
-        (add-to-list 'company-backends 'company-capf)
-        (add-to-list 'company-backends 'company-files)
+  
+  (define-key company-mode-map
+    [remap indent-for-tab-command] 'company-indent-or-complete-common)
+  
+  (add-to-list 'company-backends 'company-cmake)
+  (add-to-list 'company-backends 'company-capf)
+  (add-to-list 'company-backends 'company-files)
   (add-hook 'emacs-lisp-mode-hook 'company-mode))
 
 (with-hook company-mode
@@ -698,17 +701,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ** elpy
 #+begin_src emacs-lisp
 (with-package elpy
- (elpy-enable)
- (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
- (with-key-map
-  elpy-mode
-  ("C-M-n" . elpy-nav-forward-block)
-  ("C-M-p" . elpy-nav-backward-block)))
+  (elpy-enable)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+ 
+  (with-key-map elpy-mode
+    ("C-M-n" . elpy-nav-forward-block)
+    ("C-M-p" . elpy-nav-backward-block)))
 
-(with-hook
- elpy-mode
- (flycheck-mode 1)
- (set (make-local-variable 'company-backends '((elpy-company-backend :with company-yasnippet)))))
+(with-hook elpy-mode
+  ;;(company-mode 1)           
+  (flycheck-mode 1)
+  ;;(make-local-variable 'company-backends)
+  ;;(setq company-backends '((elpy-company-backend :with company-yasnippet)))
+  )
 #+end_src
 ** emacs                                                  :pseudo
 #+begin_src emacs-lisp
@@ -1551,7 +1556,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+end_src
 ** projectile
 #+begin_src emacs-lisp
-
+(with-package projectile
+  (setq projectile-indexing-method 'alien))
 #+end_src
 ** pyenv-mode
 #+begin_src emacs-lisp
