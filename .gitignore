@@ -20,5 +20,6 @@ etc/emacs-custom.el
 etc/abbrev_defs
 etc/places
 etc/emms/
+transient/
 network-security.data
 nov-places

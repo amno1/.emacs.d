@@ -1,4 +1,7 @@
 * About
+** To fix
+[[https://dev.to/viglioni/how-i-set-up-my-emacs-for-typescript-3eeh]]
+https://github.com/clemera/helm-ido-like-guide
 ** Introduction
 
 A personal setup, based on my init file generator tool.
@@ -414,6 +417,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 		      "\n#+begin_src emacs-lisp\n"
 		      "\n#+end_src\n"))
       (forward-line -2)))
+
+(defun install-and-configure ()
+  (interactive)
+  (install-packages)
+  (generate-init-files)
+  (install-init-files))
+
+(defun configure-emacs ()
+  (interactive)
+  (generate-init-files)
+  (install-init-files))
 #+end_src
 * Prolog
 ** Early init
@@ -529,6 +543,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  (beacon-mode t)
  (diminish 'beacon-mode))
 #+end_src
+** bug-hunter
+#+begin_src emacs-lisp
+
+#+end_src
+** cmake-font-lock
+#+begin_src emacs-lisp
+(with-hook prog-mode
+  ;; Highlighting in cmake-mode this way interferes with
+  ;; cmake-font-lock, which is something I dont yet understand.
+  (when (not (derived-mode-p 'cmake-mode))
+    (font-lock-add-keywords nil
+     '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
+        1 font-lock-warning-face t)))))
+
+(with-hook cmake-mode
+  (cmake-font-lock-activate))
+#+end_src
+** cmake-mode
+#+begin_src emacs-lisp
+(with-hook after-init
+  (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
+  (add-to-list 'auto-mode-alist '("\\CMakeLists.txt\\'" . cmake-mode)))
+#+end_src
 ** company
 #+begin_src emacs-lisp
 (with-package company 
@@ -625,6 +662,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
    (append (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
            auto-mode-alist)))
 #+end_src
+** dap-java                                              :pseudo
+#+begin_src emacs-lisp
+
+#+end_src
+** dap-mode
+#+begin_src emacs-lisp
+
+#+end_src
+** dash
+#+begin_src emacs-lisp
+
+#+end_src
+** deft
+#+begin_src emacs-lisp
+
+#+end_src
 ** diminish
 #+begin_src emacs-lisp
 
@@ -632,10 +685,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ** dired-git-info
 #+begin_src emacs-lisp
 (with-package dired-git-info
+  (autoload 'dired-subtree-toggle "dired-subtree.el" nil t)
   (setq dgi-auto-hide-details-p nil)
-  (define-key dired-mode-map ")" 'dired-git-info-mode))
+  (define-key dired-mode-map ")" 'dired-git-info-mode)
+  
+  (with-key-map dired-mode
+   ("TAB" . dired-subtree-toggle)))
 
 (with-hook after-init
+  (add-hook 'dired-git-info-auto-enable 'dired-subtree-toggle)
   (add-hook 'dired-after-readin-hook 'dired-git-info-auto-enable))
 #+end_src
 ** dired-hacks-utils
@@ -695,21 +753,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ** dired-subtree
 #+begin_src emacs-lisp
   (with-package dired-subtree
-                (setq dired-subtree-line-prefix "    "
-                      dired-subtree-use-backgrounds nil))
+   (setq dired-subtree-line-prefix "    "
+         dired-subtree-use-backgrounds nil))
 
-  (with-hook dired-subtree
-             ;; fixes the case of the first line in dired when the cursor jumps 
-             ;; to the header in dired rather then to the first file in buffer
-             (defun dired-subtree-toggle ()
-               "Insert subtree at point or remove it if it was not present."
-               (interactive)
-               (when (dired-subtree--is-expanded-p)
-                 (dired-next-line 1)
-                 (dired-subtree-remove)
-                 (when (bobp)
-                   (dired-next-line 1))
-                 (save-excursion (dired-subtree-insert)))))
+  ;; (with-hook dired-subtree
+  ;;  ;; fixes the case of the first line in dired when the cursor jumps 
+  ;;  ;; to the header in dired rather then to the first file in buffer
+  ;;  (defun dired-subtree-toggle ()
+  ;;    "Insert subtree at point or remove it if it was not present."
+  ;;    (interactive)
+  ;;    (when (dired-subtree--is-expanded-p)
+  ;;      (dired-next-line 1)
+  ;;      (dired-subtree-remove)
+  ;;      (when (bobp)
+  ;;        (dired-next-line 1))
+  ;;      (save-excursion (dired-subtree-insert)))))
+#+end_src
+** dumb-jump
+#+begin_src emacs-lisp
+
 #+end_src
 ** elisp		                                          :pseudo
 #+begin_src emacs-lisp
@@ -1002,6 +1064,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-hook expand-region-mode
            (diminish 'expand-region-mode))
 #+end_src
+** flimenu
+#+begin_src emacs-lisp
+(with-package flimenu
+  (flimenu-global-mode))
+#+end_src
 ** flycheck
 #+begin_src emacs-lisp
 
@@ -1011,6 +1078,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #+end_src
 ** gist
+#+begin_src emacs-lisp
+
+#+end_src
+** git-gutter
+#+begin_src emacs-lisp
+
+#+end_src
+** github-search
+#+begin_src emacs-lisp
+
+#+end_src
+** git-link
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1078,6 +1157,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 (with-hook google-c-style-mode
   (diminish 'google-c-style-mode))
+#+end_src
+** goto-last-change
+#+begin_src emacs-lisp
+
 #+end_src
 ** helm
 #+begin_src emacs-lisp
@@ -1201,6 +1284,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-hook helm-c-yasnippet
            (setq helm-yas-space-match-any-greedy t))
 #+end_src
+** helm-dash
+#+begin_src emacs-lisp
+
+#+end_src
 ** helm-descbinds
 #+begin_src emacs-lisp
 
@@ -1220,7 +1307,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
+** helm-firefox
+#+begin_src emacs-lisp
+
+#+end_src
+** helm-flx
+#+begin_src emacs-lisp
+
+#+end_src
 ** helm-flyspell
+#+begin_src emacs-lisp
+
+#+end_src
+** helm-fuzzier
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1291,6 +1390,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
+** helm-navi
+#+begin_src emacs-lisp
+
+#+end_src
 ** helm-org
 #+begin_src emacs-lisp
 
@@ -1300,6 +1403,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #+end_src
 
+** helm-smex
+#+begin_src emacs-lisp
+
+#+end_src
 ** helm-swoop
 #+begin_src emacs-lisp
 
@@ -1361,7 +1468,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 ("c" org-capture "Capture") ; Dont forget to define the captures you want http://orgmode.org/manual/Capture.html
                 ("l" (or )rg-capture-goto-last-stored "Last Capture")))))
 #+end_src
+** iedit
+#+begin_src emacs-lisp
+
+#+end_src
 ** imenu-anywhere
+#+begin_src emacs-lisp
+
+#+end_src
+** import-js
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1373,6 +1488,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
               ("\\.lsp$" . lisp-mode)
               ("\\.cl$" . lisp-mode))
               auto-mode-alist)))
+#+end_src
+** lsp-java
+#+begin_src emacs-lisp
+
 #+end_src
 ** lsp-mode
 #+begin_src emacs-lisp
@@ -1403,6 +1522,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 (with-hook lsp-mode
       (diminish 'lsp-mode))
 #+end_src
+** lsp-treemacs
+#+begin_src emacs-lisp
+
+#+end_src
 ** lsp-ui
 #+begin_src emacs-lisp
 (with-package lsp-ui
@@ -1430,7 +1553,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
     ("C-c u" . lsp-ui-imenu)))
 #+end_src
+** magit
+#+begin_src emacs-lisp
+
+#+end_src
+** markdown-mode
+#+begin_src emacs-lisp
+
+#+end_src
 ** marshal
+#+begin_src emacs-lisp
+
+#+end_src
+** mc-extras
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1438,6 +1573,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 (with-hook modern-cpp-font-lock-mode
   (diminish 'modern-cpp-font-lock-mode))
+#+end_src
+** multiple-cursors
+#+begin_src emacs-lisp
+
+#+end_src
+** navi-mode
+#+begin_src emacs-lisp
+
 #+end_src
 ** nov
 #+begin_src emacs-lisp
@@ -1572,6 +1715,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ("l" image-forward-hscroll :color red)
         ("h" image-backward-hscroll :color red)))
 #+end_src
+** prettier-js
+#+begin_src emacs-lisp
+(with-package prettier-js
+  (diminish 'prettier-js-mode))
+
+(with-hook js2-mode
+  (prettier-js-mode))
+  
+(with-hook rjsx-mode
+  (prettier-js-mode))
+#+end_src
 ** projectile
 #+begin_src emacs-lisp
 (with-package projectile
@@ -1591,12 +1745,47 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
+** rjsx-mode
+#+begin_src emacs-lisp
+(with-package rjsx-mode
+  (setq js2-mode-show-parse-errors nil
+        js2-mode-show-strict-warnings nil
+        js2-basic-offset 2
+        js-indent-level 2)
+  (setq-local flycheck-disabled-checkers (cl-union flycheck-disabled-checkers
+                                                   '(javascript-jshint))) ; jshint doesn't work for JSX
+  (electric-pair-mode 1))
+              
+(with-hook after-init
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode)))
+#+end_src
+** smart-jump
+#+begin_src emacs-lisp
+
+#+end_src
+** smex
+#+begin_src emacs-lisp
+
+#+end_src
 ** solarized-theme
 #+begin_src emacs-lisp
 (with-hook after-init
            (load-theme 'solarized-dark t))
 #+end_src
 ** sphinx-doc
+#+begin_src emacs-lisp
+
+#+end_src
+** string-edit
+#+begin_src emacs-lisp
+
+#+end_src
+** tide
+#+begin_src emacs-lisp
+
+#+end_src
+** treemacs
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1643,13 +1832,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ;; eval: (progn (org-babel-goto-named-src-block "onstartup") (org-babel-execute-src-block) (outline-hide-sublevels 2))
 ;; End:
 #+end_src
-
-#+RESULTS:
-
-
-
-
-
 
 
 
