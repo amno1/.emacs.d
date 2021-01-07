@@ -4,6 +4,7 @@ auto-save-listg
 eln-cache/
 elpa/
 elpy/
+emms/
 eshell/
 *.elc
 *~
@@ -23,3 +24,6 @@ etc/emms/
 transient/
 network-security.data
 nov-places
+some-test
+history
+places
