@@ -1,6 +1,13 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
 (require 'recentf)
 
+;; Startup time
+;;;###autoload
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+   (format "%.2f seconds"
+    (float-time (time-subtract after-init-time before-init-time))) gcs-done))
+
 ;;;###autoload
 (defun only-current-buffer () 
   (interactive)                                                                   
