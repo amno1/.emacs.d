@@ -907,7 +907,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
            (diminish 'subword-mode)
            (diminish 'auto-insert-mode)
 
-           (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+           ;;(add-hook 'emacs-startup-hook #'efs/display-startup-time)
            (add-hook 'comint-output-filter-functions
                      'comint-watch-for-password-prompt)
 
@@ -1384,6 +1384,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #+end_src
 
+** [x] helm-sly 
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] helm-smex        
 #+begin_src emacs-lisp
 
@@ -1769,6 +1773,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] request
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] request        
 #+begin_src emacs-lisp
 
@@ -1789,10 +1797,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode)))
 #+end_src
 ** [x] sly
-#+begin_src emacs-lisp
-
-#+end_src
-** [x] sly-helm
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1840,7 +1844,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ** [x] wdired                   :pseudo
 #+begin_src emacs-lisp
 (with-package wdired
-              (require 'partial-wdired)
               (with-key-map wdired-mode
                             ("<return>"        . dired-find-file)
                             ("M-<return>"      . my-run)
