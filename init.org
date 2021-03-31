@@ -670,7 +670,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #+begin_src emacs-lisp
 (with-package dired
               (require 'dired-extras)
-              (autoload 'wdired-change-to-wdired-mode "partial-wdired.el" nil t)
               
               (setq dired-dwim-target t
                     global-auto-revert-non-file-buffers nil
