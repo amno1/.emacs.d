@@ -110,6 +110,9 @@ content is not currently inserted."
           (add-to-invisibility-spec '(org-link))
           (when dired-auto-readme-display-images
             (org-display-inline-images t t)))
+        (when (equal dar--ext "md")
+          (markdown-toggle-markup-hiding)
+          (markdown-toggle-fontify-code-blocks-natively))
         (setq dar--inserted t)
         (buffer-enable-undo)))))
 
@@ -223,10 +226,14 @@ content is not currently inserted."
   (with-temp-buffer
     (insert-file-contents file)
     (when (require 'markdown-mode)
-      (markdown-view-mode))
+      (if (equal file "README.md")
+          (progn
+            (message "GFM-VIEW")
+            (gfm-view-mode))
+        (markdown-view-mode)))
     (font-lock-mode +1)
     (font-lock-ensure)
-      (goto-char (point-min))
+    (goto-char (point-min))
     (let ((inhibit-read-only t))
       (while (not (eobp))
         (insert "  ")

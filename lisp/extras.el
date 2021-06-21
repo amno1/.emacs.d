@@ -114,18 +114,17 @@ column narrower."
   (other-window 1))
 
 ;;;###autoload
-(defun create-scratch-buffer nil
-  "create a scratch buffer"
-  (interactive)
-  (switch-to-buffer (get-buffer-create "*scratch*"))
-  (lisp-interaction-mode))   
-
-;;;###autoload
 (defun sudo-find-file (file-name)
   "Like find file, but opens the file as root."
   (interactive "FSudo Find File: ")
   (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
     (find-file tramp-file-name)))
+
+;;;###autoload
+(defun z-swap-windows () ""
+       (interactive)
+       (ace-swap-window)
+       (aw-flip-window))
 
 ;; you can modify that list, to fit your needs
 ;; from emacs-wiki: https://www.emacswiki.org/emacs/KillingBuffers
