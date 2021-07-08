@@ -1,4 +1,4 @@
-;;; sv-kalender.el --- Swedish calendar for Emacs
+;;; sv-kalender.el --- Swedish calendar for Emacs -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2002,2003,2004,2007,2009,2018 Daniel Jensen
 
@@ -51,6 +51,11 @@
 
 ;;; Code:
 
+(require 'calendar)
+(require 'holidays)
+(require 'solar)
+(require 'lunar)
+
 ;; Veckan börjar med en måndag
 (setq calendar-week-start-day 1)
 
@@ -69,7 +74,11 @@
 
 ;; Dagarnas namn
 (setq calendar-day-name-array
-      ["söndag" "måndag" "tisdag" "onsdag" "torsdag" "fredag" "lördag"])
+      ["söndag" "måndag" "tisdag" "onsdag" "torsdag" "fredag" "lördag"]
+      calendar-day-abbrev-array
+      ["sön" "mån" "tis" "ons" "tors" "fre" "lör"]
+      calendar-day-header-array
+      ["sö" "må" "ti" "on" "to" "fr" "lö"])
 
 ;; Månadernas namn
 (setq calendar-month-name-array
@@ -115,7 +124,6 @@
 Om icke-nil, göm vissa helgdagar i kalendern.")
 
 ;; Påskdagen (from holiday-easter-etc)
-;;;###autoload
 (defun sv-easter (year)
   "Calculate the date for Easter in YEAR.
 Beräkna påskdagen för år YEAR."

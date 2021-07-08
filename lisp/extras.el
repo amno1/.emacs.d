@@ -5,18 +5,18 @@
 ;;;###autoload
 (defun efs/display-startup-time ()
   (message "Emacs loaded in %s with %d garbage collections."
-   (format "%.2f seconds"
-    (float-time (time-subtract after-init-time before-init-time))) gcs-done))
+           (format "%.2f seconds"
+                   (float-time (time-subtract after-init-time before-init-time))) gcs-done))
 
 ;;;###autoload
-(defun only-current-buffer () 
-  (interactive)                                                                   
-    (mapc 'kill-buffer (cdr (buffer-list (current-buffer)))))
+(defun only-current-buffer ()
+  (interactive)
+  (mapc 'kill-buffer (cdr (buffer-list (current-buffer)))))
 
 (defun change-font-height (delta)
-    (set-face-attribute 'default
-        (selected-frame)
-        :height (+ (face-attribute 'default :height) delta)))
+  (set-face-attribute 'default
+                      (selected-frame)
+                      :height (+ (face-attribute 'default :height) delta)))
 
 ;;;###autoload
 (defun toggle-letter-case ()
@@ -53,10 +53,10 @@
   "Re-open the last buffer killed.  With ARG, re-open the nth buffer."
   (interactive "p")
   (let ((recently-killed-list (copy-sequence recentf-list))
-	(buffer-files-list
-	 (delq nil (mapcar (lambda (buf)
-			     (when (buffer-file-name buf)
-			       (expand-file-name (buffer-file-name buf)))) (buffer-list)))))
+        (buffer-files-list
+         (delq nil (mapcar (lambda (buf)
+                             (when (buffer-file-name buf)
+                               (expand-file-name (buffer-file-name buf)))) (buffer-list)))))
     (mapc
      (lambda (buf-file)
        (setq recently-killed-list
@@ -121,10 +121,11 @@ column narrower."
     (find-file tramp-file-name)))
 
 ;;;###autoload
-(defun z-swap-windows () ""
-       (interactive)
-       (ace-swap-window)
-       (aw-flip-window))
+(defun reindent-buffer ()
+  (interactive)
+  (untabify (point-min) (point-max))
+  (indent-region (point-min) (point-max))
+  (delete-trailing-whitespace))
 
 ;; you can modify that list, to fit your needs
 ;; from emacs-wiki: https://www.emacswiki.org/emacs/KillingBuffers

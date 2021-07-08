@@ -31,12 +31,14 @@
 (defvar init-file-verbose-messages nil)
 (defvar init-file-unroll-key-bindings t)
 
-(require 'package)
+;;(require 'package)
 (setq package-archives nil)
 
 (defvar org-archive '("org" . "https://orgmode.org/elpa/"))
 (defvar elpa-archive '("elpa" . "https://elpa.gnu.org/packages/"))
+(defvar nelpa-archive '("nelpa" . "https://elpa.nongnu.org/nongnu/"))
 (defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
+(defvar elpa-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
 
 (push org-archive package-archives)
 (push elpa-archive package-archives)
@@ -94,6 +96,9 @@
     (emit-to-init-file body)
     (append-to-init-file ")\n")))
 
+(defmacro when-idle (&rest body)
+  `(run-with-idle-timer 0.5 nil (lambda () ,@body)))
+
 (defmacro with-system (systype &rest body)
   (if (equal system-type systype)
       `(progn ,@body)))
@@ -128,6 +133,10 @@
                key " '" (prin1-to-string (cdr stm))
                ")")))))
 
+(defun emit-when-idle (sexp)
+  (append-to-init-file
+   (format "(run-with-idle-timer 0.5 nil (lambda () %s))" sexp)))
+
 (defun append-to-init-file (data &optional file)
   (unless file (setq file "init.el"))
   (let (insert-point)
@@ -144,6 +153,8 @@
             ((equal (car sexp) 'with-system)
              (when (equal (cadr sexp) system-type)
                (emit-to-init-file (cddr sexp))))
+            ((equal (car sexp) 'when-idle)
+             (emit-when-idle (cadr sexp)))
             (t
              (append-to-init-file (prin1-to-string sexp))))
     (append-to-init-file (prin1-to-string sexp))))
@@ -263,10 +274,6 @@
   ;; generate stuff
   (emit-packages)
   ;; do this after user init stuff
-  (with-hook after-init
-             (setq gc-cons-threshold       16777216
-                   gc-cons-percentage      0.1
-                   file-name-handler-alist old-file-name-handler))
   (emit-hooks) ;; must be done after emiting packages
   (emit-load-paths);; must be done after emiting hooks
   ;; fix init.el
@@ -359,7 +366,6 @@
           (setq s (buffer-substring-no-properties ms me))
           (when (gt (length s) 1)
             (setq s (string-trim-right s))
-            (message "M:%s:" s)
             ;; installable?
             (if (equal s "none")
                 (aset package 2 t)
@@ -411,7 +417,8 @@
     (setq packages (get-package-list)))
   (dolist (p packages)
     (unless (package-pseudo-p p)
-      (ensure-package p))))
+      (ensure-package p)))
+  (package-quickstart-refresh))
 
 ;; help fns to work with init.org
 (defun add-package (package)
@@ -430,10 +437,8 @@
   (goto-char (point-min))
   (when (re-search-forward "^* Packages")
     (forward-line 1)
-    (insert (concat "** ["
-                    org-init-checkbox-marker-char
-                    "] "
-                    package "\t\t:pseudo:"
+    (insert (concat "** [none  ] [x] "
+                    package
                     "\n#+begin_src emacs-lisp\n"
                     "\n#+end_src\n"))
     (forward-line -2)))
@@ -656,653 +661,364 @@
 (org-init-mode 1)
   #+end_src
 * Packages
-** [x] ace-window
-   #+begin_src emacs-lisp
-     (with-package ace-window
-                   (ace-window-display-mode 1)
-                   ;;(setq aw-dispatch-always t)
-                   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
-   #+end_src
-** [x] all-the-icons
-   #+begin_src emacs-lisp
-     (with-package all-the-icons
-                   (diminish 'all-the-icons-mode)
-                   (setq neo-theme 'arrow)
-                   (setq neo-window-fixed-size nil))
-   #+end_src
-** [x] async
-   #+begin_src emacs-lisp
-     (with-package async
-                   (async-bytecomp-package-mode 1)
-                   (diminish 'async-dired-mode))
-   #+end_src
-** [x] auto-package-update
-   #+begin_src emacs-lisp
-     (with-hook auto-package-update-after
-                (message "Refresh autoloads")
-                (package-quickstart-refresh))
-
-     (with-package auto-package-update
-                   (setq auto-package-update-delete-old-versions t
-                         auto-package-update-interval nil))
-   #+end_src
-** [x] auto-yasnippet
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] avy
-   #+BEGIN_SRC emacs-lisp
-
-   #+END_SRC
-** [x] beacon
-   #+begin_src emacs-lisp
-     (with-hook after-init
-                (beacon-mode t)
-                (diminish 'beacon-mode))
-   #+end_src
-** [x] bug-hunter
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] bui
-   #+begin_src emacs-lisp
-
-   #+end_src
 ** [none  ] [x] c/c++
    #+begin_src emacs-lisp
-     (with-hook after-init
-                (add-hook 'c-initialization-hook 'my-c-init)
-                (add-hook 'c++-mode-hook 'my-c++-init)
-                (add-to-list 'auto-mode-alist '("\\.c\\'" . c-mode))
-                (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-                (setq auto-mode-alist
-                      (append (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
-                              auto-mode-alist)))
-   #+end_src
-** [x] cfrs
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] cmake-font-lock
-   #+begin_src emacs-lisp
-     (with-hook prog-mode
-                ;; Highlighting in cmake-mode this way interferes with
-                ;; cmake-font-lock, which is something I dont yet understand.
-                (when (not (derived-mode-p 'cmake-mode))
-                  (font-lock-add-keywords nil
-                                          '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
-                                             1 font-lock-warning-face t)))))
-
-     (with-hook cmake-mode
-                (cmake-font-lock-activate))
-   #+end_src
-** [x] cmake-mode
-   #+begin_src emacs-lisp
-     (with-hook after-init
-                (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
-                (add-to-list 'auto-mode-alist '("\\CMakeLists.txt\\'" . cmake-mode)))
-   #+end_src
-** [x] company
-   #+begin_src emacs-lisp
-     (with-package company 
-                   (require 'company-capf)
-                   (require 'company-cmake)
-                   (require 'company-files)
-              
-                   (diminish 'company-mode)
-                   (setq company-idle-delay            0
-                         company-require-match         nil
-                         company-minimum-prefix-length 2
-                         company-show-numbers          t
-                         company-tooltip-limit         20
-                         company-async-timeout         6
-                         company-dabbrev-downcase      nil
-                         tab-always-indent 'complete
-                         company-global-modes '(not term-mode)
-                         company-backends (delete 'company-semantic company-backends))
-
-                   (define-key company-mode-map
-                     [remap indent-for-tab-command] 'company-indent-or-complete-common)
-                   (add-to-list 'company-backends 'company-cmake)
-                   (add-to-list 'company-backends 'company-capf)
-                   (add-to-list 'company-backends 'company-files)
-                   (add-hook 'emacs-lisp-mode-hook 'company-mode)
-
-                   (with-key-map company-active
-                                 ("C-n" . company-select-next)
-                                 ("C-p" . company-select-previous)))
-   #+end_src
-** [x] company-c-headers        
-   #+begin_src emacs-lisp
-     (with-hook company-c-headers-mode
-                (diminish 'company-c-headers-mode)
-                (add-to-list 'company-backends 'company-c-headers))
-   #+end_src
-** [x] company-math
-   #+begin_src emacs-lisp
-     (with-package company-math
-                   (diminish 'company-math-mode)
-                   (add-to-list 'company-backends 'company-math-symbols-latex)
-                   (add-to-list 'company-backends 'company-math-symbols-unicode))
-   #+end_src
-** [x] company-quickhelp
-   #+begin_src emacs-lisp
-     (with-package company-quickhelp-mode
-                   (diminish 'company-quickhelp-mode)
-                   (add-hook 'global-company-mode-hook 'company-quickhelp-mode))
-   #+end_src
-** [x] company-statistics
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] company-try-hard
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] company-web
-   #+begin_src emacs-lisp
-
+(with-hook after-init
+           (add-hook 'c-initialization-hook 'my-c-init)
+           (add-hook 'c++-mode-hook 'my-c++-init)
+           (add-to-list 'auto-mode-alist '("\\.c\\'" . c-mode))
+           (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
+           (setq auto-mode-alist
+                 (append (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
+                         auto-mode-alist)))
    #+end_src
 ** [none  ] [x] dap-java
    #+begin_src emacs-lisp
 
    #+end_src
-** [x] dap-mode
-   #+begin_src emacs-lisp
-     (with-package dap-mode
-                   (dap-auto-configure-mode))
-   #+end_src
-** [x] dash
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] deft        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] diminish        
-   #+begin_src emacs-lisp
-
-   #+end_src
 ** [none  ] [x] dired
    #+begin_src emacs-lisp
-  (with-package dired
-                (require 'dired-extras)
-                (setq dired-dwim-target t
-                      global-auto-revert-non-file-buffers nil
-                      dired-recursive-copies  'always
-                      dired-recursive-deletes 'always
-                      ;; there is a bug with dired-subtree: when -D (--dired) switch is
-                      ;; specified, dired-subtree-toggle toggles only one level deep
-                      dired-listing-switches "-lA --si --time-style=long-iso --group-directories-first"
-                      wdired-use-vertical-movement t
-                      wdired-allow-to-change-permissions t
-                      dired-omit-files-p t
-                      dired-omit-files (concat dired-omit-files "\\|^\\..+$"))
+(with-hook after-init
+           (when-idle
+            (require 'dired)
+            (require 'dired-extras)))
 
-                (setq openwith-associations
-                      (list (list (openwith-make-extension-regexp
-                                   '("flac" "mpg" "mpeg" "mp3" "mp4"
-                                     "avi" "wmv" "wav" "mov" "flv"
-                                     "ogm" "ogg" "mkv" "webm"))
-                                  "mpv"
-                                  '(file))
+(with-package dired
+              (require 'dired-extras)
+              (setq dired-dwim-target t
+                    global-auto-revert-non-file-buffers nil
+                    dired-recursive-copies  'always
+                    dired-recursive-deletes 'always
+                    ;; there is a bug with dired-subtree: when -D (--dired) switch is
+                    ;; specified, dired-subtree-toggle toggles only one level deep
+                    dired-listing-switches "-lA --si --time-style=long-iso --group-directories-first"
+                    wdired-use-vertical-movement t
+                    wdired-allow-to-change-permissions t
+                    dired-omit-files-p t
+                    dired-omit-files (concat dired-omit-files "\\|^\\..+$"))
 
-                            (list (openwith-make-extension-regexp
-                                   '("html" "htm"))
-                                  (getenv "BROWSER")
-                                  '(file))))
+              (setq openwith-associations
+                    (list (list (openwith-make-extension-regexp
+                                 '("flac" "mpg" "mpeg" "mp3" "mp4"
+                                   "avi" "wmv" "wav" "mov" "flv"
+                                   "ogm" "ogg" "mkv" "webm"))
+                                "mpv"
+                                '(file))
 
-                (with-system gnu/linux
-                             (dolist (ext (list (list (openwith-make-extension-regexp
-                                                       '("xbm" "pbm" "pgm" "ppm" "pnm"
-                                                         "png" "gif" "bmp" "tif" "jpeg" "jpg"))
-                                                      "feh"
-                                                      '(file))
+                          (list (openwith-make-extension-regexp
+                                 '("html" "htm"))
+                                (getenv "BROWSER")
+                                '(file))))
 
-                                                (list (openwith-make-extension-regexp
-                                                       '("doc" "xls" "ppt" "odt" "ods" "odg" "odp" "rtf"))
-                                                      "libreoffice"
-                                                      '(file))
+              (with-system gnu/linux
+                           (dolist (ext (list (list (openwith-make-extension-regexp
+                                                     '("xbm" "pbm" "pgm" "ppm" "pnm"
+                                                       "png" "gif" "bmp" "tif" "jpeg" "jpg"))
+                                                    "feh"
+                                                    '(file))
+                                              
+                                              (list (openwith-make-extension-regexp
+                                                     '("doc" "xls" "ppt" "odt" "ods" "odg" "odp" "rtf"))
+                                                    "libreoffice"
+                                                    '(file))
 
-                                                (list (openwith-make-extension-regexp
-                                                       '("\\.lyx"))
-                                                      "lyx"
-                                                      '(file))
+                                              (list (openwith-make-extension-regexp
+                                                     '("\\.lyx"))
+                                                    "lyx"
+                                                    '(file))
 
-                                                (list (openwith-make-extension-regexp
-                                                       '("chm"))
-                                                      "kchmviewer"
-                                                      '(file))
+                                              (list (openwith-make-extension-regexp
+                                                     '("chm"))
+                                                    "kchmviewer"
+                                                    '(file))
 
-                                                (list (openwith-make-extension-regexp
-                                                       '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi"))
-                                                      "okular"
-                                                      '(file))))
-                               (add-to-list 'openwith-associations ext)))
+                                              (list (openwith-make-extension-regexp
+                                                     '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi"))
+                                                    "okular"
+                                                    '(file))))
+                             (add-to-list 'openwith-associations ext)))
 
-                (with-key-map dired-mode
-                              ("C-x <M-S-return>" . dired-open-current-as-sudo)                    
-                              ("r"                . dired-do-rename)
-                              ("C-S-r"            . wdired-change-to-wdired-mode)
-                              ("f"                . wdired-change-to-partial-wdired-mode)
-                              ;; ("C-r C-s"          . tmtxt/dired-async-get-files-size)
-                              ;; ("C-r C-r"          . tda/rsync)
-                              ;; ("C-r C-z"          . tda/zip)
-                              ;; ("C-r C-u"          . tda/unzip)
-                              ;; ("C-r C-a"          . tda/rsync-multiple-mark-file)
-                              ;; ("C-r C-e"          . tda/rsync-multiple-empty-list)
-                              ;; ("C-r C-d"          . tda/rsync-multiple-remove-item)
-                              ;; ("C-r C-v"          . tda/rsync-multiple)
-                              ;; ("C-r C-s"          . tda/get-files-size)
-                              ;; ("C-r C-q"          . tda/download-to-current-dir)
-                              ("S-<return>"       . dired-openwith)
-                              ("C-'"              . dired-collapse-mode)
-                              ("M-p"              . scroll-down-line)
-                              ("M-m"              . dired-mark-backward)
-                              ("M-<"              . dired-go-to-first)
-                              ("M->"              . dired-go-to-last)
-                              ("M-<return>"       . my-run)
-                              ("C-S-f"            . dired-narrow)
-                              ("P"                . peep-dired)
-                              ("<f1>"             . term-toggle)
-                              ("TAB"              . dired-subtree-toggle)))
+              (with-key-map dired-mode
+                            ("C-x <M-S-return>" . dired-open-current-as-sudo)                    
+                            ("r"                . dired-do-rename)
+                            ("C-S-r"            . wdired-change-to-wdired-mode)
+                            ("f"                . wdired-change-to-partial-wdired-mode)
+                            ;; ("C-r C-s"          . tmtxt/dired-async-get-files-size)
+                            ;; ("C-r C-r"          . tda/rsync)
+                            ;; ("C-r C-z"          . tda/zip)
+                            ;; ("C-r C-u"          . tda/unzip)
+                            ;; ("C-r C-a"          . tda/rsync-multiple-mark-file)
+                            ;; ("C-r C-e"          . tda/rsync-multiple-empty-list)
+                            ;; ("C-r C-d"          . tda/rsync-multiple-remove-item)
+                            ;; ("C-r C-v"          . tda/rsync-multiple)
+                            ;; ("C-r C-s"          . tda/get-files-size)
+                            ;; ("C-r C-q"          . tda/download-to-current-dir)
+                            ("S-<return>"       . dired-openwith)
+                            ("C-'"              . dired-collapse-mode)
+                            ("M-p"              . scroll-down-line)
+                            ("M-m"              . dired-mark-backward)
+                            ("M-<"              . dired-go-to-first)
+                            ("M->"              . dired-go-to-last)
+                            ("M-<return>"       . my-run)
+                            ("C-S-f"            . dired-narrow)
+                            ("P"                . peep-dired)
+                            ("<f1>"             . term-toggle)
+                            ("TAB"              . dired-subtree-toggle)))
 
-  (with-hook dired-mode
-             (dired-omit-mode t)
-             (dired-async-mode t)
-             (dired-hide-details-mode)
-             (dired-auto-readme-mode t))
-   #+end_src
-** [x] dired-hacks-utils        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] dired-narrow        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] dired-subtree
-   #+begin_src emacs-lisp
-     (with-package dired-subtree
-                   (setq dired-subtree-line-prefix "    "
-                         dired-subtree-use-backgrounds nil))
-   #+end_src
-** [x] dumb-jump        
-   #+begin_src emacs-lisp
-
+(with-hook dired-mode
+           (dired-omit-mode t)
+           (dired-async-mode t)
+           (dired-hide-details-mode)
+           (dired-auto-readme-mode t))
    #+end_src
 ** [none  ] [x] early-init
    #+begin_src emacs-lisp
-     (with-hook early-init
-                (defvar old-file-name-handler file-name-handler-alist)
-                (setq file-name-handler-alist nil
-                      gc-cons-threshold most-positive-fixnum
-                      file-name-handler-alist nil
-                      frame-inhibit-implied-resize t
-                      bidi-inhibit-bpa t
-                      initial-scratch-message ""
-                      inhibit-splash-screen t
-                      inhibit-startup-screen t
-                      inhibit-startup-message t
-                      inhibit-startup-echo-area-message t
-                      show-paren-delay 0
-                      use-dialog-box nil
-                      visible-bell nil
-                      ring-bell-function 'ignore
-                      load-prefer-newer t
-                      shell-command-default-error-buffer "Shell Command Errors"
-                      comp-speed 3)
+(with-hook early-init
+           (defvar old-file-name-handler file-name-handler-alist)
+           (setq file-name-handler-alist nil
+                 gc-cons-threshold most-positive-fixnum
+                 frame-inhibit-implied-resize t
+                 bidi-inhibit-bpa t
+                 initial-scratch-message ""
+                 inhibit-splash-screen t
+                 inhibit-startup-screen t
+                 inhibit-startup-message t
+                 inhibit-startup-echo-area-message t
+                 show-paren-delay 0
+                 use-dialog-box nil
+                 visible-bell nil
+                 ring-bell-function 'ignore
+                 load-prefer-newer t
+                 shell-command-default-error-buffer "Shell Command Errors"
+                 native-comp-async-report-warnings-errors 'silent
+                 comp-speed 3)
 
-                (setq-default abbrev-mode t
-                              indent-tabs-mode nil
-                              indicate-empty-lines t
-                              cursor-type 'bar
-                              fill-column 80
-                              auto-fill-function 'do-auto-fill
-                              cursor-in-non-selected-windows 'hollow
-                              bidi-display-reordering 'left-to-right
-                              bidi-paragraph-direction 'left-to-right)
+           (setq-default abbrev-mode t
+                         indent-tabs-mode nil
+                         indicate-empty-lines t
+                         cursor-type 'bar
+                         fill-column 80
+                         auto-fill-function 'do-auto-fill
+                         cursor-in-non-selected-windows 'hollow
+                         bidi-display-reordering 'left-to-right
+                         bidi-paragraph-direction 'left-to-right)
 
-                (push '(menu-bar-lines . 0) default-frame-alist)
-                (push '(tool-bar-lines . 0) default-frame-alist)
-                (push '(vertical-scroll-bars . nil) default-frame-alist)
-                (push '(font . "Anonymous Pro-16") default-frame-alist)
-                ;; (push '(font . "Some imaginary font") default-frame-alist)
-                (custom-set-faces '(default ((t (:height 120)))))
-
-                ;; (let ((default-directory  (expand-file-name "lisp" user-emacs-directory)))
-                ;;   (normal-top-level-add-to-load-path '("."))
-                ;;   (normal-top-level-add-subdirs-to-load-path))
-
-                (define-prefix-command 'C-z-map)
-                (global-set-key (kbd "C-z") 'C-z-map)
-                (global-unset-key (kbd "C-v")))
-   #+end_src
-** [x] elpy        
-   #+begin_src emacs-lisp
-     (with-package elpy
-                   (elpy-enable)
-                   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-              
-                   (with-key-map elpy-mode
-                                 ("C-M-n" . elpy-nav-forward-block)
-                                 ("C-M-p" . elpy-nav-backward-block)))
-
-     (with-hook elpy-mode
-                ;;(company-mode 1)           
-                (flycheck-mode 1)
-                ;;(make-local-variable 'company-backends)
-                ;;(setq company-backends '((elpy-company-backend :with company-yasnippet)))
-                )
+           (push '(menu-bar-lines . 0) default-frame-alist)
+           (push '(tool-bar-lines . 0) default-frame-alist)
+           (push '(vertical-scroll-bars . nil) default-frame-alist)
+           (push '(font . "Anonymous Pro-16") default-frame-alist)
+           ;; (push '(font . "Some imaginary font") default-frame-alist)
+           (custom-set-faces '(default ((t (:height 120)))))
+           
+           ;; (let ((default-directory  (expand-file-name "lisp" user-emacs-directory)))
+           ;;   (normal-top-level-add-to-load-path '("."))
+           ;;   (normal-top-level-add-subdirs-to-load-path))
+           
+           (define-prefix-command 'C-z-map)
+           (global-set-key (kbd "C-z") 'C-z-map)
+           (global-unset-key (kbd "C-v")))
    #+end_src
 ** [none  ] [x] emacs
    #+begin_src emacs-lisp
-      (with-hook after-init
-                 ;;            (defun org-mode-sqbr-syntax-fix (start end)
-                 ;;              (when (eq major-mode 'org-mode)
-                 ;;                (save-excursion
-                 ;;                  (goto-char start)
-                 ;;                  (while (re-search-forward "[]\\[]" end t)
-                 ;;                    (when (get-text-property (point) 'src-block)
-                 ;;                      ;; This is a [ or ] in an org-src block
-                 ;;                      (put-text-property (point) (1- (point))
-                 ;;                                         'syntax-table (string-to-syntax "_")))))))
+(with-hook after-init
+           ;;            (defun org-mode-sqbr-syntax-fix (start end)
+           ;;              (when (eq major-mode 'org-mode)
+           ;;                (save-excursion
+           ;;                  (goto-char start)
+           ;;                  (while (re-search-forward "[]\\[]" end t)
+           ;;                    (when (get-text-property (point) 'src-block)
+           ;;                      ;; This is a [ or ] in an org-src block
+           ;;                      (put-text-property (point) (1- (point))
+           ;;                                         'syntax-table (string-to-syntax "_")))))))
 
-                 ;;            (defun org-setup-sqbr-syntax-fix ()
-                 ;;              "Setup for characters ?< and ?> in source code blocks.
-                 ;; Add this function to `org-mode-hook'."
-                 ;;              (setq syntax-propertize-function 'org-mode-sqbr-syntax-fix)
-                 ;;              (syntax-propertize (point-max)))
+           ;;            (defun org-setup-sqbr-syntax-fix ()
+           ;;              "Setup for characters ?< and ?> in source code blocks.
+           ;; Add this function to `org-mode-hook'."
+           ;;              (setq syntax-propertize-function 'org-mode-sqbr-syntax-fix)
+           ;;              (syntax-propertize (point-max)))
 
-                 ;;            (add-hook 'org-mode-hook 'org-setup-sqbr-syntax-fix)
+           ;;            (add-hook 'org-mode-hook 'org-setup-sqbr-syntax-fix)
 
-                 ;;(unless (getenv "BROWSER")
-                 (setenv "BROWSER" "firefox-developer-edition")
-                 ;;)
+           ;;(unless (getenv "BROWSER")
+           (setenv "BROWSER" "firefox-developer-edition")
+           ;;)
 
-                 (with-system windows-nt
-                              (push "c:/msys64/usr/bin" exec-path)
-                              (push "c:/msys64/mingw64/bin" exec-path)
-                              (setenv "PATH"
-                                      (concat
-                                       "c:\\msys64\\mingw64\\bin;"
-                                       "c:\\msys64\\usr\\bin;"
-                                       (getenv "PATH")))
-                              ;; (global-disable-mouse-mode 1)
-                              (setq w32-get-true-file-attributes nil
-                                    w32-pipe-read-delay 0
-                                    w32-pipe-buffer-size (* 64 1024)
-                                    package-gnupghome-dir "/c/Users/arthu/.emacs.d/elpa/gnupg"
-                                    source-directory "c:\\emacs/emsrc/emacs"
-                                    command-line-x-option-alist nil
-                                    command-line-ns-option-alist nil
-                                    exec-path (list
-                                               "c:/msys64/mingw64/bin"
-                                               "c:/WINDOWS/system32"
-                                               "C:/WINDOWS"
-                                               "C:/WINDOWS/System32/Wbem"
-                                               "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common" 
-                                               "C:/Program Files/Calibre2/"
-                                               "C:/Users/arthu/AppData/Local/Microsoft/WindowsApps"
-                                               "c:/msys64/mingw64/libexec/emacs/28.0.50/x86_64-w64-mingw32")))
+           (with-system windows-nt
+                        (push "c:/msys64/usr/bin" exec-path)
+                        (push "c:/msys64/mingw64/bin" exec-path)
+                        (setenv "PATH"
+                                (concat
+                                 "c:\\msys64\\mingw64\\bin;"
+                                 "c:\\msys64\\usr\\bin;"
+                                 (getenv "PATH")))
+                        ;; (global-disable-mouse-mode 1)
+                        (setq w32-get-true-file-attributes nil
+                              w32-pipe-read-delay 0
+                              w32-pipe-buffer-size (* 64 1024)
+                              package-gnupghome-dir "/c/Users/arthu/.emacs.d/elpa/gnupg"
+                              source-directory "c:\\emacs/emsrc/emacs"
+                              command-line-x-option-alist nil
+                              command-line-ns-option-alist nil
+                              exec-path (list
+                                         "c:/msys64/mingw64/bin"
+                                         "c:/WINDOWS/system32"
+                                         "C:/WINDOWS"
+                                         "C:/WINDOWS/System32/Wbem"
+                                         "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common" 
+                                         "C:/Program Files/Calibre2/"
+                                         "C:/Users/arthu/AppData/Local/Microsoft/WindowsApps"
+                                         "c:/msys64/mingw64/libexec/emacs/28.0.50/x86_64-w64-mingw32")))
 
-                 (let ((etc (expand-file-name "etc" user-emacs-directory)))
-                   (unless (file-directory-p etc)
-                     (make-directory etc))
-                   (setq show-paren-style 'expression
-                         shell-file-name "bash"
-                         shell-command-switch "-ic"
-                         delete-exited-processes t
-                         echo-keystrokes 0.1
-                         winner-dont-bind-my-keys t
-                         auto-window-vscroll nil
-                         require-final-newline t
-                         next-line-add-newlines t
-                         bookmark-save-flag 1
-                         delete-selection-mode t
-                         confirm-kill-processes nil
-                         large-file-warning-threshold nil
-                         save-abbrevs 'silent
-                         save-interprogram-paste-before-kill t
-                         save-place-file (expand-file-name "places" etc)
-                         max-lisp-eval-depth '100000
-                         max-specpdl-size '1000000
-                         scroll-preserve-screen-position 'always
-                         scroll-conservatively 1
-                         maximum-scroll-margin 1
-                         scroll-margin 0
+           (let ((etc (expand-file-name "etc" user-emacs-directory)))
+             (unless (file-directory-p etc)
+               (make-directory etc))
+             (setq show-paren-style 'expression
+                   shell-file-name "bash"
+                   shell-command-switch "-ic"
+                   delete-exited-processes t
+                   echo-keystrokes 0.1
+                   winner-dont-bind-my-keys t
+                   auto-window-vscroll nil
+                   require-final-newline t
+                   next-line-add-newlines t
+                   bookmark-save-flag 1
+                   delete-selection-mode t
+                   confirm-kill-processes nil
+                   large-file-warning-threshold nil
+                   save-abbrevs 'silent
+                   save-interprogram-paste-before-kill t
+                   save-place-file (expand-file-name "places" etc)
+                   max-lisp-eval-depth '100000
+                   max-specpdl-size '1000000
+                   scroll-preserve-screen-position 'always
+                   scroll-conservatively 1
+                   maximum-scroll-margin 1
+                   scroll-margin 0
 
-                         backup-directory-alist `(("." . ,etc))
-                         custom-file (expand-file-name "emacs-custom.el" etc)
-                         abbrev-file-name (expand-file-name "abbrevs.el" etc)
-                         bookmark-default-file (expand-file-name "bookmarks" etc)))
+                   backup-directory-alist `(("." . ,etc))
+                   custom-file (expand-file-name "emacs-custom.el" etc)
+                   abbrev-file-name (expand-file-name "abbrevs.el" etc)
+                   bookmark-default-file (expand-file-name "bookmarks" etc)))
 
-                   ;;(add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
-                 (when (and custom-file (file-exists-p custom-file))
-                   (load custom-file 'noerror))
+           (fset 'yes-or-no-p 'y-or-n-p)
+           (electric-indent-mode 1)
+           (electric-pair-mode 1)
+           (global-auto-revert-mode)
+           (global-hl-line-mode 1)
+           (global-subword-mode 1)
+           (auto-compression-mode 1)
+           (auto-image-file-mode)
+           (auto-insert-mode 1)
+           (auto-save-mode 1)
+           (blink-cursor-mode 1)
+           (column-number-mode 1)
+           (delete-selection-mode 1)
+           (display-time-mode 1)
+           (pending-delete-mode 1)
+           (show-paren-mode t)
+           (save-place-mode 1)
+           (winner-mode t)
+           
+           (with-key-map global
+                         ;; Window-buffer operations
+                         ("C-<insert>"    . term-toggle)
+                         ("<insert>"      . term-toggle-eshell)
+                         ([f9]            . ispell-word)
+                         ([S-f10]         . next-buffer)
+                         ([f10]           . previous-buffer)
+                         ([f12]           . kill-buffer-but-not-some)
+                         ([M-f12]         . kill-buffer-other-window)
+                         ([C-M-f12]       . only-current-buffer)
 
-                 (fset 'yes-or-no-p 'y-or-n-p)
-                 (electric-indent-mode 1)
-                 (electric-pair-mode 1)
-                 (global-auto-revert-mode)
-                 (global-hl-line-mode 1)
-                 (global-subword-mode 1)
-                 (auto-compression-mode 1)
-                 (auto-image-file-mode)
-                 (auto-insert-mode 1)
-                 (auto-save-mode 1)
-                 (blink-cursor-mode 1)
-                 (column-number-mode 1)
-                 (delete-selection-mode 1)
-                 (display-time-mode 1)
-                 (pending-delete-mode 1)
-                 (save-place-mode 1)
-                 (show-paren-mode t)
-                 (winner-mode t)
-                 (turn-on-auto-fill)
-                 (diminish 'winner-mode)
-                 (diminish 'eldoc-mode)
-                 (diminish 'electric-pair-mode)
-                 (diminish 'auto-complete-mode)
-                 (diminish 'abbrev-mode)
-                 (diminish 'auto-fill-function)
-                 (diminish 'subword-mode)
-                 (diminish 'auto-insert-mode)
+                         ;; Emacs windows
+                         ("C-v <left>"   . windmove-swap-states-left)
+                         ("C-v <right>"  . windmove-swap-states-right)
+                         ("C-v <up>"     . windmove-swap-states-up)
+                         ("C-v <down>"   . windmove-swap-states-down)
+                         ("C-v o"        . other-window)
+                         ("C-v j"        . windmove-left)
+                         ("C-v l"        . windmove-right)
+                         ("C-v i"        . windmove-up)
+                         ("C-v k"        . windmove-down)
+                         ("C-v a"        . send-to-window-left)
+                         ("C-v d"        . send-to-window-right)
+                         ("C-v w"        . send-to-window-up)
+                         ("C-v s"        . send-to-window-down)
+                         ("C-v v"        . maximize-window-vertically)
+                         ("C-v h"        . maximize-window-horizontally)
+                         ("C-v n"        . next-buffer)
+                         ("C-v p"        . previous-buffer)
+                         ("C-v C-+"      . enlarge-window-horizontally)
+                         ("C-v C-,"      . enlarge-window-vertically)
+                         ("C-v C--"      . shrink-window-horizontally)
+                         ("C-v C-."      . shrink-window-vertically)
+                         ("C-v u"        . winner-undo)
+                         ("C-v r"        . winner-redo)
+                         ("C-v C-k"      . delete-window)
+                         ("C-v C-l"      . windmove-delete-left)
+                         ("C-v C-r"      . windmove-delete-right)
+                         ("C-v C-a"      . windmove-delete-up)
+                         ("C-v C-b"      . windmove-delete-down)
+                         ("C-v <return>" . delete-other-windows)
+                         ("C-v ,"        . split-window-right)
+                         ("C-v ."        . split-window-below)
+                         ("C-v C-s"      . swap-two-buffers)
+                         ([remap other-window] . ace-window)
 
-                 ;;(add-hook 'emacs-startup-hook #'efs/display-startup-time)
-                 (add-hook 'comint-output-filter-functions
-                           'comint-watch-for-password-prompt)
+                         ;; cursor movement
+                         ("M-n"     . scroll-up-line)
+                         ("M-N"     . scroll-up-command)
+                         ("M-p"     . scroll-down-line)
+                         ("M-P"     . scroll-down-command)
+                         ("C-v c"   . org-capture)
+                         ("C-v C-c" . avy-goto-char)
+                         ("C-v C-v" . avy-goto-word-1)
+                         ("C-v C-w" . avy-goto-word-0)
+                         ("C-v C-g" . avy-goto-line)
 
-                 (with-key-map global
-                               ;; Window-buffer operations
-                               ("C-<insert>"    . term-toggle)
-                               ("<insert>"      . term-toggle-eshell)
-                               ([f9]            . ispell-word)
-                               ([S-f10]         . next-buffer)
-                               ([f10]           . previous-buffer)
-                               ([f12]           . kill-buffer-but-not-some)
-                               ([M-f12]         . kill-buffer-other-window)
-                               ([C-M-f12]       . only-current-buffer)
+                         ;; emms
+                         ("C-v e SPC"   . emms-pause)
+                         ("C-v e d"     . emms-play-directory)
+                         ("C-v e l"     . emms-play-list)
+                         ("C-v e n"     . emms-next)
+                         ("C-v e p"     . emms-previous)
+                         ("C-v e a"     . emms-add-directory)
+                         ("C-v e A"     . emms-add-directory-tree)
+                         ("C-v e +"     . pulseaudio-control-increase-volume)
+                         ("C-v e -"     . pulseaudio-control-decrease-volume)
+                         ("C-v e r"     . emms-start)
+                         ("C-v e s"     . emms-stop)
+                         ("C-v e m"     . emms-play-m3u-playlist)
 
-                               ;; Emacs windows
-                               ("C-v <left>"   . windmove-swap-states-left)
-                               ("C-v <right>"  . windmove-swap-states-right)
-                               ("C-v <up>"     . windmove-swap-states-up)
-                               ("C-v <down>"   . windmove-swap-states-down)
-                               ("C-v o"        . other-window)
-                               ("C-v j"        . windmove-left)
-                               ("C-v l"        . windmove-right)
-                               ("C-v i"        . windmove-up)
-                               ("C-v k"        . windmove-down)
-                               ("C-v a"        . send-to-window-left)
-                               ("C-v d"        . send-to-window-right)
-                               ("C-v w"        . send-to-window-up)
-                               ("C-v s"        . send-to-window-down)
-                               ("C-v v"        . maximize-window-vertically)
-                               ("C-v h"        . maximize-window-horizontally)
-                               ("C-v n"        . next-buffer)
-                               ("C-v p"        . previous-buffer)
-                               ("C-v C-+"      . enlarge-window-horizontally)
-                               ("C-v C-,"      . enlarge-window-vertically)
-                               ("C-v C--"      . shrink-window-horizontally)
-                               ("C-v C-."      . shrink-window-vertically)
-                               ("C-v u"        . winner-undo)
-                               ("C-v r"        . winner-redo)
-                               ("C-v C-k"      . delete-window)
-                               ("C-v C-l"      . windmove-delete-left)
-                               ("C-v C-r"      . windmove-delete-right)
-                               ("C-v C-a"      . windmove-delete-up)
-                               ("C-v C-b"      . windmove-delete-down)
-                               ("C-v <return>" . delete-other-windows)
-                               ("C-v ,"        . split-window-right)
-                               ("C-v ."        . split-window-below)
-                               ("C-v C-s"      . swap-two-buffers)
-                               ([remap other-window] . ace-window)
-
-                               ;; cursor movement
-                               ("M-n"     . scroll-up-line)
-                               ("M-N"     . scroll-up-command)
-                               ("M-p"     . scroll-down-line)
-                               ("M-P"     . scroll-down-command)
-                               ("C-v c"   . org-capture)
-                               ("C-v C-c" . avy-goto-char)
-                               ("C-v C-v" . avy-goto-word-1)
-                               ("C-v C-w" . avy-goto-word-0)
-                               ("C-v C-g" . avy-goto-line)
-
-                               ;; emms
-                               ("C-v e SPC"   . emms-pause)
-                               ("C-v e d"     . emms-play-directory)
-                               ("C-v e l"     . emms-play-list)
-                               ("C-v e n"     . emms-next)
-                               ("C-v e p"     . emms-previous)
-                               ("C-v e a"     . emms-add-directory)
-                               ("C-v e A"     . emms-add-directory-tree)
-                               ("C-v e +"     . pulseaudio-control-increase-volume)
-                               ("C-v e -"     . pulseaudio-control-decrease-volume)
-                               ("C-v e r"     . emms-start)
-                               ("C-v e s"     . emms-stop)
-                               ("C-v e m"     . emms-play-m3u-playlist)
-
-                               ;; some random stuff
-                               ("C-x C-j"   . dired-jump)
-                               ("C-x 4 C-j" . dired-jump-other-window)
-                               ("C-h C-i"   . (lambda() 
-                                                (interactive)
-                                                (find-file (expand-file-name
-                                                            "init.org" user-emacs-directory))))))
-   #+end_src
-** [x] emms
-   #+begin_src emacs-lisp
-     (with-package emms
-                   (require 'emms)
-                   (require 'emms-setup)
-                   (require 'emms-volume)
-                   (require 'emms-source-file)
-                   (require 'emms-source-playlist)
-                   (require 'emms-playlist-mode)
-                   (require 'emms-playlist-limit)
-                   (require 'emms-playing-time)
-                   (require 'emms-mode-line-cycle)
-                   (require 'emms-player-mpv)
-                   (emms-all)
-                   (emms-history-load)
-                   (emms-default-players)
-                   (helm-mode 1)
-                   (emms-mode-line 1)
-                   (emms-playing-time 1)
-
-                   (setq-default emms-player-list '(emms-player-mpv)
-                                 emms-player-mpv-environment '("PULSE_PROP_media.role=music"))
-                   ;;emms-player-mpv-ipc-method nil)
-                   ;; emms-player-mpv-debug t
-                   ;;     emms-player-mpv-environment '("PULSE_PROP_media.role=music")
-                   ;;     emms-player-mpv-parameters '("--quiet" "--really-quiet" "--no-audio-display" "--force-window=no" "--vo=null"))
-              
-                   (setq emms-source-file-default-directory (expand-file-name "~/Musik"))
-                   (setq emms-directory (expand-file-name "etc/emms/" user-emacs-directory)
-                         emms-cache-file (expand-file-name "cache" emms-directory)
-                         emms-history-file (expand-file-name "history" emms-directory)
-                         emms-score-file (expand-file-name "scores" emms-directory)
-                         emms-stream-bookmark-file (expand-file-name "streams" emms-directory)
-                         emms-playlist-buffer-name "*Music Playlist*"
-                         emms-show-format "Playing: %s"
-                         ;; Icon setup.
-                         emms-mode-line-icon-before-format "["
-                         emms-mode-line-format " %s]"
-                         emms-playing-time-display-format "%s ]"
-                         emms-mode-line-icon-color "lightgrey"
-                         global-mode-string '("" emms-mode-line-string " " emms-playing-time-string)
-                         emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find
-                         emms-browser-covers 'emms-browser-cache-thumbnail)
-
-                   (add-to-list 'emms-info-functions 'emms-info-cueinfo)
-              
-                   (when (executable-find "emms-print-metadata")
-                     (require 'emms-info-libtag)
-                     (add-to-list 'emms-info-functions 'emms-info-libtag)
-                     (delete 'emms-info-ogginfo emms-info-functions)
-                     (delete 'emms-info-mp3info emms-info-functions)
-                     (add-to-list 'emms-info-functions 'emms-info-ogginfo)
-                     (add-to-list 'emms-info-functions 'emms-info-mp3info))
-              
-                   (add-hook 'emms-browser-tracks-added-hook 'z-emms-play-on-add)
-                   (add-hook 'emms-player-started-hook 'emms-show))
-   #+end_src
-** [x] emms-mode-line-cycle        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] esup        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] esxml
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] ewmctrl
-#+begin_src emacs-lisp
-
-#+end_src
-** [x] expand-region        
-   #+begin_src emacs-lisp
-     (with-hook expand-region-mode
-                (diminish 'expand-region-mode))
-   #+end_src
-** [x] flimenu        
-   #+begin_src emacs-lisp
-     (with-package flimenu
-                   (flimenu-global-mode))
-   #+end_src
-** [x] flycheck        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] gh        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] gist        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] git-gutter        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] github-search        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] git-link        
-   #+begin_src emacs-lisp
-
-   #+end_src
-** [x] gnu-elpa-keyring-update
-   #+begin_src emacs-lisp
-
+                         ;; some random stuff
+                         ("C-+" . er/expand-region)
+                         ("C--" . er/contract-region)
+                         ("C-x C-j"   . dired-jump)
+                         ("C-x 4 C-j" . dired-jump-other-window)
+                         ("C-h C-i"   . (lambda() 
+                                          (interactive)
+                                          (find-file (expand-file-name
+                                                      "init.org"
+                                                      user-emacs-directory)))))
+           
+           (when-idle (require 'sv-kalender)
+                      ;;(add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
+                      (when (and custom-file (file-exists-p custom-file))
+                        (load custom-file 'noerror))
+                      (add-hook 'comint-output-filter-functions #'comint-watch-for-password-prompt)
+                      (setq gc-cons-threshold       16777216
+                            gc-cons-percentage      0.1
+                            file-name-handler-alist old-file-name-handler)
+                      (turn-on-auto-fill)
+                      (diminish 'winner-mode)
+                      (diminish 'eldoc-mode)
+                      (diminish 'electric-pair-mode)
+                      (diminish 'auto-complete-mode)
+                      (diminish 'abbrev-mode)
+                      (diminish 'auto-fill-function)
+                      (diminish 'subword-mode)
+                      (diminish 'auto-insert-mode)
+                      (force-mode-line-update)))
    #+end_src
 ** [none  ] [x] gnus
    #+begin_src emacs-lisp
@@ -1364,6 +1080,466 @@
                                          ;;("Reddit")
                                          ("Gnus"))))
    #+end_src
+** [none  ] [x] inferior-python-mode
+   #+begin_src emacs-lisp
+     (with-hook inferior-python-mode
+                (hide-mode-line-mode))
+   #+end_src
+** [none  ] [x] lisp & elisp
+   #+begin_src emacs-lisp
+(with-hook after-init
+           (defun shell-command-on-buffer ()
+             (interactive)
+             (shell-command-on-region
+              (point-min) (point-max)
+              (read-shell-command "Shell command on buffer: ") ))
+
+           ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
+           (defun fc-eval-and-replace ()
+             "Replace the preceding sexp with its value."
+             (interactive)
+             (backward-kill-sexp)
+             (condition-case nil
+                 (prin1 (eval (read (current-kill 0)))
+                        (current-buffer))
+               (error (message "Invalid expression")
+                      (insert (current-kill 0)))))
+
+           ;; https://stackoverflow.com/questions/2171890/emacs-how-to-evaluate-the-smallest-s-expression-the-cursor-is-in-or-the-follow
+           (defun eval-next-sexp ()
+             (interactive)
+             (forward-sexp)
+             (eval-last-sexp nil))
+           
+           ;; this works sometimes
+           (defun eval-surrounding-sexp (levels)
+             (interactive "p")
+             (up-list (abs levels))
+             (eval-last-sexp nil))
+           
+           (set-default 'auto-mode-alist
+                        (append '(("\\.lisp$" . lisp-mode)
+                                  ("\\.lsp$" . lisp-mode)
+                                  ("\\.cl$" . lisp-mode))
+                                auto-mode-alist)))
+(with-hook emacs-lisp-mode
+           (setq fill-column 80)
+           (company-mode 1)
+           (outshine-mode 1)
+           (yas-minor-mode 1)
+           (with-key-map emacs-lisp-mode
+                         ("\C-c b" . eval-buffer)
+                         ("\C-c d" . eval-defun)
+                         ("\C-c i" . reindent-buffer)
+                         ("\C-c l" . eval-last-sexp)
+                         ("\C-c n" . eval-next-sexp)
+                         ("\C-c r" . fc-eval-and-replace)
+                         ("\C-c s" . eval-surrounding-sexp)))
+   #+end_src
+** [none  ] [x] wdired
+   #+begin_src emacs-lisp
+(with-package wdired
+              (with-key-map wdired-mode
+                            ("<return>"        . dired-find-file)
+                            ("M-<return>"      . my-run)
+                            ("S-<return>"      . dired-openwith)
+                            ("M-<"             . dired-go-to-first)
+                            ("M->"             . dired-go-to-last)
+                            ("M-p"             . scroll-down-line)))
+   #+end_src
+** [x] academic-phrases
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] ace-window
+   #+begin_src emacs-lisp
+(with-package ace-window
+              (ace-window-display-mode 1)
+              ;;(setq aw-dispatch-always t)
+              (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+   #+end_src
+** [x] all-the-icons
+   #+begin_src emacs-lisp
+(with-package all-the-icons
+              (diminish 'all-the-icons-mode)
+              (setq neo-theme 'arrow)
+              (setq neo-window-fixed-size nil))
+   #+end_src
+** [x] async
+   #+begin_src emacs-lisp
+(with-package async
+              (async-bytecomp-package-mode 1)
+              (diminish 'async-dired-mode))
+   #+end_src
+** [x] auto-package-update
+   #+begin_src emacs-lisp
+(with-hook auto-package-update-after
+           (message "Refresh autoloads")
+           (package-quickstart-refresh))
+
+(with-package auto-package-update
+              (setq auto-package-update-delete-old-versions t
+                    auto-package-update-interval nil))
+   #+end_src
+** [x] auto-yasnippet
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] avy
+   #+BEGIN_SRC emacs-lisp
+
+   #+END_SRC
+** [x] beacon
+   #+begin_src emacs-lisp
+(with-hook after-init
+          (when-idle
+           (beacon-mode t)
+           (diminish 'beacon-mode)))
+   #+end_src
+** [x] borg
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] bug-hunter
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] bui
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] cfrs
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] cmake-font-lock
+   #+begin_src emacs-lisp
+(with-hook prog-mode
+           ;; Highlighting in cmake-mode this way interferes with
+           ;; cmake-font-lock, which is something I dont yet understand.
+           (when (not (derived-mode-p 'cmake-mode))
+             (font-lock-add-keywords nil
+                                     '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
+                                        1 font-lock-warning-face t)))))
+
+(with-hook cmake-mode
+           (cmake-font-lock-activate))
+   #+end_src
+** [x] cmake-mode
+   #+begin_src emacs-lisp
+(with-hook after-init
+           (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
+           (add-to-list 'auto-mode-alist '("\\CMakeLists.txt\\'" . cmake-mode)))
+(with-hook cmake
+           (require 'company-cmake)
+           (company-mode 1))
+   #+end_src
+** [x] company
+   #+begin_src emacs-lisp
+(with-hook after-init
+           (when-idle
+            (require 'company)))
+
+(with-package company 
+              (require 'company-capf)
+              (require 'company-files)
+              
+              (diminish 'company-mode)
+              (setq company-idle-delay            0
+                    company-require-match         nil
+                    company-minimum-prefix-length 2
+                    company-show-numbers          t
+                    company-tooltip-limit         20
+                    company-async-timeout         6
+                    company-dabbrev-downcase      nil
+                    tab-always-indent 'complete
+                    company-global-modes '(not term-mode)
+                    company-backends (delete 'company-semantic company-backends))
+
+              (define-key company-mode-map
+                [remap indent-for-tab-command] 'company-indent-or-complete-common)
+              (add-to-list 'company-backends 'company-cmake)
+              (add-to-list 'company-backends 'company-capf)
+              (add-to-list 'company-backends 'company-files)
+              (add-hook 'emacs-lisp-mode-hook 'company-mode)
+
+              (with-key-map company-active
+                            ("C-n" . company-select-next)
+                            ("C-p" . company-select-previous)))
+   #+end_src
+** [x] company-c-headers        
+   #+begin_src emacs-lisp
+(with-hook company-c-headers-mode
+           (diminish 'company-c-headers-mode)
+           (add-to-list 'company-backends 'company-c-headers))
+   #+end_src
+** [x] company-flx
+#+begin_src emacs-lisp
+(with-package company
+              (company-flx-mode +1))
+#+end_src
+** [x] company-math
+   #+begin_src emacs-lisp
+(with-package company-math
+              (diminish 'company-math-mode)
+              (add-to-list 'company-backends 'company-math-symbols-latex)
+              (add-to-list 'company-backends 'company-math-symbols-unicode))
+   #+end_src
+** [x] company-quickhelp
+   #+begin_src emacs-lisp
+(with-package company-quickhelp-mode
+              (diminish 'company-quickhelp-mode)
+              (add-hook 'global-company-mode-hook 'company-quickhelp-mode))
+   #+end_src
+** [x] company-statistics
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] company-try-hard
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] company-web
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] crux
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] dap-mode
+   #+begin_src emacs-lisp
+(with-package dap-mode
+              (dap-auto-configure-mode))
+   #+end_src
+** [x] dash
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] deft        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] diminish        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] dired-hacks-utils        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] dired-narrow        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] dired-rsync
+#+begin_src emacs-lisp
+(with-hook after-init (when-idle (require 'dired-async)))
+
+(with-package dired (require 'dired-async))
+#+end_src
+** [x] dired-subtree
+   #+begin_src emacs-lisp
+(with-hook after-init (when-idle (require 'dired-subtree)))
+
+(with-package dired-subtree
+              (setq dired-subtree-line-prefix "    "
+                    dired-subtree-use-backgrounds nil))
+   #+end_src
+** [x] dumb-jump        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] elisp-def
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] elisp-slime-nav
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] elnode
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] elpy        
+   #+begin_src emacs-lisp
+(with-package elpy
+              (elpy-enable)
+              (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+              
+              (with-key-map elpy-mode
+                            ("C-M-n" . elpy-nav-forward-block)
+                            ("C-M-p" . elpy-nav-backward-block)))
+
+(with-hook elpy-mode
+           ;;(company-mode 1)           
+           (flycheck-mode 1)
+           ;;(make-local-variable 'company-backends)
+           ;;(setq company-backends '((elpy-company-backend :with company-yasnippet)))
+           )
+   #+end_src
+** [x] el-search
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] emms
+   #+begin_src emacs-lisp
+(with-hook after-init (when-idle (require 'emms)))
+
+(with-package emms
+              (require 'emms)
+              (require 'emms-setup)
+              (require 'emms-volume)
+              (require 'emms-source-file)
+              (require 'emms-source-playlist)
+              (require 'emms-playlist-mode)
+              (require 'emms-playlist-limit)
+              (require 'emms-playing-time)
+              (require 'emms-mode-line-cycle)
+              (require 'emms-player-mpv)
+              (emms-all)
+              (emms-history-load)
+              (emms-default-players)
+              (helm-mode 1)
+              (emms-mode-line 1)
+              (emms-playing-time 1)
+
+              (setq-default emms-player-list '(emms-player-mpv)
+                            emms-player-mpv-environment '("PULSE_PROP_media.role=music"))
+              ;;emms-player-mpv-ipc-method nil)
+              ;; emms-player-mpv-debug t
+              ;;     emms-player-mpv-environment '("PULSE_PROP_media.role=music")
+              ;;     emms-player-mpv-parameters '("--quiet" "--really-quiet" "--no-audio-display" "--force-window=no" "--vo=null"))
+              
+              (setq emms-source-file-default-directory (expand-file-name "~/Musik"))
+              (setq emms-directory (expand-file-name "etc/emms/" user-emacs-directory)
+                    emms-cache-file (expand-file-name "cache" emms-directory)
+                    emms-history-file (expand-file-name "history" emms-directory)
+                    emms-score-file (expand-file-name "scores" emms-directory)
+                    emms-stream-bookmark-file (expand-file-name "streams" emms-directory)
+                    emms-playlist-buffer-name "*Music Playlist*"
+                    emms-show-format "Playing: %s"
+                    ;; Icon setup.
+                    emms-mode-line-icon-before-format "["
+                    emms-mode-line-format " %s]"
+                    emms-playing-time-display-format "%s ]"
+                    emms-mode-line-icon-color "lightgrey"
+                    global-mode-string '("" emms-mode-line-string " " emms-playing-time-string)
+                    emms-source-file-directory-tree-function 'emms-source-file-directory-tree-find
+                    emms-browser-covers 'emms-browser-cache-thumbnail)
+              
+              (add-to-list 'emms-info-functions 'emms-info-cueinfo)
+              
+              (when (executable-find "emms-print-metadata")
+                (require 'emms-info-libtag)
+                (add-to-list 'emms-info-functions 'emms-info-libtag)
+                (delete 'emms-info-ogginfo emms-info-functions)
+                (delete 'emms-info-mp3info emms-info-functions)
+                (add-to-list 'emms-info-functions 'emms-info-ogginfo)
+                (add-to-list 'emms-info-functions 'emms-info-mp3info))
+              
+              (add-hook 'emms-browser-tracks-added-hook 'z-emms-play-on-add)
+              (add-hook 'emms-player-started-hook 'emms-show))
+   #+end_src
+** [x] emms-mode-line-cycle        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] emr
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] eros
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] ert-runner
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] esup        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] esxml
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] evil
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] evil-exchange
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] evil-matchit
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] evil-multiedit
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] evil-snipe
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] ewmctrl
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] expand-region        
+   #+begin_src emacs-lisp
+     (with-hook expand-region-mode
+                (diminish 'expand-region-mode))
+   #+end_src
+** [x] f
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] feebleline
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] flimenu        
+   #+begin_src emacs-lisp
+     (with-package flimenu
+                   (flimenu-global-mode))
+   #+end_src
+** [x] flycheck        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] gh        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] gist        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] git-gutter        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] github-search        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] git-link        
+   #+begin_src emacs-lisp
+
+   #+end_src
+** [x] git-messenger
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] gnu-elpa-keyring-update
+   #+begin_src emacs-lisp
+
+   #+end_src
 ** [x] google-c-style        
    #+begin_src emacs-lisp
      (with-hook google-c-style-mode
@@ -1375,109 +1551,116 @@
    #+end_src
 ** [x] helm        
    #+begin_src emacs-lisp
-     (with-hook eshell-mode
-                (with-key-map eshell-mode-map
-                              ("C-c C-h" . helm-eshell-history)
-                              ("C-c C-r" . helm-comint-input-ring)
-                              ("C-c C-l" . helm-minibuffer-history)))
+(with-hook after-init (when-idle
+                       (require 'helm)
+                       (require 'helm-config)
+                       (require 'helm-eshell)
+                       (require 'helm-buffers)
+                       (require 'helm-files)))
 
-     (with-hook helm-ff-cache-mode
-                (diminish 'helm-ff-cache-mode))
+(with-hook eshell-mode
+           (with-key-map eshell-mode-map
+                         ("C-c C-h" . helm-eshell-history)
+                         ("C-c C-r" . helm-comint-input-ring)
+                         ("C-c C-l" . helm-minibuffer-history)))
 
-     (with-package helm
-                   (require 'helm-config)
-                   (require 'helm-eshell)
-                   (require 'helm-buffers)
-                   (require 'helm-files)
+(with-hook helm-ff-cache-mode
+           (diminish 'helm-ff-cache-mode))
 
-                   (defun my-helm-next-source ()
-                     (interactive)
-                     (helm-next-source)
-                     (helm-next-line))
+(with-package helm
+              (require 'helm-config)
+              (require 'helm-eshell)
+              (require 'helm-buffers)
+              (require 'helm-files)
+              
+              (defun my-helm-next-source ()
+                (interactive)
+                (helm-next-source)
+                (helm-next-line))
+              
+              (defun my-helm-return ()
+                (interactive)
+                (helm-select-nth-action 0))
+              
+              (setq helm-completion-style             'emacs
+                    helm-completion-in-region-fuzzy-match t
+                    helm-recentf-fuzzy-match              t
+                    helm-buffers-fuzzy-matching           t
+                    helm-locate-fuzzy-match               t
+                    helm-lisp-fuzzy-completion            t
+                    helm-session-fuzzy-match              t
+                    helm-apropos-fuzzy-match              t
+                    helm-imenu-fuzzy-match                t
+                    helm-semantic-fuzzy-match             t
+                    helm-M-x-fuzzy-match                  t
+                    helm-split-window-inside-p            t
+                    helm-move-to-line-cycle-in-source     t
+                    helm-ff-search-library-in-sexp        t
+                    helm-scroll-amount                    8
+                    helm-ff-file-name-history-use-recentf t
+                    helm-ff-auto-update-initial-value     t
+                    helm-net-prefer-curl                  t
+                    helm-autoresize-max-height            0
+                    helm-autoresize-min-height           30
+                    helm-candidate-number-limit         100
+                    helm-idle-delay                     0.0
+                    helm-input-idle-delay               0.0
+                    helm-ff-cache-mode-lighter-sleep    nil
+                    helm-ff-cache-mode-lighter-updating nil
+                    helm-ff-cache-mode-lighter          nil
+                    helm-ff-skip-boring-files            t)
 
-                   (defun my-helm-return ()
-                     (interactive)
-                     (helm-select-nth-action 0))
+              (dolist (regexp '("\\`\\*direnv" "\\`\\*straight" "\\`\\*xref"))
+                (push regexp helm-boring-buffer-regexp-list))
 
-                   (setq helm-completion-style             'emacs
-                         helm-completion-in-region-fuzzy-match t
-                         helm-recentf-fuzzy-match              t
-                         helm-buffers-fuzzy-matching           t
-                         helm-locate-fuzzy-match               t
-                         helm-lisp-fuzzy-completion            t
-                         helm-session-fuzzy-match              t
-                         helm-apropos-fuzzy-match              t
-                         helm-imenu-fuzzy-match                t
-                         helm-semantic-fuzzy-match             t
-                         helm-M-x-fuzzy-match                  t
-                         helm-split-window-inside-p            t
-                         helm-move-to-line-cycle-in-source     t
-                         helm-ff-search-library-in-sexp        t
-                         helm-scroll-amount                    8
-                         helm-ff-file-name-history-use-recentf t
-                         helm-ff-auto-update-initial-value     t
-                         helm-net-prefer-curl                  t
-                         helm-autoresize-max-height            0
-                         helm-autoresize-min-height           30
-                         helm-candidate-number-limit         100
-                         helm-idle-delay                     0.0
-                         helm-input-idle-delay               0.0
-                         helm-ff-cache-mode-lighter-sleep    nil
-                         helm-ff-cache-mode-lighter-updating nil
-                         helm-ff-cache-mode-lighter          nil
-                         helm-ff-skip-boring-files            t)
+              (helm-autoresize-mode 1)
+              (helm-adaptive-mode t)
+              (helm-mode 1)
 
-                   (dolist (regexp '("\\`\\*direnv" "\\`\\*straight" "\\`\\*xref"))
-                     (push regexp helm-boring-buffer-regexp-list))
+              (add-to-list 'helm-sources-using-default-as-input
+                           'helm-source-man-pages)
+              (setq helm-mini-default-sources '(helm-source-buffers-list
+                                                helm-source-bookmarks
+                                                helm-source-recentf
+                                                helm-source-buffer-not-found))
+              (with-key-map helm
+                            ("M-i" . helm-previous-line)
+                            ("M-k" . helm-next-line)
+                            ("M-I" . helm-previous-page)
+                            ("M-K" . helm-next-page)
+                            ("M-h" . helm-beginning-of-buffer)
+                            ("M-H" . helm-end-of-buffer))
 
-                   (helm-autoresize-mode 1)
-                   (helm-adaptive-mode t)
-                   (helm-mode 1)
+              (with-key-map helm-read-file
+                            ("C-o" . my-helm-next-source) 
+                            ("RET" . my-helm-return)))
 
-                   (add-to-list 'helm-sources-using-default-as-input
-                                'helm-source-man-pages)
-                   (setq helm-mini-default-sources '(helm-source-buffers-list
-                                                     helm-source-bookmarks
-                                                     helm-source-recentf
-                                                     helm-source-buffer-not-found))
-                   (with-key-map helm
-                                 ("M-i" . helm-previous-line)
-                                 ("M-k" . helm-next-line)
-                                 ("M-I" . helm-previous-page)
-                                 ("M-K" . helm-next-page)
-                                 ("M-h" . helm-beginning-of-buffer)
-                                 ("M-H" . helm-end-of-buffer))
+(with-hook after-init
+           (with-key-map global    
+                         ("M-x"     . helm-M-x)
+                         ("C-x C-b" . helm-buffers-list)
+                         ("C-z a"   . helm-ag)
+                         ("C-z b"   . helm-filtered-bookmarks)
+                         ("C-z c"   . helm-company)
+                         ("C-z d"   . helm-dabbrev)
+                         ("C-z e"   . helm-calcul-expression)
+                         ("C-z g"   . helm-google-suggest)
+                         ("C-z h"   . helm-descbinds)
+                         ("C-z i"   . helm-imenu-anywhere)
+                         ("C-z k"   . helm-show-kill-ring)
 
-                   (with-key-map helm-read-file
-                                 ("C-o" . my-helm-next-source) 
-                                 ("RET" . my-helm-return)))
-
-     (with-hook after-init
-                (with-key-map global    
-                              ("M-x"     . helm-M-x)
-                              ("C-x C-b" . helm-buffers-list)
-                              ("C-z a"   . helm-ag)
-                              ("C-z b"   . helm-filtered-bookmarks)
-                              ("C-z c"   . helm-company)
-                              ("C-z d"   . helm-dabbrev)
-                              ("C-z e"   . helm-calcul-expression)
-                              ("C-z g"   . helm-google-suggest)
-                              ("C-z h"   . helm-descbinds)
-                              ("C-z i"   . helm-imenu-anywhere)
-                              ("C-z k"   . helm-show-kill-ring)
-
-                              ("C-z f"   . helm-find-files)
-                              ("C-z m"   . helm-mini)
-                              ("C-z o"   . helm-occur)
-                              ("C-z p"   . helm-browse-project)
-                              ("C-z q"   . helm-apropos)
-                              ("C-z r"   . helm-recentf)
-                              ("C-z s"   . helm-swoop)
-                              ("C-z C-c" . helm-colors)
-                              ("C-z x"   . helm-M-x)
-                              ("C-z y"   . helm-yas-complete)
-                              ("C-z C-g" . helm-ls-git-ls)
-                              ("C-z SPC" . helm-all-mark-rings)))
+                         ("C-z f"   . helm-find-files)
+                         ("C-z m"   . helm-mini)
+                         ("C-z o"   . helm-occur)
+                         ("C-z p"   . helm-browse-project)
+                         ("C-z q"   . helm-apropos)
+                         ("C-z r"   . helm-recentf)
+                         ("C-z s"   . helm-swoop)
+                         ("C-z C-c" . helm-colors)
+                         ("C-z x"   . helm-M-x)
+                         ("C-z y"   . helm-yas-complete)
+                         ("C-z C-g" . helm-ls-git-ls)
+                         ("C-z SPC" . helm-all-mark-rings)))
    #+end_src
 
 ** [x] helm-ag        
@@ -1519,10 +1702,14 @@
    #+begin_src emacs-lisp
 
    #+end_src
-** [x] helm-flx        
-   #+begin_src emacs-lisp
-
-   #+end_src
+** [x] helm-flx
+#+begin_src emacs-lisp
+(with-package helm
+           (when-idle
+            (setq helm-flx-for-helm-find-files t
+                  helm-flx-for-helm-locate t)
+            (helm-flx-mode +1)))
+#+end_src
 ** [x] helm-flyspell        
    #+begin_src emacs-lisp
 
@@ -1531,6 +1718,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] helm-git-grep
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] helm-ls-git        
    #+begin_src emacs-lisp
 
@@ -1638,6 +1829,10 @@
 
    #+end_src
 ** [x] ht
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] ht
    #+begin_src emacs-lisp
 
    #+end_src
@@ -1695,60 +1890,9 @@
    #+begin_src emacs-lisp
 
    #+end_src
-** [none  ] [x] inferior-python-mode
-   #+begin_src emacs-lisp
-     (with-hook inferior-python-mode
-                (hide-mode-line-mode))
-   #+end_src
 ** [x] kv
    #+begin_src emacs-lisp
 
-   #+end_src
-** [none  ] [x] lisp & elisp
-   #+begin_src emacs-lisp
-     (with-hook after-init
-                (add-hook 'emacs-lisp-mode 'yas-minor-mode)
-                (defun shell-command-on-buffer ()
-                  (interactive)
-                  (shell-command-on-region
-                   (point-min) (point-max)
-                   (read-shell-command "Shell command on buffer: ") ))
-
-                ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
-                (defun fc-eval-and-replace ()
-                  "Replace the preceding sexp with its value."
-                  (interactive)
-                  (backward-kill-sexp)
-                  (condition-case nil
-                      (prin1 (eval (read (current-kill 0)))
-                             (current-buffer))
-                    (error (message "Invalid expression")
-                           (insert (current-kill 0)))))
-
-                ;; https://stackoverflow.com/questions/2171890/emacs-how-to-evaluate-the-smallest-s-expression-the-cursor-is-in-or-the-follow
-                (defun eval-next-sexp ()
-                  (interactive)
-                  (forward-sexp)
-                  (eval-last-sexp nil))
-
-                ;; this works sometimes
-                (defun eval-surrounding-sexp (levels)
-                  (interactive "p")
-                  (up-list (abs levels))
-                  (eval-last-sexp nil))
-           
-                (set-default 'auto-mode-alist
-                             (append '(("\\.lisp$" . lisp-mode)
-                                       ("\\.lsp$" . lisp-mode)
-                                       ("\\.cl$" . lisp-mode))
-                                     auto-mode-alist)))
-     (with-hook emacs-lisp-mode
-                (setq fill-column 80)
-                (define-key emacs-lisp-mode-map (kbd "\C-c r") 'fc-eval-and-replace)
-                (define-key emacs-lisp-mode-map (kbd "\C-c s") 'eval-surrounding-sexp)
-                (define-key emacs-lisp-mode-map (kbd "\C-c l") 'eval-last-sexp)
-                (define-key emacs-lisp-mode-map (kbd "\C-c n") 'eval-next-sexp)
-                (define-key emacs-lisp-mode-map (kbd "\C-c d") 'eval-defun))
    #+end_src
 ** [x] lsp-java        
    #+begin_src emacs-lisp
@@ -1833,10 +1977,22 @@
                               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
                               ("C-c u" . lsp-ui-imenu)))
    #+end_src
+** [x] lusty-explorer
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] macro-math
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] magit        
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] magit-filenotify
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] markdown-mode        
    #+begin_src emacs-lisp
 
@@ -1936,6 +2092,14 @@
                           org-startup-folded           'overview
                           org-startup-indented         nil))
    #+end_src
+** [x] org-appear
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] org-download
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] org-noter-pdftools
    #+begin_src emacs-lisp
      (unless (equal system-type 'windows-nt)
@@ -1968,6 +2132,18 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] org-superstar
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] overseer
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] package-lint
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] pdf-tools
    #+begin_src emacs-lisp
      (unless (equal system-type 'windows-nt)
@@ -2002,6 +2178,14 @@
      (with-hook rjsx-mode
                 (prettier-js-mode))
    #+end_src
+** [x] pretty-symbols
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] prodigy
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] projectile        
    #+begin_src emacs-lisp
      (with-package projectile
@@ -2031,10 +2215,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
-** [x] request
-   #+begin_src emacs-lisp
+** [x] refine
+#+begin_src emacs-lisp
 
-   #+end_src
+#+end_src
 ** [x] request        
    #+begin_src emacs-lisp
 
@@ -2054,6 +2238,10 @@
                 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
                 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode)))
    #+end_src
+** [x] s
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] sly
    #+begin_src emacs-lisp
 
@@ -2074,6 +2262,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] smooth-scrolling
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] solarized-theme        
    #+begin_src emacs-lisp
      (with-hook after-init
@@ -2099,17 +2291,6 @@
                    (with-key-map python-mode
                                  ("C-f t" . treemacs)))
    #+end_src
-** [none  ] [x] wdired
-   #+begin_src emacs-lisp
-(with-package wdired
-              (with-key-map wdired-mode
-                            ("<return>"        . dired-find-file)
-                            ("M-<return>"      . my-run)
-                            ("S-<return>"      . dired-openwith)
-                            ("M-<"             . dired-go-to-first)
-                            ("M->"             . dired-go-to-last)
-                            ("M-p"             . scroll-down-line)))
-   #+end_src
 ** [x] which-key        
    #+begin_src emacs-lisp
      (with-hook after-init
@@ -2120,6 +2301,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] with-simulated-input
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] wrap-region        
    #+begin_src emacs-lisp
      (with-hook after-init
@@ -2133,20 +2318,22 @@
    #+end_src
 ** [x] yasnippet
    #+begin_src emacs-lisp
-     (with-package yasnippet
-                   (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
-                   (setq yas-key-syntaxes '("w_" "w_." "^ ")
-                         ;; yas-snippet-dirs (eval-when-compile
-                         ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
-                         yas-expand-only-for-last-commands nil)
+(when-idle (require 'yasnippet))
 
-                   (define-key yas-minor-mode-map (kbd "C-i") nil)
-                   (define-key yas-minor-mode-map (kbd "TAB") nil)
-                   (define-key yas-minor-mode-map (kbd "<tab>") nil)
-                   (define-key yas-minor-mode-map (kbd "C-<return>") 'yas-expand))
+(with-package yasnippet
+              (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+              (setq yas-key-syntaxes '("w_" "w_." "^ ")
+                    ;; yas-snippet-dirs (eval-when-compile
+                    ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
+                    yas-expand-only-for-last-commands nil)
 
-     (with-hook yas-minor-mode
-                (diminish 'yas-mode 'yas-minor-mode))
+              (define-key yas-minor-mode-map (kbd "C-i") nil)
+              (define-key yas-minor-mode-map (kbd "TAB") nil)
+              (define-key yas-minor-mode-map (kbd "<tab>") nil)
+              (define-key yas-minor-mode-map (kbd "C-<return>") 'yas-expand))
+
+(with-hook yas-minor-mode
+           (diminish 'yas-mode 'yas-minor-mode))
    #+end_src
 ** [x] yasnippet-snippets
    #+begin_src emacs-lisp
