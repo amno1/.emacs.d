@@ -918,6 +918,16 @@
            (show-paren-mode t)
            (save-place-mode 1)
            (winner-mode t)
+           (turn-on-auto-fill)
+           
+           (diminish 'winner-mode)
+           (diminish 'eldoc-mode)
+           (diminish 'electric-pair-mode)
+           (diminish 'auto-complete-mode)
+           (diminish 'abbrev-mode)
+           (diminish 'auto-fill-function)
+           (diminish 'subword-mode)
+           (diminish 'auto-insert-mode)
            
            (with-key-map global
                          ;; Window-buffer operations
@@ -1008,17 +1018,7 @@
                       (add-hook 'comint-output-filter-functions #'comint-watch-for-password-prompt)
                       (setq gc-cons-threshold       16777216
                             gc-cons-percentage      0.1
-                            file-name-handler-alist old-file-name-handler)
-                      (turn-on-auto-fill)
-                      (diminish 'winner-mode)
-                      (diminish 'eldoc-mode)
-                      (diminish 'electric-pair-mode)
-                      (diminish 'auto-complete-mode)
-                      (diminish 'abbrev-mode)
-                      (diminish 'auto-fill-function)
-                      (diminish 'subword-mode)
-                      (diminish 'auto-insert-mode)
-                      (force-mode-line-update)))
+                            file-name-handler-alist old-file-name-handler)))
    #+end_src
 ** [none  ] [x] gnus
    #+begin_src emacs-lisp
@@ -1832,10 +1832,6 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] ht
-   #+begin_src emacs-lisp
-
-   #+end_src
 ** [x] hydra
    #+begin_src emacs-lisp
      (with-package hydra
