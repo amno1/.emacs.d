@@ -109,26 +109,25 @@
         	   (concat "Dired " dired-actual-switches)))))
     (force-mode-line-update)))
 
-(defun dired-is-empty-p (directory-name)
-  "Check if a directory contains any other files then dot-files"
-  (null (directory-files directory-name nil
-                         directory-files-no-dot-files-regexp t)))
+(when (version< emacs-version "28")
+  (defun directory-empty-p (file-name)
+    "Check if a directory contains any other files then dot-files"
+    (when (file-directory-p file-name)
+      (null (directory-files file-name nil
+                             directory-files-no-dot-files-regexp t)))))
 
 (defun dired-mark-empty-dirs ()
   "Interactively mark all empty directories in current Dired buffer."
   (interactive)
   (when (equal major-mode 'dired-mode)
-    (let ((curr-file))
-      (save-excursion
-        (dired-go-to-first)
-        (while (not (eobp))
-          (setq curr-file (dired-file-name-at-point))
-          (when (file-directory-p curr-file)
-            (when (dired-is-empty-p curr-file)              
-              (dired-mark 1)
-              (dired-previous-line 1)))
-          (dired-next-line 1))))))
-
+    (save-excursion
+      (dired-go-to-first)
+      (while (not (eobp))
+        (ignore-errors
+          (when (directory-empty-p (dired-get-filename))
+            (dired-mark 1)
+            (dired-previous-line 1)))
+        (dired-next-line 1)))))
 
 (provide 'dired-extras)
 ;;; dired-extras.el ends here

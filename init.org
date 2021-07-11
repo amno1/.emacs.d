@@ -30,6 +30,7 @@
 (defvar init-file-bake-autoloads t)
 (defvar init-file-verbose-messages nil)
 (defvar init-file-unroll-key-bindings t)
+(defvar init-file-lisp-directory nil)
 
 ;;(require 'package)
 (setq package-archives nil)
@@ -42,10 +43,12 @@
 
 (push org-archive package-archives)
 (push elpa-archive package-archives)
+(push nelpa-archive package-archives)
 (push melpa-archive package-archives)
 
 (setq init-file-bake-autoloads t)
 (setq init-file-unroll-key-bindings t)
+(setq init-file-lisp-directory (expand-file-name "lisp" user-emacs-directory))
 
 (unless (boundp 'init-file-hooks)
   (make-variable-buffer-local 'init-file-hooks))
@@ -87,6 +90,13 @@
         (delete-char 1))
       (forward-char 1))
     (write-region (point-min) (point-max) "init.el")))
+
+(defmacro after-load (name &rest body)
+  (with-eval-after-load name
+    `(progn ,@body)))
+
+(after-load elisp-mode
+            (message "ELISP MODE LOADED"))
 
 (defmacro with-package (name &rest body)
   (verbose "Parsing package %s" name)
@@ -679,6 +689,9 @@
 ** [none  ] [x] dired
    #+begin_src emacs-lisp
 (with-hook after-init
+           (with-key-map global
+                         ("C-x C-j"   . dired-jump)
+                         ("C-x 4 C-j" . dired-jump-other-window))
            (when-idle
             (require 'dired)
             (require 'dired-extras)))
@@ -986,25 +999,7 @@
                          ("C-v C-w" . avy-goto-word-0)
                          ("C-v C-g" . avy-goto-line)
 
-                         ;; emms
-                         ("C-v e SPC"   . emms-pause)
-                         ("C-v e d"     . emms-play-directory)
-                         ("C-v e l"     . emms-play-list)
-                         ("C-v e n"     . emms-next)
-                         ("C-v e p"     . emms-previous)
-                         ("C-v e a"     . emms-add-directory)
-                         ("C-v e A"     . emms-add-directory-tree)
-                         ("C-v e +"     . pulseaudio-control-increase-volume)
-                         ("C-v e -"     . pulseaudio-control-decrease-volume)
-                         ("C-v e r"     . emms-start)
-                         ("C-v e s"     . emms-stop)
-                         ("C-v e m"     . emms-play-m3u-playlist)
-
                          ;; some random stuff
-                         ("C-+" . er/expand-region)
-                         ("C--" . er/contract-region)
-                         ("C-x C-j"   . dired-jump)
-                         ("C-x 4 C-j" . dired-jump-other-window)
                          ("C-h C-i"   . (lambda() 
                                           (interactive)
                                           (find-file (expand-file-name
@@ -1108,33 +1103,38 @@
            ;; https://stackoverflow.com/questions/2171890/emacs-how-to-evaluate-the-smallest-s-expression-the-cursor-is-in-or-the-follow
            (defun eval-next-sexp ()
              (interactive)
-             (forward-sexp)
-             (eval-last-sexp nil))
+             (save-excursion
+               (forward-sexp)
+               (eval-last-sexp nil)))
            
            ;; this works sometimes
            (defun eval-surrounding-sexp (levels)
              (interactive "p")
-             (up-list (abs levels))
-             (eval-last-sexp nil))
+             (save-excursion
+               (up-list (abs levels))
+               (eval-last-sexp nil)))
            
            (set-default 'auto-mode-alist
                         (append '(("\\.lisp$" . lisp-mode)
                                   ("\\.lsp$" . lisp-mode)
                                   ("\\.cl$" . lisp-mode))
                                 auto-mode-alist)))
+
+(with-package elisp-mode
+              (with-key-map emacs-lisp-mode
+                            ("\C-c b" . eval-buffer)
+                            ("\C-c d" . eval-defun)
+                            ("\C-c i" . reindent-buffer)
+                            ("\C-c l" . eval-last-sexp)
+                            ("\C-c n" . eval-next-sexp)
+                            ("\C-c r" . fc-eval-and-replace)
+                            ("\C-c s" . eval-surrounding-sexp)))
+
 (with-hook emacs-lisp-mode
            (setq fill-column 80)
            (company-mode 1)
            (outshine-mode 1)
-           (yas-minor-mode 1)
-           (with-key-map emacs-lisp-mode
-                         ("\C-c b" . eval-buffer)
-                         ("\C-c d" . eval-defun)
-                         ("\C-c i" . reindent-buffer)
-                         ("\C-c l" . eval-last-sexp)
-                         ("\C-c n" . eval-next-sexp)
-                         ("\C-c r" . fc-eval-and-replace)
-                         ("\C-c s" . eval-surrounding-sexp)))
+           (yas-minor-mode 1))
    #+end_src
 ** [none  ] [x] wdired
    #+begin_src emacs-lisp
@@ -1385,7 +1385,22 @@
 #+end_src
 ** [x] emms
    #+begin_src emacs-lisp
-(with-hook after-init (when-idle (require 'emms)))
+(with-hook after-init
+           (when-idle (require 'emms))
+           (with-key-map global
+                         ;; emms
+                         ("C-v e SPC"   . emms-pause)
+                         ("C-v e d"     . emms-play-directory)
+                         ("C-v e l"     . emms-play-list)
+                         ("C-v e n"     . emms-next)
+                         ("C-v e p"     . emms-previous)
+                         ("C-v e a"     . emms-add-directory)
+                         ("C-v e A"     . emms-add-directory-tree)
+                         ("C-v e +"     . pulseaudio-control-increase-volume)
+                         ("C-v e -"     . pulseaudio-control-decrease-volume)
+                         ("C-v e r"     . emms-start)
+                         ("C-v e s"     . emms-stop)
+                         ("C-v e m"     . emms-play-m3u-playlist)))
 
 (with-package emms
               (require 'emms)
@@ -1492,8 +1507,12 @@
 #+end_src
 ** [x] expand-region        
    #+begin_src emacs-lisp
-     (with-hook expand-region-mode
-                (diminish 'expand-region-mode))
+(with-hook after-init
+           (with-key-map global
+                         ("C-+" . er/expand-region)
+                         ("C--" . er/contract-region)))
+(with-hook expand-region-mode
+           (diminish 'expand-region-mode))
    #+end_src
 ** [x] f
 #+begin_src emacs-lisp
@@ -1505,8 +1524,8 @@
 #+end_src
 ** [x] flimenu        
    #+begin_src emacs-lisp
-     (with-package flimenu
-                   (flimenu-global-mode))
+(with-package flimenu
+              (flimenu-global-mode))
    #+end_src
 ** [x] flycheck        
    #+begin_src emacs-lisp
@@ -1573,6 +1592,29 @@
               (require 'helm-buffers)
               (require 'helm-files)
               
+              (defvar helm-source-header-default-background (face-attribute
+                                                             'helm-source-header :background)) 
+              (defvar helm-source-header-default-foreground (face-attribute
+                                                             'helm-source-header :foreground)) 
+              (defvar helm-source-header-default-box (face-attribute
+                                                      'helm-source-header :box)) 
+              (set-face-attribute 'helm-source-header nil :height 0.1)
+
+              (defun helm-toggle-header-line ()
+                (if (> (length helm-sources) 1)
+                    (set-face-attribute 'helm-source-header
+                                        nil
+                                        :foreground helm-source-header-default-foreground
+                                        :background helm-source-header-default-background
+                                        :box helm-source-header-default-box
+                                        :height 1.0)
+                  (set-face-attribute 'helm-source-header
+                                      nil
+                                      :foreground (face-attribute 'helm-selection :background)
+                                      :background (face-attribute 'helm-selection :background)
+                                      :box nil
+                                      :height 0.1)))
+
               (defun my-helm-next-source ()
                 (interactive)
                 (helm-next-source)
@@ -1583,6 +1625,7 @@
                 (helm-select-nth-action 0))
               
               (setq helm-completion-style             'emacs
+                    helm-display-header-line              nil
                     helm-completion-in-region-fuzzy-match t
                     helm-recentf-fuzzy-match              t
                     helm-buffers-fuzzy-matching           t

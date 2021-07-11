@@ -81,7 +81,7 @@
 (setq calendar-date-display-form
       '((if dayname
             (concat dayname ", "))
-        day ". " (hr-month-filter monthname) " " year))
+        day ". " monthname-formatted " " year))
 
 ;; 24-hour clock without a timezone
 (setq calendar-time-display-form
@@ -96,9 +96,11 @@
           (throw 'done (aref calendar-month-names-genitive i)))
         (setq i (1+ i))))))
 
-;; Dagarnas namn
+;; Day names
 (setq calendar-day-name-array
       ["nedjelja" "ponedjeljak" "utorak" "srijeda" "četvrtak" "petak" "subota"]
+      calendar-day-name-formatted-array
+      ["nedjelje" "ponedjeljka" "utorka" "srijede" "četvrtka" "petka" "subote"]
       calendar-day-abbrev-array
       ["ned" "pon" "uto" "srj" "čet" "pet" "sub"]
       calendar-day-header-array
@@ -112,7 +114,7 @@
       ["januar" "februar" "mart" "april" "maj" "jun" "jul" "avgust" "septembar"
        "oktobar" "novembar" "decembar"]))
 
-(setq calendar-month-names-genitive
+(setq calendar-month-name-formatted-array
       (if calendar-hr-prefer-slavic-names
           ["siječnja" "veljače" "ožujka" "travnja" "svibnja" "lipnja" "srpnja"
            "kolovoza" "rujna" "listopada" "studenog" "prosinca"]
