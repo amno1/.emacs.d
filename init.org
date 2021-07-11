@@ -777,6 +777,7 @@
                             ("P"                . peep-dired)
                             ("<f1>"             . term-toggle)
                             ("TAB"              . dired-subtree-toggle)
+                            ("f"                . dired-subtree-fold-all)                            
                             ("e"                . dired-subtree-expand-all)))
 
 (with-hook dired-mode
