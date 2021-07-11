@@ -48,17 +48,17 @@
   (call-interactively 'dired-mark)
   (dired-previous-line 2))
 
-(defun dired-go-to-first ()
+(defun dired-goto-first ()
   (interactive)
   (goto-char (point-min))
   (dired-next-line 1)
-  (skip-chars-forward " \n\t"))
+  (dired-move-to-filename))
 
-(defun dired-go-to-last ()
+(defun dired-goto-last ()
   (interactive)
   (goto-char (point-max))
   (dired-next-line -1)
-  (skip-chars-forward " \n\t"))
+  (dired-move-to-filename))
 
 (defun sudo-find-file (file-name)
   "Like find file, but opens the file as root."

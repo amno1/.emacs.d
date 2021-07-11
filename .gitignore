@@ -25,6 +25,7 @@ etc/emacs-custom.el
 etc/abbrev_defs
 etc/places
 etc/emms/
+etc/bookmarks
 transient/
 emacs-vision/
 network-security.data

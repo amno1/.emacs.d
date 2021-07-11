@@ -204,9 +204,21 @@ content is not currently inserted."
   (call-interactively 'dired-create-directory)
   (revert-buffer t t t))
 
+(defun dired-auto-readme-goto-last ()
+  (interactive)
+  (goto-char (or (dar--point) (point-max)))
+  (ignore-error
+      (while (not (dired-get-filename nil t))
+        (dired-previous-line 1)))
+  (unless (dired-get-filename nil t)
+    (dired-previous-line 1))
+  (dired-move-to-filename))
+
 (defvar dired-auto-readme-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [remap wdired-change-to-wdired-mode] 'dar--to-wdired)
+    (if (fboundp 'dired-goto-last)
+        (define-key map [remap dired-goto-last] 'dired-auto-readme-goto-last)
+      (define-key map [M->] 'dired-auto-readme-goto-last))
     (define-key map [remap wdired-change-to-wdired-mode] 'dar--to-wdired)
     (define-key map [remap dired-create-directory] 'dar--create-directory)
     map)
