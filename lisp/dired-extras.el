@@ -29,12 +29,12 @@
 (require 'openwith)
 (require 'dired-aux)
 (require 'dired-async)
+(require 'dired-subtree)
 (require 'dired-copy-paste)
 ;;(require 'dired+)
 ;;(require 'tmtxt-dired-async)
-;; (require 'dired-show-readme)
 
-(autoload 'dired-subtree-toggle "dired-subtree.el" nil t)
+;;(autoload 'dired-subtree-toggle "dired-subtree.el" nil t)
 (autoload 'dired-openwith "openwith.el" nil t)
 
 ;; quick-hack - need to rewrite this
@@ -59,6 +59,26 @@
   (goto-char (point-max))
   (dired-next-line -1)
   (dired-move-to-filename))
+
+(defun dired-subtree-expand-all ()
+  (interactive)
+  (save-excursion
+    (dired-goto-last)
+    (while (not (bobp))
+      (dired-next-line -1)
+      (ignore-errors
+        (unless (dired-subtree--is-expanded-p)
+          (dired-subtree-insert))))))
+
+(defun dired-subtree-fold-all ()
+  (interactive)
+  (save-excursion
+    (dired-goto-last)
+    (while (not (bobp))
+      (dired-next-line -1)
+      (ignore-errors
+        (unless (dired-subtree--is-expanded-p)
+          (dired-subtree-remove))))))
 
 (defun sudo-find-file (file-name)
   "Like find file, but opens the file as root."
@@ -121,7 +141,7 @@
   (interactive)
   (when (equal major-mode 'dired-mode)
     (save-excursion
-      (dired-go-to-first)
+      (dired-goto-first)
       (while (not (eobp))
         (ignore-errors
           (when (directory-empty-p (dired-get-filename))

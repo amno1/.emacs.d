@@ -531,6 +531,7 @@
   (let ((map (make-sparse-keymap)))
     ;; (define-key map [remap org-shiftright] #'org-init--shiftright)
     ;; (define-key map [remap org-shiftleft] #'org-init--shiftleft)
+    (define-key map "\C-c g" 'generate-init-files)
     map)
   "Keymap used in `org-init-mode'.")
 
@@ -693,8 +694,7 @@
                          ("C-x C-j"   . dired-jump)
                          ("C-x 4 C-j" . dired-jump-other-window))
            (when-idle
-            (require 'dired)
-            (require 'dired-extras)))
+            (require 'dired)))
 
 (with-package dired
               (require 'dired-extras)
@@ -776,7 +776,8 @@
                             ("C-S-f"            . dired-narrow)
                             ("P"                . peep-dired)
                             ("<f1>"             . term-toggle)
-                            ("TAB"              . dired-subtree-toggle)))
+                            ("TAB"              . dired-subtree-toggle)
+                            ("e"                . dired-subtree-expand-all)))
 
 (with-hook dired-mode
            (dired-omit-mode t)
@@ -913,6 +914,9 @@
                    abbrev-file-name (expand-file-name "abbrevs.el" etc)
                    bookmark-default-file (expand-file-name "bookmarks" etc)))
 
+           (add-to-list 'display-buffer-alist '("\\*Compile-Log\\*"
+                                                (display-buffer-no-window)))
+
            (fset 'yes-or-no-p 'y-or-n-p)
            (electric-indent-mode 1)
            (electric-pair-mode 1)
@@ -1010,16 +1014,19 @@
                       ;;(add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
                       (when (and custom-file (file-exists-p custom-file))
                         (load custom-file 'noerror))
-                      (add-hook 'comint-output-filter-functions #'comint-watch-for-password-prompt)
+                      (add-hook 'comint-output-filter-functions
+                                #'comint-watch-for-password-prompt)
                       (setq gc-cons-threshold       16777216
                             gc-cons-percentage      0.1
                             file-name-handler-alist old-file-name-handler)))
    #+end_src
 ** [none  ] [x] gnus
    #+begin_src emacs-lisp
-     (with-hook after-init
+     (with-package gnus
 
+                (require 'nnir)
                 ;;(require 'nnreddit)
+                ;;(add-to-list 'gnus-secondary-select-methods '(nnreddit ""))
 
                 (setq user-full-name    "Arthur Miller"
                       user-mail-address "arthur.miller@live.com")
@@ -1036,19 +1043,14 @@
                       smtpmail-default-smtp-server "smtp-mail.outlook.com"
                       smtpmail-smtp-service 587
                       smtpmail-local-domain "homepc")
-                )
 
      ;;(setq auth-source-debug t)
      ;;(setq auth-source-do-cache nil)
-     (with-hook gnus-mode
-                (require 'nnir)
 
                 (setq gnus-thread-sort-functions
                       '(gnus-thread-sort-by-most-recent-date
                         (not gnus-thread-sort-by-number)))
-           
-                ;;(add-to-list 'gnus-secondary-select-methods '(nnreddit ""))
-                (setq gnus-use-cache t)
+                (setq gnus-use-cache t gnus-view-pseudo-asynchronously t)
                 ;; Show more MIME-stuff:
                 (setq gnus-mime-display-multipart-related-as-mixed t)
                 ;; http://www.gnu.org/software/emacs/manual/html_node/gnus/_005b9_002e2_005d.html
@@ -1072,7 +1074,6 @@
                 ;;(("Reddit" visible))))
                 ;; each topic corresponds to a public imap folder
                 (setq gnus-topic-alist '(("live.com")
-                                         ;;("Reddit")
                                          ("Gnus"))))
    #+end_src
 ** [none  ] [x] inferior-python-mode
