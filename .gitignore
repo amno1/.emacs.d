@@ -21,7 +21,7 @@ lisp/org-view-mode.el
 package-quickstart.el
 helm-adaptive-history
 etc/.emacs.desktop.lock
-etc/emacs-custom.el
+etc/custom.el
 etc/abbrev_defs
 etc/places
 etc/emms/

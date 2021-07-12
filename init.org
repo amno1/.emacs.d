@@ -307,11 +307,12 @@
   (message "Exporting init.el ...")
   (tangle-init-file)
   (let ((tangled-file "init.el"))
+    (verbose "Byte compiled %s" tangled-file)
+    (if (featurep 'comp)
+        (message "Native compiled %s" (native-compile tangled-file)))
     ;; always produce elc file
     (byte-compile-file tangled-file)
-    (when (featurep 'nativecomp)
-      (message "Native compiled %s" (native-compile tangled-file)))
-    (message "Tangled and compiled %s" tangled-file))
+    (verbose "Tangled and compiled %s" tangled-file))
   (message "Done."))
 
 (defun install-file (file)
@@ -531,7 +532,10 @@
   (let ((map (make-sparse-keymap)))
     ;; (define-key map [remap org-shiftright] #'org-init--shiftright)
     ;; (define-key map [remap org-shiftleft] #'org-init--shiftleft)
-    (define-key map "\C-c g" 'generate-init-files)
+    (define-key map (kbd "C-c i a") 'add-package)
+    (define-key map (kbd "C-c i g") 'generate-init-files)
+    (define-key map (kbd "C-c i i") 'install-packages)
+    (define-key map (kbd "C-c i p") 'add-pseudo-package)
     map)
   "Keymap used in `org-init-mode'.")
 
@@ -884,39 +888,40 @@
                                          "C:/Users/arthu/AppData/Local/Microsoft/WindowsApps"
                                          "c:/msys64/mingw64/libexec/emacs/28.0.50/x86_64-w64-mingw32")))
 
-           (let ((etc (expand-file-name "etc" user-emacs-directory)))
-             (unless (file-directory-p etc)
-               (make-directory etc))
-             (setq show-paren-style 'expression
-                   shell-file-name "bash"
-                   shell-command-switch "-ic"
-                   delete-exited-processes t
-                   echo-keystrokes 0.1
-                   winner-dont-bind-my-keys t
-                   auto-window-vscroll nil
-                   require-final-newline t
-                   next-line-add-newlines t
-                   bookmark-save-flag 1
-                   delete-selection-mode t
-                   confirm-kill-processes nil
-                   large-file-warning-threshold nil
-                   save-abbrevs 'silent
-                   save-interprogram-paste-before-kill t
-                   save-place-file (expand-file-name "places" etc)
-                   max-lisp-eval-depth '100000
-                   max-specpdl-size '1000000
-                   scroll-preserve-screen-position 'always
-                   scroll-conservatively 1
-                   maximum-scroll-margin 1
-                   scroll-margin 0
+           (eval-when-compile
+             (let ((etc (expand-file-name "etc" user-emacs-directory)))
+                 (unless (file-directory-p etc)
+                   (make-directory etc))
+               (setq show-paren-style 'expression
+                     shell-file-name "bash"
+                     shell-command-switch "-ic"
+                     delete-exited-processes t
+                     echo-keystrokes 0.1
+                     winner-dont-bind-my-keys t
+                     auto-window-vscroll nil
+                     require-final-newline t
+                     next-line-add-newlines t
+                     bookmark-save-flag 1
+                     delete-selection-mode t
+                     confirm-kill-processes nil
+                     large-file-warning-threshold nil
+                     save-abbrevs 'silent
+                     save-interprogram-paste-before-kill t
+                     save-place-file (expand-file-name "places" etc)
+                     max-lisp-eval-depth '100000
+                     max-specpdl-size '1000000
+                     scroll-preserve-screen-position 'always
+                     scroll-conservatively 1
+                     maximum-scroll-margin 1
+                     scroll-margin 0
+                     make-backup-files nil
+                     backup-directory-alist `(("." . ,etc))
+                     custom-file (expand-file-name "custom.el" etc)
+                     abbrev-file-name (expand-file-name "abbrevs.el" etc)
+                     bookmark-default-file (expand-file-name "bookmarks" etc)))
 
-                   backup-directory-alist `(("." . ,etc))
-                   custom-file (expand-file-name "emacs-custom.el" etc)
-                   abbrev-file-name (expand-file-name "abbrevs.el" etc)
-                   bookmark-default-file (expand-file-name "bookmarks" etc)))
-
-           (add-to-list 'display-buffer-alist '("\\*Compile-Log\\*"
-                                                (display-buffer-no-window)))
+             (add-to-list 'display-buffer-alist '("\\*Compile-Log\\*"
+                                                  (display-buffer-no-window))))
 
            (fset 'yes-or-no-p 'y-or-n-p)
            (electric-indent-mode 1)
@@ -1023,59 +1028,55 @@
    #+end_src
 ** [none  ] [x] gnus
    #+begin_src emacs-lisp
-     (with-package gnus
+(with-package gnus
 
-                (require 'nnir)
-                ;;(require 'nnreddit)
-                ;;(add-to-list 'gnus-secondary-select-methods '(nnreddit ""))
+              (require 'nnir)
 
-                (setq user-full-name    "Arthur Miller"
-                      user-mail-address "arthur.miller@live.com")
-           
-                ;; for the outlook
-                (setq gnus-select-method '(nnimap "live.com"
-                                                  (nnimap-address "imap-mail.outlook.com")
-                                                  (nnimap-server-port 993)
-                                                  (nnimap-stream ssl)
-                                                  (nnir-search-engine imap)))
+              (setq user-full-name    "Arthur Miller"
+                    user-mail-address "arthur.miller@live.com")
+              
+              ;; for the outlook
+              (setq gnus-select-method '(nnimap "live.com"
+                                                (nnimap-address "imap-mail.outlook.com")
+                                                (nnimap-server-port 993)
+                                                (nnimap-stream ssl)
+                                                (nnir-search-engine imap)))
 
-                ;; Send email through SMTP
-                (setq message-send-mail-function 'smtpmail-send-it
-                      smtpmail-default-smtp-server "smtp-mail.outlook.com"
-                      smtpmail-smtp-service 587
-                      smtpmail-local-domain "homepc")
+              ;; Send email through SMTP
+              (setq message-send-mail-function 'smtpmail-send-it
+                    smtpmail-default-smtp-server "smtp-mail.outlook.com"
+                    smtpmail-smtp-service 587
+                    smtpmail-local-domain "homepc")
 
-     ;;(setq auth-source-debug t)
-     ;;(setq auth-source-do-cache nil)
-
-                (setq gnus-thread-sort-functions
-                      '(gnus-thread-sort-by-most-recent-date
-                        (not gnus-thread-sort-by-number)))
-                (setq gnus-use-cache t gnus-view-pseudo-asynchronously t)
-                ;; Show more MIME-stuff:
-                (setq gnus-mime-display-multipart-related-as-mixed t)
-                ;; http://www.gnu.org/software/emacs/manual/html_node/gnus/_005b9_002e2_005d.html
-                (setq gnus-use-correct-string-widths nil)
-                (setq nnmail-expiry-wait 'immediate)
-           
-                ;; Smileys:
-                (setq smiley-style 'medium)
-           
-                ;; Use topics per default:
-                (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
-                (setq gnus-message-archive-group '((format-time-string "sent.%Y")))
-                (setq gnus-server-alist '(("archive" nnfolder "archive" (nnfolder-directory "~/mail/archive")
-                                           (nnfolder-active-file "~/mail/archive/active")
-                                           (nnfolder-get-new-mail nil)
-                                           (nnfolder-inhibit-expiry t))))
-           
-                (setq gnus-topic-topology '(;;("Gnus" visible)
-                                            ;;(("misc" visible))
-                                            ("live.com" visible)))
-                ;;(("Reddit" visible))))
-                ;; each topic corresponds to a public imap folder
-                (setq gnus-topic-alist '(("live.com")
-                                         ("Gnus"))))
+              (setq gnus-thread-sort-functions
+                    '(gnus-thread-sort-by-most-recent-date
+                      (not gnus-thread-sort-by-number)))
+              (setq gnus-use-cache t gnus-view-pseudo-asynchronously t)
+              ;; Show more MIME-stuff:
+              (setq gnus-mime-display-multipart-related-as-mixed t)
+              ;; http://www.gnu.org/software/emacs/manual/html_node/gnus/_005b9_002e2_005d.html
+              (setq gnus-use-correct-string-widths nil)
+              (setq nnmail-expiry-wait 'immediate)
+              
+              ;; Smileys:
+              (setq smiley-style 'medium)
+              
+              ;; Use topics per default:
+              (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+              (setq gnus-message-archive-group '((format-time-string "sent.%Y")))
+              (setq gnus-server-alist '(("archive" nnfolder "archive" (nnfolder-directory "~/mail/archive")
+                                         (nnfolder-active-file "~/mail/archive/active")
+                                         (nnfolder-get-new-mail nil)
+                                         (nnfolder-inhibit-expiry t))))
+              
+              (setq gnus-topic-topology '(;;("Gnus" visible)
+                                          ;;(("misc" visible))
+                                          ("live.com" visible)))
+              
+              ;; each topic corresponds to a public imap folder
+              (setq gnus-topic-alist '(("live.com")
+                                       ("Gnus")))
+              )
    #+end_src
 ** [none  ] [x] inferior-python-mode
    #+begin_src emacs-lisp
@@ -1356,6 +1357,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] eldev
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] elisp-def
 #+begin_src emacs-lisp
 
@@ -1386,6 +1391,18 @@
            )
    #+end_src
 ** [x] el-search
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] emacs-director
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] run-command
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] emacs-velocity
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1858,6 +1875,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] helm-system-packages
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] helm-xref        
    #+begin_src emacs-lisp
 
@@ -2256,6 +2277,10 @@
      (with-hook python-mode
                 (pyvenv-mode +1))    
    #+end_src
+** [x] quelpa
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] recentf        
    #+begin_src emacs-lisp
 
@@ -2324,6 +2349,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] system-packages
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] tide        
    #+begin_src emacs-lisp
 
