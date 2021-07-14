@@ -493,7 +493,6 @@
   (generate-init-files)
   (install-init-files))
 
-
 ;; org hacks
 (defun org-init--package-enabled-p ()
   "Return t if point is in a package headline and package is enabled."
@@ -507,32 +506,65 @@
       (org-todo 2)
     (org-todo 1)))
 
+(defun org-init--package-section-p ()
+  (save-excursion
+    (let ((current-point (point)))
+      (when (re-search-backward "^\\* Packages" nil t)
+        (forward-line 1)
+        (gte current-point (point))))))
+
+(defun org-init--shiftup ()
+  "Switch between enabled/disabled todo state."
+  (interactive)
+  (if (org-init--package-section-p)
+      (save-excursion
+        (unless (looking-at org-heading-regexp)
+          (re-search-backward org-heading-regexp))
+        (ohc--shiftup))
+    (org-shiftup)))
+
+(defun org-init--shiftdown ()
+  "Switch between enabled/disabled todo state."
+  (interactive)
+  (if (org-init--package-section-p)
+      (save-excursion
+        (unless (looking-at org-heading-regexp)
+          (re-search-backward org-heading-regexp))
+        (ohc--shiftdown))
+    (org-shiftdown)))
+
 (defun org-init--shiftright ()
   "Switch between enabled/disabled todo state."
   (interactive)
-  (save-excursion
-    (beginning-of-line)
-    (if (looking-at org-heading-regexp)
-        (org-init--toggle-headline-checkbox)
-      (org-shiftright))))
+  (if (org-init--package-section-p)
+      (save-excursion
+        (unless (looking-at org-heading-regexp)
+          (re-search-backward org-heading-regexp))
+        (org-shiftright))
+    (org-shiftright)))
 
 (defun org-init--shiftleft ()
   "Switch between enabled/disabled todo state."
   (interactive)
-  (save-excursion
-    (beginning-of-line)
-    (if (looking-at org-heading-regexp)
-        (org-init--toggle-headline-checkbox)
-      (org-shiftleft))))
+  (if (org-init--package-section-p)
+      (save-excursion
+        (unless (looking-at org-heading-regexp)
+          (re-search-backward org-heading-regexp))
+        (org-shiftleft))
+    (org-shiftleft)))
 
 (defvar org-init-mode-map
   (let ((map (make-sparse-keymap)))
-    ;; (define-key map [remap org-shiftright] #'org-init--shiftright)
-    ;; (define-key map [remap org-shiftleft] #'org-init--shiftleft)
+    ;; (define-key org-heading-checkbox-mode-map
+    ;;   [remap ohc--shiftup] #'org-init--shiftup)
+    ;; (define-key org-heading-checkbox-mode-map
+    ;;   [remap ohc--shiftdown] #'org-init--shiftdown)
+    (define-key org-mode-map [remap org-shiftleft] #'org-init--shiftleft)
+    (define-key org-mode-map [remap org-shiftright] #'org-init--shiftright)
     (define-key map (kbd "C-c i a") 'add-package)
-    (define-key map (kbd "C-c i g") 'generate-init-files)
     (define-key map (kbd "C-c i i") 'install-packages)
     (define-key map (kbd "C-c i p") 'add-pseudo-package)
+    (define-key map (kbd "C-c i g") 'generate-init-files)
     map)
   "Keymap used in `org-init-mode'.")
 
