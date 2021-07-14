@@ -95,9 +95,6 @@
   (with-eval-after-load name
     `(progn ,@body)))
 
-(after-load elisp-mode
-            (message "ELISP MODE LOADED"))
-
 (defmacro with-package (name &rest body)
   (verbose "Parsing package %s" name)
   (let ((package (symbol-name name)))
@@ -685,7 +682,9 @@
            (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
            (setq auto-mode-alist
                  (append (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
-                         auto-mode-alist)))
+                         auto-mode-alist))
+           (when-idle
+            (require 'c++-setup)))
    #+end_src
 ** [none  ] [x] dap-java
    #+begin_src emacs-lisp
@@ -698,7 +697,8 @@
                          ("C-x C-j"   . dired-jump)
                          ("C-x 4 C-j" . dired-jump-other-window))
            (when-idle
-            (require 'dired)))
+            (require 'dired)
+            (message "Dired loaded on idle.")))
 
 (with-package dired
               (require 'dired-extras)
@@ -727,6 +727,9 @@
                                 (getenv "BROWSER")
                                 '(file))))
 
+              (with-system windows-nt
+                            (setq ls-lisp-use-insert-directory-program "gls"))
+              
               (with-system gnu/linux
                            (dolist (ext (list (list (openwith-make-extension-regexp
                                                      '("xbm" "pbm" "pgm" "ppm" "pnm"
@@ -840,55 +843,18 @@
 ** [none  ] [x] emacs
    #+begin_src emacs-lisp
 (with-hook after-init
-           ;;            (defun org-mode-sqbr-syntax-fix (start end)
-           ;;              (when (eq major-mode 'org-mode)
-           ;;                (save-excursion
-           ;;                  (goto-char start)
-           ;;                  (while (re-search-forward "[]\\[]" end t)
-           ;;                    (when (get-text-property (point) 'src-block)
-           ;;                      ;; This is a [ or ] in an org-src block
-           ;;                      (put-text-property (point) (1- (point))
-           ;;                                         'syntax-table (string-to-syntax "_")))))))
-
-           ;;            (defun org-setup-sqbr-syntax-fix ()
-           ;;              "Setup for characters ?< and ?> in source code blocks.
-           ;; Add this function to `org-mode-hook'."
-           ;;              (setq syntax-propertize-function 'org-mode-sqbr-syntax-fix)
-           ;;              (syntax-propertize (point-max)))
-
-           ;;            (add-hook 'org-mode-hook 'org-setup-sqbr-syntax-fix)
-
-           ;;(unless (getenv "BROWSER")
            (setenv "BROWSER" "firefox-developer-edition")
-           ;;)
 
            (with-system windows-nt
-                        (push "c:/msys64/usr/bin" exec-path)
-                        (push "c:/msys64/mingw64/bin" exec-path)
-                        (setenv "PATH"
-                                (concat
-                                 "c:\\msys64\\mingw64\\bin;"
-                                 "c:\\msys64\\usr\\bin;"
-                                 (getenv "PATH")))
                         ;; (global-disable-mouse-mode 1)
                         (setq w32-get-true-file-attributes nil
                               w32-pipe-read-delay 0
                               w32-pipe-buffer-size (* 64 1024)
-                              package-gnupghome-dir "/c/Users/arthu/.emacs.d/elpa/gnupg"
-                              source-directory "c:\\emacs/emsrc/emacs"
+                              ;;package-gnupghome-dir "c:/Users/arthu/.emacs.d/elpa/gnupg"
+                              source-directory "c:/emacs/emsrc/emacs"
                               command-line-x-option-alist nil
-                              command-line-ns-option-alist nil
-                              exec-path (list
-                                         "c:/msys64/mingw64/bin"
-                                         "c:/WINDOWS/system32"
-                                         "C:/WINDOWS"
-                                         "C:/WINDOWS/System32/Wbem"
-                                         "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common" 
-                                         "C:/Program Files/Calibre2/"
-                                         "C:/Users/arthu/AppData/Local/Microsoft/WindowsApps"
-                                         "c:/msys64/mingw64/libexec/emacs/28.0.50/x86_64-w64-mingw32")))
-
-           (eval-when-compile
+                              command-line-ns-option-alist nil))
+           
              (let ((etc (expand-file-name "etc" user-emacs-directory)))
                  (unless (file-directory-p etc)
                    (make-directory etc))
@@ -921,7 +887,7 @@
                      bookmark-default-file (expand-file-name "bookmarks" etc)))
 
              (add-to-list 'display-buffer-alist '("\\*Compile-Log\\*"
-                                                  (display-buffer-no-window))))
+                                                  (display-buffer-no-window)))
 
            (fset 'yes-or-no-p 'y-or-n-p)
            (electric-indent-mode 1)
@@ -1028,9 +994,13 @@
    #+end_src
 ** [none  ] [x] gnus
    #+begin_src emacs-lisp
+(with-hook after-init
+           (require 'gnus)
+           (message "Gnus loaded on idle."))
+
 (with-package gnus
 
-              (require 'nnir)
+              ;;(require 'nnir)
 
               (setq user-full-name    "Arthur Miller"
                     user-mail-address "arthur.miller@live.com")
@@ -1154,6 +1124,18 @@
                             ("M->"             . dired-go-to-last)
                             ("M-p"             . scroll-down-line)))
    #+end_src
+** [none  ] [x] emacs-director
+#+begin_src emacs-lisp
+
+#+end_src
+** [none  ] [x] emacs-velocity
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] helm-company
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] academic-phrases
 #+begin_src emacs-lisp
 
@@ -1238,12 +1220,18 @@
            (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
            (add-to-list 'auto-mode-alist '("\\CMakeLists.txt\\'" . cmake-mode)))
 (with-hook cmake
+           (require 'company)
            (require 'company-cmake)
            (company-mode 1))
    #+end_src
 ** [x] company
    #+begin_src emacs-lisp
 (with-hook after-init
+           (add-hook 'c-mode-common-hook 'company-mode)
+           (add-hook 'sgml-mode-hook 'company-mode)
+           (add-hook 'emacs-lisp-mode-hook 'company-mode)
+           (add-hook 'text-mode-hook 'company-mode)
+           (add-hook 'lisp-mode-hook 'company-mode)
            (when-idle
             (require 'company)))
 
@@ -1255,20 +1243,26 @@
               (setq company-idle-delay            0
                     company-require-match         nil
                     company-minimum-prefix-length 2
-                    company-show-numbers          t
+                    company-show-numbers          0
                     company-tooltip-limit         20
                     company-async-timeout         6
                     company-dabbrev-downcase      nil
                     tab-always-indent 'complete
                     company-global-modes '(not term-mode)
-                    company-backends (delete 'company-semantic company-backends))
-
+                    company-backends (delete 'company-semantic
+                                             company-backends))
+              
+              (setq company-backends '(company-capf
+                                       company-keywords
+                                       company-semantic
+                                       company-files
+                                       company-etags
+                                       company-elisp
+                                       company-clang
+                                       company-ispell
+                                       company-yasnippet))
               (define-key company-mode-map
                 [remap indent-for-tab-command] 'company-indent-or-complete-common)
-              (add-to-list 'company-backends 'company-cmake)
-              (add-to-list 'company-backends 'company-capf)
-              (add-to-list 'company-backends 'company-files)
-              (add-hook 'emacs-lisp-mode-hook 'company-mode)
 
               (with-key-map company-active
                             ("C-n" . company-select-next)
@@ -1282,7 +1276,7 @@
    #+end_src
 ** [x] company-flx
 #+begin_src emacs-lisp
-(with-package company
+(with-hook company
               (company-flx-mode +1))
 #+end_src
 ** [x] company-math
@@ -1394,15 +1388,7 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] emacs-director
-#+begin_src emacs-lisp
-
-#+end_src
 ** [x] run-command
-#+begin_src emacs-lisp
-
-#+end_src
-** [x] emacs-velocity
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1440,8 +1426,8 @@
               (emms-history-load)
               (emms-default-players)
               (helm-mode 1)
-              (emms-mode-line 1)
-              (emms-playing-time 1)
+              ;;(emms-mode-line 1)
+              (emms-playing-time-mode 1)
 
               (setq-default emms-player-list '(emms-player-mpv)
                             emms-player-mpv-environment '("PULSE_PROP_media.role=music"))
@@ -1598,7 +1584,8 @@
                        (require 'helm-config)
                        (require 'helm-eshell)
                        (require 'helm-buffers)
-                       (require 'helm-files)))
+                       (require 'helm-files)
+                       (message "Helm loaded on idle.")))
 
 (with-hook eshell-mode
            (with-key-map eshell-mode-map

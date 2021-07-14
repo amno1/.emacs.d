@@ -29,6 +29,11 @@
 
 ;;; Code:
 
+(defgroup org-pretty-table nil
+  "Display org-tables with box-drawing unicode glyphs."
+  :prefix "org-pretty-table-"
+  :group 'org)
+
 (defconst org-pretty-table-regexp (regexp-opt '("-" "+" "|")))
 
 (defsubst org-pretty-table-is-empty-line ()
@@ -66,7 +71,9 @@ Used by jit-lock for dynamic highlighting."
              ((equal "-" match)
               (backward-char 1)
               (re-search-forward "-+")
-              (put-text-property (match-beginning 0) (match-end 0) 'display (make-string (- (match-end 0) (match-beginning 0)) ?─))
+              (put-text-property
+               (match-beginning 0) (match-end 0)
+               'display (make-string (- (match-end 0) (match-beginning 0)) ?─))
               t)
              ((equal "|" match)
               (cond
@@ -135,7 +142,7 @@ Used by jit-lock for dynamic highlighting."
                        (eq (following-char) ?|))
                      (save-excursion
                        (backward-char 1)
-                       (next-line)
+                       (forward-line 1)
                        (eq (following-char) ?|)))
                 (put-text-property (match-beginning 0) (match-end 0) 'display "┼")
                 t)
@@ -145,7 +152,7 @@ Used by jit-lock for dynamic highlighting."
                        (eq (preceding-char) ?-))
                      (save-excursion
                        (backward-char 1)
-                       (previous-line)
+                       (forward-line -1)
                        (memq (following-char) '(? 10)))
                      (save-excursion
                        (let ((char-pos (- (point) (line-beginning-position) 1)))
@@ -167,7 +174,7 @@ Used by jit-lock for dynamic highlighting."
                        (eq (following-char) ?|))
                      (save-excursion
                        (backward-char 1)
-                       (next-line)
+                       (forward-line 1)
                        (or (memq (following-char) '(? 10))
                            (eq (char-after (line-beginning-position)) ?#))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display "┴")
@@ -197,7 +204,8 @@ Used by jit-lock for dynamic highlighting."
   (org-pretty-table-mode 0))
 
 ;;;###autoload
-(define-globalized-minor-mode global-org-pretty-table-mode
+(define-globalized-minor-mode
+  global-org-pretty-table-mode
   org-pretty-table-mode turn-on-org-pretty-table-mode)
 
 (provide 'org-pretty-table)
