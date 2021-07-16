@@ -40,11 +40,13 @@
 (defvar nelpa-archive '("nelpa" . "https://elpa.nongnu.org/nongnu/"))
 (defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
 (defvar elpa-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
+(defvar site-archive '("local" . "~/.emacs.d/lisp"))
 
 (push org-archive package-archives)
 (push elpa-archive package-archives)
 (push nelpa-archive package-archives)
 (push melpa-archive package-archives)
+(push site-archive package-archives)
 
 (setq init-file-bake-autoloads t)
 (setq init-file-unroll-key-bindings t)
@@ -347,14 +349,15 @@
   (unless init-file-package-list
     (save-excursion
       (goto-char (point-min))
-      (let (package packages start end ms me s)
+      (let (package packages start end
+            config-start config-end ms me s)
         (goto-char (point-min))
         (verbose "Creating package list ...")
         (re-search-forward "^\\* Packages")
         (while (re-search-forward "^\\*\\* " (eobp) t)
-          ;; format: [name enabled pseudo pinned-to code-start-pos code-end-pos]
-          (setq package (vector "" t nil "" 0 0)
-                start (point) end (line-end-position))
+          ;; format: [name enabled pseudo pinned-to code-start-pos code-end-pos fetch-url]
+          (setq package (vector "" t nil "" 0 0 "")
+                config-start (point) end (line-end-position))
           ;; package name
           (while (search-forward "] " end t) )
           (setq start (point))
@@ -386,6 +389,16 @@
           (re-search-forward "end_src$" (eobp) t)
           (beginning-of-line)
           (aset package 5 (point))
+          ;; are we fetching from somewhere?
+          (goto-char (aref package 5))
+          (when (re-search-backward "^[ \t].*GIT:" config-start t)
+            (search-forward "GIT:")
+            (skip-chars-forward " \t")
+            (setq start (point))
+            (end-of-line)
+            (skip-chars-backward " \t")
+            (aset package 6
+                  (buffer-substring-no-properties start (point))))
           (push package init-file-package-list)
           (setq init-file-package-list (nreverse init-file-package-list))))))
   init-file-package-list)
@@ -518,6 +531,7 @@
   (interactive)
   (if (org-init--package-section-p)
       (save-excursion
+        (beginning-of-line)
         (unless (looking-at org-heading-regexp)
           (re-search-backward org-heading-regexp))
         (ohc--shiftup))
@@ -528,6 +542,7 @@
   (interactive)
   (if (org-init--package-section-p)
       (save-excursion
+        (beginning-of-line)
         (unless (looking-at org-heading-regexp)
           (re-search-backward org-heading-regexp))
         (ohc--shiftdown))
@@ -538,6 +553,7 @@
   (interactive)
   (if (org-init--package-section-p)
       (save-excursion
+        (beginning-of-line)
         (unless (looking-at org-heading-regexp)
           (re-search-backward org-heading-regexp))
         (org-shiftright))
@@ -548,19 +564,37 @@
   (interactive)
   (if (org-init--package-section-p)
       (save-excursion
+        (beginning-of-line)
         (unless (looking-at org-heading-regexp)
           (re-search-backward org-heading-regexp))
         (org-shiftleft))
     (org-shiftleft)))
 
+(defun org-init--open-in-dired ()
+  (interactive)
+  (if (org-init--package-section-p)
+      (save-excursion
+        (beginning-of-line)
+        (unless (looking-at org-heading-regexp)
+          (re-search-backward org-heading-regexp))
+        (let ((elpa (expand-file-name "elpa" user-emacs-directory))
+              start pkgname)
+          (while (search-forward "] " (line-end-position) t) )
+          (setq start (point))
+          (skip-chars-forward "[a-zA-Z\\-]")
+          (setq pkgname (buffer-substring-no-properties start (point)))
+          (setq pkdir (directory-files elpa t pkgname t ))
+          (if pkdir (dired (car pkdir)))))))
+
 (defvar org-init-mode-map
   (let ((map (make-sparse-keymap)))
-    ;; (define-key org-heading-checkbox-mode-map
-    ;;   [remap ohc--shiftup] #'org-init--shiftup)
-    ;; (define-key org-heading-checkbox-mode-map
-    ;;   [remap ohc--shiftdown] #'org-init--shiftdown)
+    (define-key org-heading-checkbox-mode-map
+      [remap ohc--shiftup] #'org-init--shiftup)
+    (define-key org-heading-checkbox-mode-map
+      [remap ohc--shiftdown] #'org-init--shiftdown)
     (define-key org-mode-map [remap org-shiftleft] #'org-init--shiftleft)
     (define-key org-mode-map [remap org-shiftright] #'org-init--shiftright)
+    (define-key map (kbd "C-c C-j") 'org-init--open-in-dired)
     (define-key map (kbd "C-c i a") 'add-package)
     (define-key map (kbd "C-c i i") 'install-packages)
     (define-key map (kbd "C-c i p") 'add-pseudo-package)
@@ -702,9 +736,16 @@
                   "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?"
                   "[ \t]*$"))))
 
+(push "GIT" org-element-affiliated-keywords)
+
 (org-init-mode 1)
   #+end_src
 * Packages
+** [local ] [x] emacs-run-command
+   #+GIT: https://github.com/bard/emacs-run-command
+#+begin_src emacs-lisp
+
+#+end_src
 ** [none  ] [x] c/c++
    #+begin_src emacs-lisp
 (with-hook after-init
@@ -1157,10 +1198,12 @@
                             ("M-p"             . scroll-down-line)))
    #+end_src
 ** [none  ] [x] emacs-director
+   #+GIT: https://github.com/bard/emacs-director
 #+begin_src emacs-lisp
 
 #+end_src
 ** [none  ] [x] emacs-velocity
+   #+GIT: https://github.com/bard/emacs-velocity
 #+begin_src emacs-lisp
 
 #+end_src
