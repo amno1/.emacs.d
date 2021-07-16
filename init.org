@@ -515,6 +515,16 @@
           (setq pkdir (directory-files elpa t pkgname t ))
           (if pkdir (dired (car pkdir)))))))
 
+(defun org-init--sort-packages ()
+  "This is just a convenience wrapper for org-sort. It does reverted sort on
+  todo keywords-"
+  (interactive)
+  (save-excursion
+    (goto-char (org-init--packages))
+    (org-sort-entries nil ?a) ;; first sort alphabetic than in reversed todo-order
+    (org-sort-entries nil ?O)
+    (org-cycle) (org-cycle)))
+
 (defvar org-init-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key org-heading-checkbox-mode-map
@@ -527,6 +537,7 @@
     (define-key map (kbd "C-c i a") 'add-package)
     (define-key map (kbd "C-c i i") 'install-packages)
     (define-key map (kbd "C-c i p") 'add-pseudo-package)
+    (define-key map (kbd "C-c i s") 'org-init--sort-packages)
     (define-key map (kbd "C-c i g") 'generate-init-files)
     map)
   "Keymap used in `org-init-mode'.")
@@ -670,19 +681,6 @@
 (org-init-mode 1)
   #+end_src
 * Packages
-** [x] lispy
-#+begin_src emacs-lisp
-
-#+end_src
-** [x] mmm-mode
-#+begin_src emacs-lisp
-
-#+end_src
-** [none  ] [x] emacs-run-command
-   #+GIT: https://github.com/bard/emacs-run-command
-#+begin_src emacs-lisp
-
-#+end_src
 ** [none  ] [x] c/c++
    #+begin_src emacs-lisp
 (with-hook after-init
@@ -1002,6 +1000,21 @@
                             gc-cons-percentage      0.1
                             file-name-handler-alist old-file-name-handler)))
    #+end_src
+** [none  ] [x] emacs-director
+   #+GIT: https://github.com/bard/emacs-director
+#+begin_src emacs-lisp
+
+#+end_src
+** [none  ] [x] emacs-run-command
+   #+GIT: https://github.com/bard/emacs-run-command
+#+begin_src emacs-lisp
+
+#+end_src
+** [none  ] [x] emacs-velocity
+   #+GIT: https://github.com/bard/emacs-velocity
+#+begin_src emacs-lisp
+
+#+end_src
 ** [none  ] [x] gnus
    #+begin_src emacs-lisp
 (with-hook after-init
@@ -1134,20 +1147,6 @@
                             ("M->"             . dired-go-to-last)
                             ("M-p"             . scroll-down-line)))
    #+end_src
-** [none  ] [x] emacs-director
-   #+GIT: https://github.com/bard/emacs-director
-#+begin_src emacs-lisp
-
-#+end_src
-** [none  ] [x] emacs-velocity
-   #+GIT: https://github.com/bard/emacs-velocity
-#+begin_src emacs-lisp
-
-#+end_src
-** [x] helm-company
-#+begin_src emacs-lisp
-
-#+end_src
 ** [x] academic-phrases
 #+begin_src emacs-lisp
 
@@ -1397,10 +1396,6 @@
            )
    #+end_src
 ** [x] el-search
-#+begin_src emacs-lisp
-
-#+end_src
-** [x] run-command
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1735,6 +1730,10 @@
                          helm-ag-base-command 
                          "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*"))
    #+end_src
+** [x] helm-company
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] helm-c-yasnippet        
    #+begin_src emacs-lisp
      (with-package helm-c-yasnippet
@@ -1959,6 +1958,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] lispy
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] lsp-java        
    #+begin_src emacs-lisp
 
@@ -2070,6 +2073,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] mmm-mode
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] modern-cpp-font-lock        
    #+begin_src emacs-lisp
      (with-hook modern-cpp-font-lock-mode
@@ -2307,6 +2314,10 @@
                 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
                 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode)))
    #+end_src
+** [x] run-command
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] s
 #+begin_src emacs-lisp
 
