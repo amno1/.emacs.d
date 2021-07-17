@@ -304,6 +304,117 @@
   (append-to-init-file ";; byte-compile-warnings: (not free-vars unresolved))\n")
   (append-to-init-file ";; End:\n")
   (clean-init-file))
+defun goto-code-start (section)
+  (goto-char (point-min))
+  (re-search-forward section)
+  (re-search-forward "begin_src.*emacs-lisp")
+  (skip-chars-forward "\s\t\n\r"))
+
+(defun goto-code-end ()
+  (re-search-forward "end_src")
+  (beginning-of-line))
+
+(defun generate-init-files ()
+  (interactive)
+  (message "Exporting init.el ...")
+  (tangle-init-file)
+  (let ((tangled-file "init.el"))
+    (verbose "Byte compiled %s" tangled-file)
+    (if (featurep 'comp)
+        (message "Native compiled %s" (native-compile tangled-file)))
+    ;; always produce elc file
+    (byte-compile-file tangled-file)
+    (verbose "Tangled and compiled %s" tangled-file))
+  (message "Done."))
+
+(defun install-file (file)
+  (when (file-exists-p file)
+    (unless (equal (file-name-directory buffer-file-name)
+                   (expand-file-name user-emacs-directory))
+      (copy-file file user-emacs-directory t))
+    (message "Wrote: %s." file)))
+
+(defun install-init-files ()
+  (interactive)
+  (let ((i "init.el")
+        (ic "init.elc")
+        (ei "early-init.el")
+        (al "autoloads.el")
+        (pq (expand-file-name "package-quickstart.el" user-emacs-directory))
+        (pqc (expand-file-name "package-quickstart.elc" user-emacs-directory)))
+    (install-file i)
+    (install-file ei)
+    (unless (file-exists-p ic)
+      (byte-compile (expand-file-name el)))
+    (install-file ic)
+    (unless init-file-bake-autoloads
+      (byte-compile pq))
+    (when init-file-bake-autoloads
+      ;; remove package-quickstart files from .emacs.d
+      (when (file-exists-p pq)
+        (delete-file pq))
+      (when (file-exists-p pqc)
+        (delete-file pqc)))))
+
+(defun get-package-list ()
+  (when (buffer-modified-p)
+    (setq init-file-package-list nil))
+  (unless init-file-package-list
+    (save-excursion
+      (goto-char (point-min))
+      (let (package packages start end
+            config-start config-end ms me s)
+        (goto-char (point-min))
+        (verbose "Creating package list ...")
+        (re-search-forward "^\\* Packages")
+        (while (re-search-forward "^\\*\\* " (eobp) t)
+          ;; format: [name enabled pseudo pinned-to code-start-pos code-end-pos fetch-url]
+          (setq package (vector "" t nil "" 0 0 "")
+                config-start (point) end (line-end-position))
+          ;; package name
+          (while (search-forward "] " end t) )
+          (setq start (point))
+          (skip-chars-forward "[a-zA-Z\\-]")
+          (aset package 0
+                (buffer-substring-no-properties start (point)))
+          (goto-char (line-beginning-position))
+          ;; enabled?
+          (when (search-forward "[ ]" end t)
+            (aset package 1 nil))
+          (goto-char (line-beginning-position))
+          (search-forward "[" end t)
+          (setq ms (point))
+          (goto-char (line-beginning-position))
+          (search-forward "]" end t)
+          (setq me (- (point) 1))
+          (setq s (buffer-substring-no-properties ms me))
+          (when (gt (length s) 1)
+            (setq s (string-trim-right s))
+            ;; installable?
+            (if (equal s "none")
+                (aset package 2 t)
+              ;; pinned to repository?
+              (aset package 3 s)))
+          (goto-char start)
+          ;; code start
+          (re-search-forward "begin_src.*emacs-lisp" (eobp) t)
+          (aset package 4 (point))
+          (re-search-forward "end_src$" (eobp) t)
+          (beginning-of-line)
+          (aset package 5 (point))
+          ;; are we fetching from somewhere?
+          (goto-char (aref package 5))
+          (when (re-search-backward "^[ \t].*GIT:" config-start t)
+            (search-forward "GIT:")
+            (skip-chars-forward " \t")
+            (setq start (point))
+            (end-of-line)
+            (skip-chars-backward " \t")
+            (aset package 6
+                  (buffer-substring-no-properties start (point))))
+          (push package init-file-package-list)
+          (setq init-file-package-list (nreverse init-file-package-list))))))
+  init-file-package-list)
 
 ;; (let ((l (get-package-list)))
 ;;   (with-current-buffer (get-buffer-create "*package-list*")
@@ -405,7 +516,7 @@
   (interactive "sPackage name: ")
   (goto-char (org-init--packages))
   (forward-line 1)
-  (insert (concat "** [x] "
+  (insert (concat "\n** [x] "
                   package
                   "\n#+begin_src emacs-lisp\n"
                   "\n#+end_src\n"))
@@ -678,9 +789,20 @@
 
 (push "GIT" org-element-affiliated-keywords)
 
-(org-init-mode 1)
+(org-init-mode +1)
   #+end_src
 * Packages
+
+** [x] deferred
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [none  ] [x] emacs-gif-screencast
+#+GIT: https://gitlab.com/ambrevar/emacs-gif-screencast
+#+begin_src emacs-lisp
+
+#+end_src
 ** [none  ] [x] c/c++
    #+begin_src emacs-lisp
 (with-hook after-init
