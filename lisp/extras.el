@@ -1,6 +1,20 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
 (require 'recentf)
 
+;;;###autoload
+;; (defun replace-with-spaces (beg end)
+;;   "Replace the region with the equivalent number of spaces."
+;;   (interactive "r")
+;;   (goto-char beg)
+;;   (while (re-search-forward "." end t)
+;;     (replace-match " ")))
+
+(defun replace-with-spaces (beg end)
+  "Replace the region with the equivalent number of spaces."
+  (interactive "r")
+  (delete-region beg end)
+  (insert-char ?\s (- end beg)))
+
 ;; Startup time
 ;;;###autoload
 (defun efs/display-startup-time ()

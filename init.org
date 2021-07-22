@@ -1,4 +1,4 @@
-# -*- eval: (progn (org-babel-goto-named-src-block "onstartup") (org-babel-execute-src-block) (outline-hide-sublevels 2)); -*-
+# -*- eval: (progn (org-babel-goto-named-src-block "onstartup") (org-babel-execute-src-block)); -*-
 * About
 ** To fix
    [[https://dev.to/viglioni/how-i-set-up-my-emacs-for-typescript-3eeh]]
@@ -787,8 +787,19 @@
     (org-sort-entries nil ?O)
     (org-cycle) (org-cycle)))
 
+(defun org-init--helm-imenu ()
+  (interactive)
+  (let ((jumpto
+         (save-excursion
+           (goto-char (org-init--packages))
+           (helm-imenu-anywhere))))
+    (when jumpto
+      (goto-char jumpto)
+      (show-subtree))))
+
 (defvar org-init-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key global-map [remap helm-imenu-anywhere] #'org-init--helm-imenu)
     (define-key org-heading-checkbox-mode-map
       [remap ohc--shiftup] #'org-init--shiftup)
     (define-key org-heading-checkbox-mode-map
@@ -821,6 +832,17 @@
       (when (lt len l)
 	(setq len l)))
     len))
+
+(defun org-init--initial-outline ()
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "^\\* About")
+    (hide-subtree)
+    (re-search-forward "^\\* Generator")
+    (hide-subtree)
+    (re-search-forward "^\\* Packages")
+    (hide-subtree)
+    (show-children)))
 
 (define-minor-mode org-init-mode ""
   :global nil :lighter " init-file"
@@ -1008,11 +1030,11 @@
     (cursor-sensor-mode -1))
   (font-lock-fontify-buffer))
 
+(org-init--initial-outline)
 (org-init-mode +1)
 (scimax-src-keymap-mode +1)
     #+end_src
 * Packages
-
 ** [ local ] [x] system-cores.el
 #+GIT: https://github.com/aaron-em/system-cores.el
 #+begin_src emacs-lisp
@@ -2774,3 +2796,4 @@
    #+begin_src emacs-lisp
 
    #+end_src
+   
