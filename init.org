@@ -48,7 +48,7 @@
 (defvar init-file-lisp-directory nil)
 (defvar init-file-use-modules t)
 (defvar init-file-modules-directory nil)
-;;(require 'package)
+(require 'package)
 (setq package-archives nil)
 
 (defvar site-archive '("local" . "~/.emacs.d/lisp"))
@@ -56,13 +56,13 @@
 (defvar elpa-archive '("elpa" . "https://elpa.gnu.org/packages/"))
 (defvar nelpa-archive '("nelpa" . "https://elpa.nongnu.org/nongnu/"))
 (defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
-(defvar marmalade-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
+;;(defvar marmalade-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
 
 (push org-archive package-archives)
 (push elpa-archive package-archives)
 (push nelpa-archive package-archives)
 (push melpa-archive package-archives)
-(push marmalade-archive package-archives)
+;; (push marmalade-archive package-archives)
 
 (setq init-file-bake-autoloads t)
 (setq init-file-unroll-key-bindings t)
@@ -648,6 +648,62 @@
   (install-init-files))
 
 ;; org hacks
+(if (featurep 'org-heading-checkbox)
+    (unload-feature 'org-heading-checkbox))
+
+(defvar org-init--enabled-re "^[ \t]*\\*+.*?[ \t]*\\[x\\]")
+(defvar org-init--disabled-re "^[ \t]*\\*+.*?[ \t]*\\[ \\]")
+(defvar org-init--checkbox-re "^[ \t]*\\*+.*?\\[[ x]\\]")
+
+(defun org-init--heading-checkbox-p ()
+  "Return t if this is a heading with a checkbox."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at org-init--checkbox-re)))
+
+(defun org-init--checkbox-enabled-p ()
+  "Return t if point is at a heading with an enabed checkbox."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at "^[ \t]*\\*+.*?\\[x\\]")))
+
+(defun org-init--checkbox-disabled-p ()
+  "Return t if point is at a heading with a disabeled checkbox."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at "^[ \t]*\\*+.*?\\[ \\]")))
+
+(defun org-init--checkbox-enable ()
+  "Disable checkbox for heading at point."
+  (interactive)
+  (when (org-init--checkbox-enabled-p)
+    (save-excursion
+      (beginning-of-line)
+      (replace-string "[ ]" "[x]" nil (line-beginning-position)
+                      (line-end-position)))))
+
+(defun org-init--checkbox-disable ()
+  "Disable checkbox for heading at point."
+  (interactive)
+  (when (org-init--checkbox-enabled-p)
+    (save-excursion
+      (beginning-of-line)
+      (replace-string "[x]" "[ ]" nil (line-beginning-position)
+                      (line-end-position)))))
+
+(defun org-init--checkbox-toggle ()
+  "Toggle state of checkbox at heading under the point."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (cond ((looking-at org-init--enabled-re)
+           (replace-string "[x]" "[ ]" nil (line-beginning-position)
+                           (line-end-position)))
+          ((looking-at org-init--disabled-re)
+           (replace-string "[ ]" "[x]" nil (line-beginning-position)
+                           (line-end-position)))
+          (t (error "Not at org-init-checkbox line.")))))
+
 (defun org-init--packages ()
   "Return start of packages; point after the \"* Packages\" heading."
   (save-excursion
@@ -725,7 +781,8 @@
 	(beginning-of-line)
 	(unless (looking-at org-heading-regexp)
 	  (re-search-backward org-heading-regexp))
-	(ohc--shiftup))
+        (if (org-init--heading-checkbox-p)
+            (org-init--checkbox-toggle)))
     (org-shiftup)))
 
 (defun org-init--shiftdown ()
@@ -736,7 +793,8 @@
 	(beginning-of-line)
 	(unless (looking-at org-heading-regexp)
 	  (re-search-backward org-heading-regexp))
-	(ohc--shiftdown))
+        (if (org-init--heading-checkbox-p)
+            (org-init--checkbox-toggle)))
     (org-shiftdown)))
 
 (defun org-init--shiftright ()
@@ -799,11 +857,10 @@
 
 (defvar org-init-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key global-map [remap helm-imenu-anywhere] #'org-init--helm-imenu)
-    (define-key org-heading-checkbox-mode-map
-      [remap ohc--shiftup] #'org-init--shiftup)
-    (define-key org-heading-checkbox-mode-map
-      [remap ohc--shiftdown] #'org-init--shiftdown)
+    (when (featurep 'helm-imenu)
+      (define-key global-map [remap helm-imenu-anywhere] #'org-init--helm-imenu))
+    (define-key org-mode-map [remap org-shiftup] #'org-init--shiftup)
+    (define-key org-mode-map [remap org-shiftdown] #'org-init--shiftdown)
     (define-key org-mode-map [remap org-shiftleft] #'org-init--shiftleft)
     (define-key org-mode-map [remap org-shiftright] #'org-init--shiftright)
     (define-key map (kbd "C-c C-j") 'org-init--open-in-dired)
@@ -843,35 +900,6 @@
     (re-search-forward "^\\* Packages")
     (hide-subtree)
     (show-children)))
-
-(define-minor-mode org-init-mode ""
-  :global nil :lighter " init-file"
-  (unless (derived-mode-p 'org-mode)
-    (error "Not in org-mode."))
-  (cond (org-init-mode
-	 (unless org-init-mode-enabled
-	   (setq org-init-mode-enabled t
-		 org-init-old-log-done org-log-done
-		 org-init-old-kwds org-todo-keywords-1
-		 org-init-old-key-alist org-todo-key-alist
-		 org-init-old-kwd-alist org-todo-kwd-alist)
-	   (setq-local org-log-done nil)
-	   (let (s kwdlist templist l)
-	     (dolist (repo package-archives)
-	       (push (car repo) templist))
-	     (push "none" templist)
-	     (setq l (org-init--longest-str templist))
-	     (dolist (s templist)
-	       (while (lt (length s) l)
-		 (setq s (concat s " ")))
-	       (push (concat "[ " s " ]") kwdlist))
-	     (org-todo-per-file-keywords (nreverse kwdlist)))))
-	(t
-	 (setq org-todo-keywords-1 org-init-old-kwds
-	       org-todo-key-alist org-init-old-key-alist
-	       org-todo-kwd-alist org-init-old-kwd-alist
-	       org-log-done org-init-old-log-done
-	       org-init-mode-enabled nil))))
 
 (defun org-todo-per-file-keywords (kwds)
   "Sets per file TODO labels. Takes as argument a list of strings to be
@@ -1015,28 +1043,50 @@
 			    ;; This simulates a mouse click and makes a menu change
 			    (org-mouse-down-mouse nil)))))))))))
 
-(define-minor-mode scimax-src-keymap-mode
-  "Minor mode to add mode keymaps to src-blocks."
-  :init-value nil
-  (if scimax-src-keymap-mode
-      (progn
-	(add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
-	(add-to-list 'font-lock-extra-managed-props 'local-map)
-	(add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
-	(advice-add 'lispy--eval :around 'scimax-spoof-mode)
-	(cursor-sensor-mode +1))
-    (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
-    (advice-remove 'lispy--eval 'scimax-spoof-mode)
-    (cursor-sensor-mode -1))
+(define-minor-mode org-init-mode ""
+  :global nil :lighter " init-file"
+  (unless (derived-mode-p 'org-mode)
+    (error "Not in org-mode."))
+  (cond (org-init-mode
+	 (unless org-init-mode-enabled
+	   (setq org-init-mode-enabled t
+		 org-init-old-log-done org-log-done
+		 org-init-old-kwds org-todo-keywords-1
+		 org-init-old-key-alist org-todo-key-alist
+		 org-init-old-kwd-alist org-todo-kwd-alist)
+	   (setq-local org-log-done nil)
+	   (let (s kwdlist templist l)
+	     (dolist (repo package-archives)
+	       (push (car repo) templist))
+	     (push "none" templist)
+	     (setq l (org-init--longest-str templist))
+	     (dolist (s templist)
+	       (while (lt (length s) l)
+		 (setq s (concat s " ")))
+	       (push (concat "[ " s " ]") kwdlist))
+	     (org-todo-per-file-keywords (nreverse kwdlist))))
+	 (add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
+	 (add-to-list 'font-lock-extra-managed-props 'local-map)
+	 (add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
+	 (advice-add 'lispy--eval :around 'scimax-spoof-mode)
+	 (cursor-sensor-mode +1))
+	(t
+         (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
+         (advice-remove 'lispy--eval 'scimax-spoof-mode)
+         (cursor-sensor-mode -1)
+	 (setq org-todo-keywords-1 org-init-old-kwds
+	       org-todo-key-alist org-init-old-key-alist
+	       org-todo-kwd-alist org-init-old-kwd-alist
+	       org-log-done org-init-old-log-done
+	       org-init-mode-enabled nil)))
   (font-lock-fontify-buffer))
 
 (org-init--initial-outline)
 (org-init-mode +1)
-(scimax-src-keymap-mode +1)
     #+end_src
 * Packages
-** [ local ] [x] system-cores.el
-#+GIT: https://github.com/aaron-em/system-cores.el
+** [ none  ] [x] system-cores.el
+   #+GIT: https://github.com/aaron-em/system-cores.el
 #+begin_src emacs-lisp
 
 #+end_src
@@ -2478,7 +2528,6 @@
 ** [x] org
    #+begin_src emacs-lisp
      (with-hook org-mode
-                (org-heading-checkbox-mode 1)
                 (when (equal (buffer-name) "init.org")
                   (org-babel-hide-markers-mode 1)))
 

@@ -121,8 +121,5 @@
          (ohc--mode-on))
         (t (ohc--mode-off))))
 
-(defun test-hook ()
-  (message "A HOOK IS RUN"))
-
 (provide 'org-heading-checkbox)
 ;;; org-heading-checkbox.el ends here

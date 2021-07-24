@@ -38,3 +38,7 @@ url/
 games/
 request/
 modules/
+elpa-bak/
+async-bytecomp.log
+elpa-compile.log
+elpa1.txt
