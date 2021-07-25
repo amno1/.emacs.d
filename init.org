@@ -58,12 +58,12 @@
 (defvar nelpa-archive '("nelpa" . "https://elpa.nongnu.org/nongnu/"))
 (defvar marmalade-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
 
-(add-to-list 'package-archives 'org-archive)
-(add-to-list 'package-archives 'gnu-archive)
-(add-to-list 'package-archives 'site-archive)
-(add-to-list 'package-archives 'nelpa-archive)
-(add-to-list 'package-archives 'melpa-archive)
-(add-to-list 'package-archives 'marmalade-archive)
+(add-to-list 'package-archives org-archive)
+(add-to-list 'package-archives gnu-archive)
+(add-to-list 'package-archives site-archive)
+(add-to-list 'package-archives nelpa-archive)
+(add-to-list 'package-archives melpa-archive)
+(add-to-list 'package-archives marmalade-archive)
 
 (setq init-file-bake-autoloads t)
 (setq init-file-unroll-key-bindings t)
@@ -604,7 +604,7 @@
   (dolist (p packages)
     (unless (package-pseudo-p p)
       (unless (string-empty-p (aref p 3))
-        (add-to-list 'package-pinned-packages `(,(aref p 0) . ,(aref p 3))))
+        (add-to-list 'package-pinned-packages (cons (intern (aref p 0)) (aref p 3))))
       (ensure-package p)))
   (package-quickstart-refresh))
 
