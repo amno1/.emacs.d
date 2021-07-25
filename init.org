@@ -53,22 +53,23 @@
 
 (defvar site-archive '("local" . "~/.emacs.d/lisp"))
 (defvar org-archive '("org" . "https://orgmode.org/elpa/"))
-(defvar elpa-archive '("elpa" . "https://elpa.gnu.org/packages/"))
-(defvar nelpa-archive '("nelpa" . "https://elpa.nongnu.org/nongnu/"))
+(defvar gnu-archive '("gnu" . "https://elpa.gnu.org/packages/"))
 (defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
-;;(defvar marmalade-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
+(defvar nelpa-archive '("nelpa" . "https://elpa.nongnu.org/nongnu/"))
+(defvar marmalade-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
 
-(push org-archive package-archives)
-(push elpa-archive package-archives)
-(push nelpa-archive package-archives)
-(push melpa-archive package-archives)
-;; (push marmalade-archive package-archives)
+(add-to-list 'package-archives 'org-archive)
+(add-to-list 'package-archives 'gnu-archive)
+(add-to-list 'package-archives 'site-archive)
+(add-to-list 'package-archives 'nelpa-archive)
+(add-to-list 'package-archives 'melpa-archive)
+(add-to-list 'package-archives 'marmalade-archive)
 
 (setq init-file-bake-autoloads t)
 (setq init-file-unroll-key-bindings t)
 (setq init-file-lisp-directory (expand-file-name "lisp" user-emacs-directory))
 (setq init-file-modules-directory
-      (expand-file-name "modules" user-emacs-directory))
+      (expand-file-name "elc-cache" user-emacs-directory))
 
 (unless (file-directory-p init-file-modules-directory)
   (make-directory init-file-modules-directory))
@@ -602,6 +603,8 @@
     (setq packages (get-package-list)))
   (dolist (p packages)
     (unless (package-pseudo-p p)
+      (unless (string-empty-p (aref p 3))
+        (add-to-list 'package-pinned-packages `(,(aref p 0) . ,(aref p 3))))
       (ensure-package p)))
   (package-quickstart-refresh))
 
@@ -879,6 +882,9 @@
 (defvar org-init-old-log-done nil)
 (defvar org-init-old-todo nil)
 
+(setq org-init-mode-enabled nil org-init-old-kwds nil org-init-old-key-alist nil
+      org-init-old-kwd-alist nil org-init-old-log-done nil org-init-old-todo nil)
+
 (make-variable-buffer-local 'org-log-done)
 (make-variable-buffer-local 'org-todo-keywords)
 
@@ -1068,11 +1074,13 @@
 	 (add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
 	 (add-to-list 'font-lock-extra-managed-props 'local-map)
 	 (add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
-	 (advice-add 'lispy--eval :around 'scimax-spoof-mode)
-	 (cursor-sensor-mode +1))
+	 ;;(advice-add 'lispy--eval :around 'scimax-spoof-mode)
+	 (cursor-sensor-mode +1)
+         (eldoc-mode +1)
+         (company-mode +1))
 	(t
          (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
-         (advice-remove 'lispy--eval 'scimax-spoof-mode)
+         ;;(advice-remove 'lispy--eval 'scimax-spoof-mode)
          (cursor-sensor-mode -1)
 	 (setq org-todo-keywords-1 org-init-old-kwds
 	       org-todo-key-alist org-init-old-key-alist
@@ -1565,11 +1573,11 @@
                               ("M->"             . dired-go-to-last)
                               ("M-p"             . scroll-down-line)))
   #+end_src
-** [x] academic-phrases
+** [ melpa ] [x] academic-phrases
   #+begin_src emacs-lisp
 
   #+end_src
-** [x] ace-window
+** [ elpa  ] [x] ace-window
   #+begin_src emacs-lisp
   (with-package ace-window
                 (ace-window-display-mode 1)
