@@ -222,7 +222,7 @@ column narrower."
       (require 'shell)
       (shell-mode)
       (view-mode +1))
-    (set-process-sentinel proc (lambda (process state)
+    (set-process-sentinel proc (lambda (process __state)
                                  (let ((output (with-current-buffer (process-buffer process)
                                                  (buffer-string))))
                                    (kill-buffer (process-buffer process))
@@ -250,23 +250,5 @@ column narrower."
                       " ")))
     (delete-region beg end)
     (insert replacement)))
-
-
-(defun describe-thing-in-popup ()
-  (interactive)
-  (let* ((thing (symbol-at-point))
-         (help-xref-following t)
-         (description
-          (save-window-excursion
-            (with-temp-buffer
-              (help-mode)
-              (describe-symbol thing)
-              (buffer-string)))))
-    (popup-tip description
-               :point (point)
-               :around t
-               :height 30
-               :scroll-bar t
-               :margin t)))
 
 (provide 'extras)
