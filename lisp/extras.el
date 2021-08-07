@@ -164,4 +164,109 @@ column narrower."
       (bury-buffer)
     (kill-buffer (current-buffer))))
 
+
+;; https://xenodium.com/change-emacs-shells-cwd-with-helm-projectile/
+(require 'helm-projectile)
+
+(defun shell-cd (dir-path)
+"Like shell-pop--cd-to-cwd-shell, but without recentering."
+  (unless (string-equal mode-name "Shell")
+    (error "Not in Shell mode"))
+  (message mode-name)
+  (goto-char (point-max))
+  (comint-kill-input)
+  (insert (concat "cd " (shell-quote-argument dir-path)))
+  (let ((comint-process-echoes t))
+    (comint-send-input)))
+
+(defun helm-projectile-shell-cd ()
+  "Change shell current working directory using helm projectile."
+  (interactive)
+  (unless (string-equal mode-name "Shell")
+    (error "Not in Shell mode"))
+  (let ((helm-dir-source (copy-tree  helm-source-projectile-directories-list)))
+    (add-to-list '(action . shell-cd) helm-dir-source)
+    (add-to-list '(keymap . nil) helm-dir-source)
+    (add-to-list '(header-line . "cd to directory...") helm-dir-source)
+    (helm :sources helm-dir-source
+          :buffer "*helm-dirs*"
+          :candidate-number-limit 10000)))
+
+
+;; https://xenodium.com/emacs-clone-git-repo-from-clipboard/
+
+(defvar git-repository-dirs (expand-file-name "~/repos/"))
+
+(defun git-clone-clipboard-url ()
+  "Clone git URL in clipboard asynchronously and open in dired when finished."
+  (interactive)
+  (assert (string-match-p "^\\(http\\|https\\|ssh\\)://" (current-kill 0)) nil "No URL in clipboard")
+  (let* ((url (current-kill 0))
+         (download-dir git-repository-dirs)
+         (project-dir (concat (file-name-as-directory download-dir)
+                              (file-name-base url)))
+         (default-directory download-dir)
+         (command (format "git clone %s" url))
+         (buffer (generate-new-buffer (format "*%s*" command)))
+         (proc))
+             (message "c: %s" command)
+    (when (file-exists-p project-dir)
+      (if (y-or-n-p (format "%s exists. delete?" (file-name-base url)))
+          (delete-directory project-dir t)
+        (user-error "Bailed")))
+    (switch-to-buffer buffer)
+    (setq proc (start-process-shell-command (nth 0 (split-string command)) buffer command))
+    (with-current-buffer buffer
+      (setq default-directory download-dir)
+      (shell-command-save-pos-or-erase)
+      (require 'shell)
+      (shell-mode)
+      (view-mode +1))
+    (set-process-sentinel proc (lambda (process state)
+                                 (let ((output (with-current-buffer (process-buffer process)
+                                                 (buffer-string))))
+                                   (kill-buffer (process-buffer process))
+                                   (if (= (process-exit-status process) 0)
+                                       (progn
+                                         (message "finished: %s" command)
+                                         (dired project-dir))
+                                     (user-error (format "%s\n%s" command output))))))
+    (set-process-filter proc #'comint-output-filter)))
+
+;; https://xenodium.com/emacs-quote-wrap-all-in-region/
+
+(defun toggle-quote-wrap-all-in-region (beg end)
+  "Toggle wrapping all items in region with double quotes."
+  (interactive (list (mark) (point)))
+  (unless (region-active-p)
+    (user-error "no region to wrap"))
+  (let ((deactivate-mark nil)
+        (replacement (string-join
+                      (mapcar (lambda (item)
+                                (if (string-match-p "^\".*\"$" item)
+                                    (string-trim item "\"" "\"")
+                                  (format "\"%s\"" item)))
+                              (split-string (buffer-substring beg end)))
+                      " ")))
+    (delete-region beg end)
+    (insert replacement)))
+
+
+(defun describe-thing-in-popup ()
+  (interactive)
+  (let* ((thing (symbol-at-point))
+         (help-xref-following t)
+         (description
+          (save-window-excursion
+            (with-temp-buffer
+              (help-mode)
+              (describe-symbol thing)
+              (buffer-string)))))
+    (popup-tip description
+               :point (point)
+               :around t
+               :height 30
+               :scroll-bar t
+               :margin t)))
+
 (provide 'extras)

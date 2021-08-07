@@ -1208,7 +1208,8 @@
                               ("P"                . peep-dired)
                               ("<f1>"             . term-toggle)
                               ("TAB"              . dired-subtree-toggle)
-                              ("f"                . dired-subtree-fold-all)                            
+                              ("f"                . dired-subtree-fold-all)
+                              ("z"                . dired-get-size)
                               ("e"                . dired-subtree-expand-all)))
 
   (with-hook dired-mode
@@ -1504,63 +1505,38 @@
   #+end_src
 ** [ none  ] [x] lisp & elisp
   #+begin_src emacs-lisp
-  (with-hook after-init
-             (defun shell-command-on-buffer ()
-               (interactive)
-               (shell-command-on-region
-                (point-min) (point-max)
-                (read-shell-command "Shell command on buffer: ") ))
+(with-hook after-init
+           (defun shell-command-on-buffer ()
+             (interactive)
+             (shell-command-on-region
+              (point-min) (point-max)
+              (read-shell-command "Shell command on buffer: ") ))
 
-             (set-default 'auto-mode-alist
-                          (append '(("\\.lisp$" . lisp-mode)
-                                    ("\\.lsp$" . lisp-mode)
-                                    ("\\.cl$" . lisp-mode))
-                                  auto-mode-alist)))
+           (set-default 'auto-mode-alist
+                        (append '(("\\.lisp$" . lisp-mode)
+                                  ("\\.lsp$" . lisp-mode)
+                                  ("\\.cl$" . lisp-mode))
+                                auto-mode-alist)))
 
-  (with-package elisp-mode
+(with-package elisp-mode
+              (require 'elisp-extras)
+              (with-key-map emacs-lisp-mode
+                            ("\C-c a" . emacs-lisp-byte-compile-and-load)
+                            ("\C-c b" . emacs-lisp-byte-compile)
+                            ("\C-c c" . emacs-lisp-native-compile-and-load)
+                            ("\C-c d" . eval-defun)
+                            ("\C-c e" . eval-buffer)
+                            ("\C-c i" . reindent-buffer)
+                            ("\C-c l" . eval-last-sexp)
+                            ("\C-c n" . eval-next-sexp)
+                            ("\C-c r" . fc-eval-and-replace)
+                            ("\C-c s" . eval-surrounding-sexp)))
 
-                ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
-                (defun fc-eval-and-replace ()
-                  "Replace the preceding sexp with its value."
-                  (interactive)
-                  (backward-kill-sexp)
-                  (condition-case nil
-                      (prin1 (eval (read (current-kill 0)))
-                             (current-buffer))
-                    (error (message "Invalid expression")
-                           (insert (current-kill 0)))))
-
-                ;; https://stackoverflow.com/questions/2171890/emacs-how-to-evaluate-the-smallest-s-expression-the-cursor-is-in-or-the-follow
-                (defun eval-next-sexp ()
-                  (interactive)
-                  (save-excursion
-                    (forward-sexp)
-                    (eval-last-sexp nil)))
-           
-                ;; this works sometimes
-                (defun eval-surrounding-sexp (levels)
-                  (interactive "p")
-                  (save-excursion
-                    (up-list (abs levels))
-                    (eval-last-sexp nil)))
-           
-                (with-key-map emacs-lisp-mode
-                              ("\C-c a" . emacs-lisp-byte-compile-and-load)
-                              ("\C-c b" . emacs-lisp-byte-compile)
-                              ("\C-c c" . emacs-lisp-native-compile-and-load)
-                              ("\C-c d" . eval-defun)
-                              ("\C-c e" . eval-buffer)
-                              ("\C-c i" . reindent-buffer)
-                              ("\C-c l" . eval-last-sexp)
-                              ("\C-c n" . eval-next-sexp)
-                              ("\C-c r" . fc-eval-and-replace)
-                              ("\C-c s" . eval-surrounding-sexp)))
-
-  (with-hook emacs-lisp-mode
-             (setq fill-column 80)
-             (company-mode 1)
-             (outshine-mode 1)
-             (yas-minor-mode 1))
+(with-hook emacs-lisp-mode
+           (setq fill-column 80)
+           (company-mode 1)
+           (outshine-mode 1)
+           (yas-minor-mode 1))
   #+end_src
 ** [ none  ] [x] wdired
   #+begin_src emacs-lisp
@@ -1577,7 +1553,7 @@
   #+begin_src emacs-lisp
 
   #+end_src
-** [ elpa  ] [x] ace-window
+** [x] ace-window
   #+begin_src emacs-lisp
   (with-package ace-window
                 (ace-window-display-mode 1)

@@ -141,13 +141,36 @@
   (interactive)
   (when (equal major-mode 'dired-mode)
     (save-excursion
-      (dired-goto-first)
+      (goto-char (point-min))
       (while (not (eobp))
         (ignore-errors
           (when (directory-empty-p (dired-get-filename))
             (dired-mark 1)
             (dired-previous-line 1)))
         (dired-next-line 1)))))
+
+(defun dired-delete-empty-dirs ()
+  "Interactively mark all empty directories in current Dired buffer."
+  (interactive)
+  (when (equal major-mode 'dired-mode)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (ignore-errors
+          (when (directory-empty-p (dired-get-filename))
+            (delete-directory (dired-get-filename))))
+        (dired-next-line 1)))))
+
+(defun dired-get-size ()
+  (interactive)
+  (let ((files (dired-get-marked-files)))
+    (with-temp-buffer
+      (apply 'call-process "/usr/bin/du" nil t nil "-sch" files)
+      (message
+       "Size of all marked files: %s"
+       (progn
+         (re-search-backward "\\(^[ 0-9.,]+[A-Za-z]+\\).*total$")
+         (match-string 1))))))
 
 (provide 'dired-extras)
 ;;; dired-extras.el ends here
