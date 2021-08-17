@@ -200,7 +200,8 @@ column narrower."
 (defun git-clone-clipboard-url ()
   "Clone git URL in clipboard asynchronously and open in dired when finished."
   (interactive)
-  (assert (string-match-p "^\\(http\\|https\\|ssh\\)://" (current-kill 0)) nil "No URL in clipboard")
+  (unless (string-match-p "^\\(http\\|https\\|ssh\\)://" (current-kill 0))
+    (error "No URL in clipboard"))
   (let* ((url (current-kill 0))
          (download-dir git-repository-dirs)
          (project-dir (concat (file-name-as-directory download-dir)
