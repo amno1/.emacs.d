@@ -23,6 +23,29 @@
 ;;  FIXME remove popup package requirement (use tooltip.el)
 
 ;;; Code:
+
+;;;; Editing
+
+(defun sexp-copy-forward (&optional arg)
+  "Save the sexp following point to the kill ring.
+ARG has the same meaning as for `kill-sexp'."
+  (interactive "p")
+  (save-excursion
+    (let ((orig-point (point)))
+      (forward-sexp (or arg 1))
+      (kill-ring-save orig-point (point)))))
+
+(defun sexp-copy-backward (&optional arg)
+  "Save the sexp preceding point to the kill ring.
+ARG has the same meaning as for `kill-sexp'."
+  (interactive "p")
+  (save-excursion
+    (let ((orig-point (point)))
+      (backward-sexp (or arg 1))
+      (kill-ring-save (point) orig-point))))
+
+
+;;;; Evaluation
 
 ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
 (defun fc-eval-and-replace ()
@@ -108,7 +131,6 @@
                :height 30
                :scroll-bar t
                :margin t)))
-
 
 (provide 'elisp-extras)
 ;;; elisp-extras.el ends here

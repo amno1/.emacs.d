@@ -164,35 +164,6 @@ column narrower."
       (bury-buffer)
     (kill-buffer (current-buffer))))
 
-
-;; https://xenodium.com/change-emacs-shells-cwd-with-helm-projectile/
-(require 'helm-projectile)
-
-(defun shell-cd (dir-path)
-"Like shell-pop--cd-to-cwd-shell, but without recentering."
-  (unless (string-equal mode-name "Shell")
-    (error "Not in Shell mode"))
-  (message mode-name)
-  (goto-char (point-max))
-  (comint-kill-input)
-  (insert (concat "cd " (shell-quote-argument dir-path)))
-  (let ((comint-process-echoes t))
-    (comint-send-input)))
-
-(defun helm-projectile-shell-cd ()
-  "Change shell current working directory using helm projectile."
-  (interactive)
-  (unless (string-equal mode-name "Shell")
-    (error "Not in Shell mode"))
-  (let ((helm-dir-source (copy-tree  helm-source-projectile-directories-list)))
-    (add-to-list '(action . shell-cd) helm-dir-source)
-    (add-to-list '(keymap . nil) helm-dir-source)
-    (add-to-list '(header-line . "cd to directory...") helm-dir-source)
-    (helm :sources helm-dir-source
-          :buffer "*helm-dirs*"
-          :candidate-number-limit 10000)))
-
-
 ;; https://xenodium.com/emacs-clone-git-repo-from-clipboard/
 
 (defvar git-repository-dirs (expand-file-name "~/repos/"))
@@ -213,7 +184,7 @@ column narrower."
              (message "c: %s" command)
     (when (file-exists-p project-dir)
       (if (y-or-n-p (format "%s exists. delete?" (file-name-base url)))
-          (delete-directory project-dir t)
+          ;;(delete-directory project-dir t)
         (user-error "Bailed")))
     (switch-to-buffer buffer)
     (setq proc (start-process-shell-command (nth 0 (split-string command)) buffer command))
@@ -251,5 +222,11 @@ column narrower."
                       " ")))
     (delete-region beg end)
     (insert replacement)))
+
+(defun shell-command-on-buffer ()
+  (interactive)
+  (shell-command-on-region
+   (point-min) (point-max)
+   (read-shell-command "Shell command on buffer: ") ))
 
 (provide 'extras)

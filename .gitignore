@@ -1,6 +1,7 @@
 .#*
 *#
 auto-save-listg
+.cask/
 eln-cache/
 elpa/
 elpy/
@@ -16,6 +17,7 @@ early-init.el
 .dap-breakpoints
 autoloads.el
 lisp/autoload.el
+lisp/site-autoloads.el
 lisp/lisp-autoloads.el
 lisp/org-view-mode.el
 package-quickstart.el

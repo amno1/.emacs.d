@@ -106,11 +106,14 @@
         auto-insert-mode t
         auto-insert-query nil
         c-default-style "gnu")
-  (push '("*compilation*"
-          (minibuffer . nil)
-          (unsplittable . t)
-          (menu-bar-lines . 0))
-        special-display-buffer-names)
+
+  (add-to-list 'display-buffer-alist
+               '(("*compilation*"
+                  (minibuffer . nil)
+                  (unsplittable . t)
+                  (menu-bar-lines . 0))
+                 special-display-buffer-names))
+  
   (add-hook 'c-mode-common-hook 'company-mode)
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'c-mode-hook 'c-modes-keys)
@@ -118,10 +121,16 @@
   (add-hook 'c-mode-hook 'yas-minor-mode)
   (add-hook 'c-mode-hook 'hide-ifdef-mode)
   (add-hook 'c-mode-hook 'auto-revert-mode)
-  (add-hook 'c-mode-hook 'clanguages-pairs-hook)
+  ;;(add-hook 'c-mode-hook 'clanguages-pairs-hook)
   (add-hook 'c-mode-hook (lambda () (subword-mode 1)))
   (add-hook 'compilation-mode-hook 'qtmstr-setup-compile-mode)
   (add-hook 'compilation-finish-functions 'qtmstr-compile-finish)
+  (add-hook 'c-mode-hook
+            (lambda ()
+              (make-local-variable 'electric-pair-pairs)
+              (dolist
+                  (pair '((cons ?< ?>) (cons ?\( ?\)) (cons ?{ ?}) (cons ?\[ ?\])))
+                (add-to-list 'electric-pair-pairs pair))))
   (add-hook 'c-mode-hook (lambda () (set (make-local-variable 'compile-command)
                                          (format "make -f %s"
                                                  (get-nearest-compilation-file))))))
@@ -137,14 +146,20 @@
   (add-hook 'c++-mode-hook 'yas-minor-mode)
   (add-hook 'c++-mode-hook 'hide-ifdef-mode)
   (add-hook 'c++-mode-hook 'auto-revert-mode)
-  (add-hook 'c++-mode-hook 'clanguages-pairs-hook)
+  ;;(add-hook 'c++-mode-hook 'clanguages-pairs-hook)
   (add-hook 'c++-mode-hook (lambda () (subword-mode 1)))
 
   ;; This prevents the extra two spaces in a namespace that Emacs
   ;; otherwise wants to put.
   (add-hook 'c-mode-common-hook 'google-set-c-style)
   ;; Autoindent using google style guide
-  (add-hook 'c-mode-common-hook 'google-make-newline-indent)
+  (add-hook 'c++-mode-hook 'google-make-newline-indent)
+  (add-hook 'c++-mode-hook
+            (lambda ()
+              (make-local-variable 'electric-pair-pairs)
+              (dolist
+                  (pair '((cons ?< ?>) (cons ?\( ?\)) (cons ?{ ?}) (cons ?\[ ?\])))
+                (add-to-list 'electric-pair-pairs pair))))
   (add-hook 'c++-mode-hook (lambda () (set (make-local-variable 'compile-command)
                                            (format "make -f %s"
                                                    (get-nearest-compilation-file))))))
