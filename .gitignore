@@ -45,3 +45,7 @@ elpa-bak/
 async-bytecomp.log
 elpa-compile.log
 elpa1.txt
+al-db-packages
+al-db-site-lisp
+ff-db-emacs
+ff-db-packages
