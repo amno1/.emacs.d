@@ -452,7 +452,7 @@
     (dolist (src srcs)
       (unless (or (string-match-p src "-pkg\\.el")
                   (string-match-p src "-autoload\\.el"))
-        (puthash index src init-file--loadpaths-map)
+        (puthash index (file-name-sans-extension src) init-file--loadpaths-map)
         (collect-autoloads src index))
       (setq index (1+ index)))
     (with-temp-file tofile
@@ -1951,11 +1951,11 @@
    #+begin_src emacs-lisp
      (with-hook after-init
                 (defkeys global-map
-                  "C-h v" helpful-variable
-                  "C-h k" helpful-key
-                  "C-h f" helpful-callable
-                  "C-h j" helpful-at-point
-                  "C-h u" helpful-command)
+                  "C-h C-v" helpful-variable
+                  "C-h C-k" helpful-key
+                  "C-h C-f" helpful-callable
+                  "C-h C-j" helpful-at-point
+                  "C-h C-u" helpful-command)
                 )
    #+end_src
 
@@ -2635,6 +2635,7 @@
 ** [ none  ] [x] early-init
   #+begin_src emacs-lisp
     (with-hook early-init
+               (defvar default-gc-cons-threshold gc-cons-threshold)
                (defvar old-file-name-handler file-name-handler-alist)
                (setq file-name-handler-alist nil
                      gc-cons-threshold most-positive-fixnum
@@ -2733,12 +2734,19 @@
            (add-to-list 'display-buffer-alist '("\\*Compile-Log\\*"
                                                 (display-buffer-no-window)))
            (add-to-list 'display-buffer-alist
-                 `((,(rx bos (or "*Apropos*" "*Help*" "*helpful"
-                                                "*info*""*Summary*")
+                 `((,(rx bos (or "*Apropos*"
+                                 ;;"*Help*"
+                                 "*helpful"
+                                 "*info*"
+                                 "*Summary*")
                          (0+ not-newline))
                     (display-buffer-same-window)
                     (display-buffer-reuse-mode-window display-buffer-pop-up-window)
-                    (mode apropos-mode help-mode helpful-mode Info-mode Man-mode))))
+                    (mode apropos-mode
+                          ;;help-mode
+                          helpful-mode
+                          Info-mode
+                          Man-mode))))
            
            (fset 'yes-or-no-p 'y-or-n-p)
            (electric-indent-mode 1)
@@ -2771,8 +2779,9 @@
            
            (defkeys global-map
              ;; Window-buffer operations
-             "C-<insert>"    term-toggle
+             "C-<insert>"    term-toggle-term
              "<insert>"      term-toggle-eshell
+             "C-v C-t"       term-toggle-ielm
              [f9]            ispell-word
              [S-f10]         next-buffer
              [f10]           previous-buffer
@@ -2840,7 +2849,7 @@
                         (load custom-file 'noerror))
                       (add-hook 'comint-output-filter-functions
                                 #'comint-watch-for-password-prompt)
-                      (setq gc-cons-threshold       16777216
+                      (setq gc-cons-threshold       default-gc-cons-threshold
                             gc-cons-percentage      0.1
                             file-name-handler-alist old-file-name-handler)))
 
