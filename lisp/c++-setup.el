@@ -115,7 +115,7 @@
                  special-display-buffer-names))
   
   (add-hook 'c-mode-common-hook 'company-mode)
-  (add-hook 'c-mode-hook 'lsp)
+  ;;(add-hook 'c-mode-hook 'lsp)
   (add-hook 'c-mode-hook 'c-modes-keys)
   (add-hook 'c-mode-hook 'hs-minor-mode)
   (add-hook 'c-mode-hook 'yas-minor-mode)

@@ -60,6 +60,16 @@
   (dired-next-line -1)
   (dired-move-to-filename))
 
+(defun dired-subtree-expand-tree ()
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (dired-next-line 1)
+      (ignore-errors
+        (unless (dired-subtree--is-expanded-p)
+          (dired-subtree-insert))))))
+
 (defun dired-subtree-expand-all ()
   (interactive)
   (save-excursion

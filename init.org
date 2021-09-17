@@ -2520,13 +2520,9 @@
   (with-hook after-init
              (add-hook 'c-initialization-hook 'my-c-init)
              (add-hook 'c++-mode-hook 'my-c++-init)
-             (add-to-list 'auto-mode-alist '("\\.c\\'" . c-mode))
-             (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-             (setq auto-mode-alist
-                   (append (list '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)$" . c++-mode)) 
-                           auto-mode-alist))
-             (when-idle
-              (require 'c++-setup)))
+             (add-to-list 'auto-mode-alist '("\\.\\(c||h\\)\\'" . c-mode))
+             (add-to-list 'auto-mode-alist '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)'" . c++-mode))
+             (when-idle  (require 'c++-setup)))
   #+end_src
 ** [ none  ] [x] dap-java
   #+begin_src emacs-lisp
