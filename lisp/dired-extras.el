@@ -34,9 +34,6 @@
 ;;(require 'dired+)
 ;;(require 'tmtxt-dired-async)
 
-;;(autoload 'dired-subtree-toggle "dired-subtree.el" nil t)
-(autoload 'dired-openwith "openwith.el" nil t)
-
 ;; quick-hack - need to rewrite this
 (defun my-run ()
   (interactive)
@@ -60,25 +57,32 @@
   (dired-next-line -1)
   (dired-move-to-filename))
 
+(defun dired-dirline-p ()
+  (save-excursion
+    (goto-char (line-beginning-position))
+    (looking-at dired-re-dir)))
+
 (defun dired-subtree-expand-tree ()
   (interactive)
   (save-excursion
     (goto-char (point-min))
     (while (not (eobp))
-      (dired-next-line 1)
-      (ignore-errors
-        (unless (dired-subtree--is-expanded-p)
-          (dired-subtree-insert))))))
+      (when (dired-move-to-filename)
+        (when (dired-dirline-p)
+          (unless (dired-subtree--is-expanded-p)
+            (dired-subtree-insert)
+            (dired-prev-dirline 1))))
+      (dired-next-dirline 1))))
 
 (defun dired-subtree-expand-all ()
   (interactive)
   (save-excursion
-    (dired-goto-last)
+    (goto-char (point-max))
     (while (not (bobp))
-      (dired-next-line -1)
       (ignore-errors
         (unless (dired-subtree--is-expanded-p)
-          (dired-subtree-insert))))))
+          (dired-subtree-insert)))
+      (dired-previous-line 1))))
 
 (defun dired-subtree-fold-all ()
   (interactive)

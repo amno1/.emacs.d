@@ -1181,7 +1181,15 @@
 
   (with-package auto-package-update
                 (setq auto-package-update-delete-old-versions t
-                      auto-package-update-interval nil))
+                      auto-package-update-interval nil)
+
+(defun apu--delete-old-versions-dirs-list ()
+  "Delete package old version dirs saved in variable apu--old-versions-dirs-list"
+  (dolist (old-version-dir-to-delete apu--old-versions-dirs-list)
+    (unless (file-symlink-p old-version-dir-to-delete)
+      (delete-directory old-version-dir-to-delete t)))
+  ;; Clear list
+  (setq apu--old-versions-dirs-list ())))
   #+end_src
 ** [x] auto-yasnippet
   #+begin_src emacs-lisp
@@ -1502,6 +1510,18 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] equake
+#+begin_src emacs-lisp
+(with-package equake
+              (advice-add #'save-buffers-kill-terminal :before-while #'equake-kill-emacs-advice)
+              (global-set-key (kbd "C-M-^") #'equake-restore-last-etab)
+              (setq equake-default-shell 'eshell)
+              ;; set list of available shells
+              (setq equake-available-shells
+                    '("shell"
+                      "eshell"
+                      "ielm")))
+#+end_src
 ** [x] eros
 #+begin_src emacs-lisp
 
@@ -1759,6 +1779,7 @@
 (with-hook after-init
            (defkeys global-map
              "M-x"     helm-M-x
+             "C-z ,"   helm-pages
              "C-x C-b" helm-buffers-list
              "C-z a"   helm-ag
              "C-z b"   helm-filtered-bookmarks
@@ -1949,14 +1970,18 @@
    #+end_src
 ** [x] helpful        
    #+begin_src emacs-lisp
-     (with-hook after-init
-                (defkeys global-map
-                  "C-h C-v" helpful-variable
-                  "C-h C-k" helpful-key
-                  "C-h C-f" helpful-callable
-                  "C-h C-j" helpful-at-point
-                  "C-h C-u" helpful-command)
-                )
+(with-package helpful
+              (define-key helpful-mode-map (kbd "i")
+                (lambda nil (interactive) (info-lookup 'symbol helpful--sym #'emacs-lisp-mode)))
+              (setq helpful-max-buffers 1))
+
+(with-hook after-init
+           (defkeys global-map
+             "C-h C-v" helpful-variable
+             "C-h C-k" helpful-key
+             "C-h C-f" helpful-callable
+             "C-h C-j" helpful-at-point
+             "C-h C-u" helpful-command))
    #+end_src
 
 ** [x] hide-mode-line
@@ -2370,6 +2395,11 @@
      (with-hook python-mode
                 (pyvenv-mode +1))    
    #+end_src
+** [x] qrencode
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] recentf        
    #+begin_src emacs-lisp
 
@@ -2520,7 +2550,7 @@
   (with-hook after-init
              (add-hook 'c-initialization-hook 'my-c-init)
              (add-hook 'c++-mode-hook 'my-c++-init)
-             (add-to-list 'auto-mode-alist '("\\.\\(c||h\\)\\'" . c-mode))
+             (add-to-list 'auto-mode-alist '("\\.\\(c\\|h\\)\\'" . c-mode))
              (add-to-list 'auto-mode-alist '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)'" . c++-mode))
              (when-idle  (require 'c++-setup)))
   #+end_src
@@ -2652,7 +2682,7 @@
                      comp-speed 3)
 
                (when 'native-comp-compiler-options
-                 (setq native-comp-compiler-options '("-march=skylake" "-mtune=native" "-mcpu=skylake")))
+                 (setq native-comp-compiler-options '("-O2" "-march=skylake" "-mtune=native")))
                
                (setq-default abbrev-mode t
                              indent-tabs-mode nil
@@ -2711,6 +2741,7 @@
                    bookmark-save-flag 1
                    delete-selection-mode t
                    confirm-kill-processes nil
+                   help-enable-symbol-autoload t
                    large-file-warning-threshold nil
                    save-abbrevs 'silent
                    save-interprogram-paste-before-kill t
@@ -2722,6 +2753,7 @@
                    maximum-scroll-margin 1
                    scroll-margin 0
                    make-backup-files nil
+                   kill-buffer-delete-auto-save-files t
                    backup-directory-alist `(("." . ,etc))
                    custom-file (expand-file-name "custom.el" etc)
                    abbrev-file-name (expand-file-name "abbrevs.el" etc)
@@ -2730,19 +2762,14 @@
            (add-to-list 'display-buffer-alist '("\\*Compile-Log\\*"
                                                 (display-buffer-no-window)))
            (add-to-list 'display-buffer-alist
-                 `((,(rx bos (or "*Apropos*"
-                                 ;;"*Help*"
-                                 "*helpful"
-                                 "*info*"
-                                 "*Summary*")
+                 `((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*")
                          (0+ not-newline))
                     (display-buffer-same-window)
+                    (dedicated t)
                     (display-buffer-reuse-mode-window display-buffer-pop-up-window)
-                    (mode apropos-mode
-                          ;;help-mode
-                          helpful-mode
-                          Info-mode
-                          Man-mode))))
+                    (mode apropos-mode help-mode helpful-mode Info-mode Man-mode))))
+
+           (add-to-list 'display-buffer-alist '(("*Help*" (window-parameters . ((dedicated . t))))))
            
            (fset 'yes-or-no-p 'y-or-n-p)
            (electric-indent-mode 1)
@@ -2817,6 +2844,7 @@
              "C-v <return>" delete-other-windows
              "C-v ,"        split-window-right
              "C-v ."        split-window-below
+             "C-h M-i"      help-toggle-source-view
              ;; "C-v C-s"      swap-two-buffers
              [remap other-window]  ace-window
              
@@ -2874,61 +2902,64 @@
   #+end_src
 ** [ none  ] [x] gnus
   #+begin_src emacs-lisp
-  (with-hook after-init
-             (require 'gnus))
+(with-hook after-init
+           (require 'gnus))
 
-  (with-package gnus
+(with-hook message-mode
+           (setq fill-column 80))
 
-                ;;(require 'nnir)
+(with-package gnus
+              
+              ;;(require 'nnir)
 
-                (setq user-full-name    "Arthur Miller"
-                      user-mail-address "arthur.miller@live.com")
+              (setq user-full-name    "Arthur Miller"
+                    user-mail-address "arthur.miller@live.com")
               
-                ;; for the outlook
-                (setq gnus-select-method '(nnimap "live.com"
-                                                  (nnimap-address "imap-mail.outlook.com")
-                                                  (nnimap-server-port 993)
-                                                  (nnimap-stream ssl)
-                                                  ;;(nnir-search-engine imap)
-                                                  ))
+              ;; for the outlook
+              (setq gnus-select-method '(nnimap "live.com"
+                                                (nnimap-address "imap-mail.outlook.com")
+                                                (nnimap-server-port 993)
+                                                (nnimap-stream ssl)
+                                                ;;(nnir-search-engine imap)
+                                                ))
 
-                (add-to-list 'gnus-secondary-select-methods '(nnhackernews ""))
-                
-                ;; Send email through SMTP
-                (setq message-send-mail-function 'smtpmail-send-it
-                      smtpmail-default-smtp-server "smtp-mail.outlook.com"
-                      smtpmail-smtp-service 587
-                      smtpmail-local-domain "homepc")
+              (add-to-list 'gnus-secondary-select-methods '(nnhackernews ""))
+              
+              ;; Send email through SMTP
+              (setq message-send-mail-function 'smtpmail-send-it
+                    smtpmail-default-smtp-server "smtp-mail.outlook.com"
+                    smtpmail-smtp-service 587
+                    smtpmail-local-domain "homepc")
 
-                (setq gnus-thread-sort-functions
-                      '(gnus-thread-sort-by-most-recent-date
-                        (not gnus-thread-sort-by-number)))
-                (setq gnus-use-cache t gnus-view-pseudo-asynchronously t)
-                ;; Show more MIME-stuff:
-                (setq gnus-mime-display-multipart-related-as-mixed t)
-                ;; http://www.gnu.org/software/emacs/manual/html_node/gnus/_005b9_002e2_005d.html
-                (setq gnus-use-correct-string-widths nil)
-                (setq nnmail-expiry-wait 'immediate)
+              (setq gnus-thread-sort-functions
+                    '(gnus-thread-sort-by-most-recent-date
+                      (not gnus-thread-sort-by-number)))
+              (setq gnus-use-cache t gnus-view-pseudo-asynchronously t)
+              ;; Show more MIME-stuff:
+              (setq gnus-mime-display-multipart-related-as-mixed t)
+              ;; http://www.gnu.org/software/emacs/manual/html_node/gnus/_005b9_002e2_005d.html
+              (setq gnus-use-correct-string-widths nil)
+              (setq nnmail-expiry-wait 'immediate)
               
-                ;; Smileys:
-                (setq smiley-style 'medium)
+              ;; Smileys:
+              (setq smiley-style 'medium)
               
-                ;; Use topics per default:
-                (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
-                (setq gnus-message-archive-group '((format-time-string "sent.%Y")))
-                (setq gnus-server-alist '(("archive" nnfolder "archive" (nnfolder-directory "~/mail/archive")
-                                           (nnfolder-active-file "~/mail/archive/active")
-                                           (nnfolder-get-new-mail nil)
-                                           (nnfolder-inhibit-expiry t))))
+              ;; Use topics per default:
+              (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+              (setq gnus-message-archive-group '((format-time-string "sent.%Y")))
+              (setq gnus-server-alist '(("archive" nnfolder "archive" (nnfolder-directory "~/mail/archive")
+                                         (nnfolder-active-file "~/mail/archive/active")
+                                         (nnfolder-get-new-mail nil)
+                                         (nnfolder-inhibit-expiry t))))
               
-                (setq gnus-topic-topology '(;;("Gnus" visible)
-                                              ;;(("misc" visible))
-                                              ("live.com" visible)))
+              (setq gnus-topic-topology '(;;("Gnus" visible)
+                                          ;;(("misc" visible))
+                                          ("live.com" visible)))
               
-                ;; each topic corresponds to a public imap folder
-                (setq gnus-topic-alist '(("live.com")
-                                         ("Gnus")))
-                )
+              ;; each topic corresponds to a public imap folder
+              (setq gnus-topic-alist '(("live.com")
+                                       ("Gnus")))
+              )
   #+end_src
 ** [ none  ] [x] helm-convert
   #+GIT: https://github.com/Zacalot/helm-convert
@@ -2950,9 +2981,9 @@
   #+begin_src emacs-lisp
 (with-hook after-init
            (set-default 'auto-mode-alist
-                        (append '(("\\.lisp$" . lisp-mode)
-                                  ("\\.lsp$" . lisp-mode)
-                                  ("\\.cl$" . lisp-mode))
+                        (append '(("\\.lisp" . lisp-mode)
+                                  ("\\.lsp" . lisp-mode)
+                                  ("\\.cl" . lisp-mode))
                                 auto-mode-alist)))
 
 (with-package elisp-mode

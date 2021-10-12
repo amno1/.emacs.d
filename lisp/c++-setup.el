@@ -29,7 +29,6 @@
         (revert-buffer t t))
     (call-interactively 'compile)))
 
-
 (defun find-dedicated-frames (buf)
   (let (result)
     (dolist (window (get-buffer-window-list buf t) result)
@@ -115,7 +114,7 @@
                  special-display-buffer-names))
   
   (add-hook 'c-mode-common-hook 'company-mode)
-  ;;(add-hook 'c-mode-hook 'lsp)
+  (add-hook 'c-mode-hook 'lsp)
   (add-hook 'c-mode-hook 'c-modes-keys)
   (add-hook 'c-mode-hook 'hs-minor-mode)
   (add-hook 'c-mode-hook 'yas-minor-mode)

@@ -15,6 +15,9 @@ early-init.el
 .last-package-update-day
 .lsp-session-*
 .dap-breakpoints
+.org-id-locations
+equake-persistent-display
+projects
 autoloads.el
 lisp/autoload.el
 lisp/site-autoloads.el
