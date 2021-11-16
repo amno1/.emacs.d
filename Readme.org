@@ -1,4 +1,4 @@
-My current minimal and very fast Emacs setup based on my new [[https://github.com/amno1/emacs-init-generator][init file generator]].
+My current minimal and very experimental Emacs setup based[[https://github.
 
 If anyone would like to try it, I would be glad to hear if and how it works,
 especially if you find bugs with the setup (they are :-)).

@@ -47,22 +47,22 @@
         (modify-frame-parameters
          frame (list (cons 'background-color orig)))))))
 
-(defun qtmstr-compile-finish (buf status)
-  (with-current-buffer buf
-    (let* ((color (if (string-match "^finished\\b" status)
-                      "#dfd" "#fdd"))
-           found)
-      (dolist (frame (find-dedicated-frames buf))
-        (setq found t)
-        (modify-frame-parameters
-         frame
-         (list (cons 'background-color color)
-               (cons 'orig-background
-                     (frame-parameter frame 'background-color)))))
-      (unless found
-        (let ((overlay (make-overlay (point-min) (point-max))))
-          (overlay-put overlay 'face (list :background color))
-          (overlay-put overlay 'evaporate t))))))
+(defun qtmstr-compile-finish (buf status))
+  ;; (with-current-buffer buf
+  ;;   (let* ((color (if (string-match "^finished\\b" status)
+  ;;                     "#dfd" "#fdd"))
+  ;;          found)
+  ;;     (dolist (frame (find-dedicated-frames buf))
+  ;;       (setq found t)
+  ;;       (modify-frame-parameters
+  ;;        frame
+  ;;        (list (cons 'background-color color)
+  ;;              (cons 'orig-background
+  ;;                    (frame-parameter frame 'background-color)))))
+  ;;     (unless found
+  ;;       (let ((overlay (make-overlay (point-min) (point-max))))
+  ;;         (overlay-put overlay 'face (list :background color))
+  ;;         (overlay-put overlay 'evaporate t))))))
 
 (defun get-nearest-compilation-file ()
   "Search for the compilation file traversing up the directory tree."

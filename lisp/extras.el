@@ -229,4 +229,11 @@ column narrower."
    (point-min) (point-max)
    (read-shell-command "Shell command on buffer: ") ))
 
+(defun f-to-c ()
+  (interactive)
+  (let* ((ftemp (read-number "Enter temperature in Fahrenheit: "))
+         (ctemp (* (- ftemp 32) 0.56)))
+    (message "%s degrees Fahrenheit is %s degrees Celsius." ftemp (float ctemp))
+    ctemp))
+
 (provide 'extras)

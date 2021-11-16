@@ -25,208 +25,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-* Experiments
-#+begin_src emacs-lisp
-(defun emit-pkgs (&optional num)
-  (message "Emiting packages ...")
-  (save-excursion
-    (let ((count 0) sxp (pkgs (get-package-list)))
-      (catch 'done
-        (dolist (p pkgs)
-          (unless num (setq num (legnth pkgs)))
-          (verbose "Checking package: %s" (package-name p))
-          (when (package-enabled-p p)
-            (verbose "Emiting package: %s" (package-name p))
-            (goto-char (package-code-beg p))
-            (ignore-errors
-              (while (lte (point) (package-code-end p))
-                (setq sxp (read (current-buffer)))
-                (when sxp
-                  (message "SXP: %S" sxp)
-                  (dolist (elt sxp)
-                    (message "ELT: %S" elt)))))
-            (setq count (1+ count))
-            (when (= num count)
-              (throw 'done count)))))
-      (message "Parsed %s packages." count))))
-
-
-;; (require 'mmm-mode)
-;; (setq mmm-global-mode 'maybe)
-;; (mmm-add-mode-ext-class 'org-mode nil 'org-elisp)
-
-;; (mmm-add-group
-;;  'org-elisp
-;;  '((elisp-src-block
-;;     :submode emacs-lisp-mode
-;;     :face org-block
-;;     :front "#\\+BEGIN_SRC emacs-lisp.*\n"
-;;     :back "#\\+END_SRC")))
-
-;; (mmm-mode +1)
-;; (require 'lispy)
-;; (require 'elpy)
-
-;; (defun get-load-paths()
-;;   (let ((source (expand-file-name "lisp/" source-directory))
-;;         (userlisp (expand-file-name "lisp/" user-emacs-directory))
-;;         (modules (expand-file-name "modules/" user-emacs-directory))
-;;         path)
-;;     (push modules path)
-;;     (push userlisp path)
-;;     (push source path)
-;;     (dolist (dir (directory-files-recursively source
-;;     	      directory-files-no-dot-files-regexp t))
-;;       (when (file-directory-p dir)
-;;         (push dir path)))
-;;     path))
-
-
-
-;; (let ((l (get-package-list)))
-;;   (with-current-buffer (get-buffer-create "*package-list*")
-;;     (erase-buffer)
-;;     (dolist (p l)
-;;       (beginning-of-line)
-;;       (insert (aref p 0))
-;;       (newline))
-;;     (switch-to-buffer (current-buffer))))
-
-;; (defun print-line (&optional beg)
-;;   (let ((end (line-end-position)))
-;;     (unless beg (setq beg (line-beginning-position)))
-;;     (message "%s" (buffer-substring-no-properties beg end))))
-
-;; (defun emit-load-paths ()
-;;   (message "Emitting load-path")
-;;   (append-to-init-file
-;;    (concat "\n(setq load-path '" (prin1-to-string (get-load-paths)) ")")
-;;    "early-init.el"))
-
-;; (defun init-quickstart-refresh ()
-;;   "(Re)Generate the `package-quickstart-file'."
-;;   (interactive)
-;;   (package-initialize 'no-activate)
-;;   (require 'info)
-;;   (let ((package--quickstart-pkgs ())
-;;         ;; Pretend we haven't activated anything yet!
-;;         (package-activated-list ())
-;;         ;; Make sure we can load this file without load-source-file-function.
-;;         (coding-system-for-write 'emacs-internal)
-;;         (Info-directory-list '("")))
-;;     (dolist (elt package-alist)
-;;       (condition-case err
-;;           (package-activate (car elt))
-;;         ;; Don't let failure of activation of a package arbitrarily stop
-;;         ;; activation of further packages.
-;;         (error (message "%s" (error-message-string err)))))
-;;     (setq package--quickstart-pkgs (nreverse package--quickstart-pkgs))
-;;     (with-temp-file package-quickstart-file
-;;       (emacs-lisp-mode)                 ;For `syntax-ppss'.
-;;       (dolist (pkg package--quickstart-pkgs)
-;;         (let* ((file
-;;                 ;; Prefer uncompiled files (and don't accept .so files).
-;;                 (let ((load-suffixes '(".el" ".elc")))
-;;                   (locate-library (package--autoloads-file-name pkg))))
-;;                (pfile (prin1-to-string file)))
-;;           (insert-file-contents file)
-;;           (goto-char (point-min))
-;;           (while (search-forward "add-to-list 'load-path" nil t)
-;;             (goto-char (line-beginning-position))
-;;             (kill-sexp))
-;;           ;; Fixup the special #$ reader form and throw away comments.
-;;           (while (re-search-forward "#\\$\\|^;\\(.*\n\\)" nil 'move)
-;;             (unless (nth 8 (syntax-ppss))
-;;               (replace-match (if (match-end 1) "" pfile) t t)))
-;;           (goto-char (point-min))
-;;           (while (search-forward ";" nil t)
-;;             (backward-char)
-;;             (delete-region (point) (line-end-position)))
-;;           (flush-lines "^[[:space:]]*^J\\|^$" (point-min) (point-max))
-;; ;;          (flush-lines "^$" (point-min) (point-max))
-;;           ))
-;;       (pp `(setq package-activated-list
-;;                  (append ',(mapcar #'package-desc-name package--quickstart-pkgs)
-;;                          package-activated-list))
-;;           (current-buffer))
-;;       (let ((info-dirs (butlast Info-directory-list)))
-;;         (when info-dirs
-;;           (pp `(progn (require 'info)
-;;                       (info-initialize)
-;;                       (setq Info-directory-list
-;;                             (append ',info-dirs Info-directory-list)))
-;;               (current-buffer)))))))
-
-;;     (defun emit-autoloads ()
-;;       (message "Emiting autoloads")
-;;       (let ((ll (expand-file-name "lisp-autoloads.el" init-file-lisp-directory))
-;; 	    (pq (expand-file-name "package-quickstart.el" user-emacs-directory)))
-;; 	(require 'package)
-;; 	(when (file-exists-p pq)
-;; 	  (verbose "removing %s" pq)
-;; 	  (delete-file pq)
-;; 	  (package-quickstart-refresh))
-;; 	(package-generate-autoloads "lisp" init-file-lisp-directory)
-;; 	(when (file-exists-p ll)
-;; 	  (verbose "Baking site autoloads file %s" ll)
-;;           (with-temp-buffer
-;; 	    (insert-file-contents pq)
-;;             (goto-char (point-min))
-;; 	    (insert "(defvar package-activated-list nil)")
-;; 	    (goto-char (point-max))
-;; 	    (insert "(package-activate-all)")
-;; 	    (goto-char (point-max))
-;;             (insert-file-contents ll)
-;;             (write-region (point-min) (point-max) pq)))))
-
-(defun install-modules ()
-  (interactive)
-  (let ((elpa (expand-file-name "elpa/" user-emacs-directory))
-	(modules (expand-file-name "modules/" user-emacs-directory))
-	link)
-    (unless (file-directory-p modules)
-      (make-directory modules))
-    (dolist (file (directory-files-recursively elpa "\\.elc"))
-      (setq link (concat (file-name-sans-extension file) ".el"))
-      (make-symbolic-link link modules t)
-      (setq link (concat (file-name-sans-extension file) "-autoloads.el"))
-      (when (file-exists-p link)
-	(make-symbolic-link link modules t))
-      (copy-file file modules t t t t))))
-
-(defun normal-top-level-add-subdirs-to-load-path ()
-  "Recursively add all subdirectories of `default-directory' to `load-path'.
-    More precisely, this uses only the subdirectories whose names
-    start with letters or digits; it excludes any subdirectory named `RCS'
-    or `CVS', and any subdirectory that contains a file named `.nosearch'."
-  (let (dirs
-	attrs
-	(pending (list default-directory)))
-    ;; This loop does a breadth-first tree walk on DIR's subtree,
-    ;; putting each subdir into DIRS as its contents are examined.
-    (while pending
-      (push (pop pending) dirs)
-      (let* ((this-dir (car dirs))
-	     (contents (directory-files this-dir))
-	     (default-directory this-dir)
-	     (canonicalized (if (fboundp 'w32-untranslated-canonical-name)
-				(w32-untranslated-canonical-name this-dir))))
-	;; The Windows version doesn't report meaningful inode numbers, so
-	;; use the canonicalized absolute file name of the directory instead.
-	(setq attrs (or canonicalized
-			(nthcdr 10 (file-attributes this-dir))))
-	(unless (member attrs normal-top-level-add-subdirs-inode-list)
-	  (push attrs normal-top-level-add-subdirs-inode-list)
-	  (dolist (file contents)
-	    (and (string-match "\\`[[:alnum:]]" file)
-		 ;; The lower-case variants of RCS and CVS are for DOS/Windows.
-		 (not (member file '("RCS" "CVS" "rcs" "cvs")))
-		 (file-directory-p file)
-		 (let ((expanded (expand-file-name file)))
-		   (or (file-exists-p (expand-file-name ".nosearch" expanded))
-		       (setq pending (nconc pending (list expanded))))))))))
-    (normal-top-level-add-to-load-path (cdr (nreverse dirs)))))
-#+end_src
 * Generator
   #+NAME: onstartup
   #+begin_src emacs-lisp :results output silent
@@ -887,13 +685,18 @@
         (unless (looking-at org-heading-regexp)
           (re-search-backward org-heading-regexp))
         (let ((elpa (expand-file-name "elpa" user-emacs-directory))
-              start pkgname)
-          (while (search-forward "] " (line-end-position) t) )
-          (setq start (point))
-          (skip-chars-forward "[a-zA-Z\\-]")
-          (setq pkgname (buffer-substring-no-properties start (point)))
-          (setq pkdir (directory-files elpa t pkgname t ))
-          (if pkdir (dired (car pkdir)))))))
+              start pkgname pkdir)
+          (search-forward "[ " (line-end-position) t)
+          (if (search-forward "none" (line-end-position) t)
+              (dired (expand-file-name "lisp/" user-emacs-directory) pkdir)
+            (progn
+              (beginning-of-line)
+              (while (search-forward "] " (line-end-position) t) )
+              (setq start (point))
+              (skip-chars-forward "[a-zA-Z\\-]")
+              (setq pkgname (buffer-substring-no-properties start (point)))
+              (setq pkdir (directory-files elpa t pkgname t ))
+              (if pkdir (dired (car pkdir)))))))))
 
 (defun org-init--sort-packages ()
   "This is just a convenience wrapper for org-sort. It does reverted sort on
@@ -1146,6 +949,16 @@
 (org-init-mode +1)
     #+end_src
 * Packages
+
+** [x] rustic
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] simple-httpd
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] ace-window
   #+begin_src emacs-lisp
   (with-package ace-window
@@ -2128,7 +1941,8 @@
                     lsp-ui-doc-use-webkit t
                     ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
                     ;; https://github.com/emacs-lsp/lsp-ui/issues/243
-                    mode-line-format nil)
+                    ;;mode-line-format nil
+                    )
               (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate))
            (defkeys lsp-ui-mode-map
              [remap xref-find-references]  lsp-ui-peek-find-references
@@ -2550,7 +2364,7 @@
   (with-hook after-init
              (add-hook 'c-initialization-hook 'my-c-init)
              (add-hook 'c++-mode-hook 'my-c++-init)
-             (add-to-list 'auto-mode-alist '("\\.\\(c\\|h\\)\\'" . c-mode))
+             (add-to-list 'auto-mode-alist '("\\.\\(c\\|h\\|inc\\|src\\)\\'" . c-mode))
              (add-to-list 'auto-mode-alist '("\\.\\(|hh\\|cc\\|c++\\|cpp\\|tpp\\|hpp\\|hxx\\|cxx\\|inl\\|cu\\)'" . c++-mode))
              (when-idle  (require 'c++-setup)))
   #+end_src
@@ -2740,6 +2554,7 @@
                    next-line-add-newlines t
                    bookmark-save-flag 1
                    delete-selection-mode t
+                   initial-major-mode 'emacs-lisp-mode
                    confirm-kill-processes nil
                    help-enable-symbol-autoload t
                    large-file-warning-threshold nil

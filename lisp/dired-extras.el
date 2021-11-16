@@ -186,5 +186,19 @@
          (re-search-backward "\\(^[ 0-9.,]+[A-Za-z]+\\).*total$")
          (match-string 1))))))
 
+(require 'seq)
+(defun dired-find-dups ()
+  (unless (or (eq major-mode 'dired-mode) (eq major-mode 'wdired-mode))
+              (error "Not in dired or wdired mode."))
+  (goto-char (point-min))
+  (let (files dups file)
+    (while (not (eobp))
+      (dired-next-line 1)
+      (setq file (dired-get-filename 'no-dir t))
+      (if (and file (seq-contains-p files file))
+          (push file dups)
+        (push file files)))
+    dups))
+
 (provide 'dired-extras)
 ;;; dired-extras.el ends here
