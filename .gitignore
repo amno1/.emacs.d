@@ -52,3 +52,4 @@ al-db-packages
 al-db-site-lisp
 ff-db-emacs
 ff-db-packages
+helm-curl.log

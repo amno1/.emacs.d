@@ -94,6 +94,12 @@
         (unless (dired-subtree--is-expanded-p)
           (dired-subtree-remove))))))
 
+(defun dired-in-vertical-split ()
+  (interactive)
+  (split-window-right)
+  (other-window 1)
+  (dired-jump))
+
 (defun sudo-find-file (file-name)
   "Like find file, but opens the file as root."
   (interactive "FSudo Find File: ")
@@ -111,7 +117,6 @@
   "disable line wrapping in dired-mode"
   (auto-fill-mode -1))
 (add-hook 'dired-mode-hook 'dired-disable-line-wrap)
-
 
 (defun smart-beginning-of-line ()
   "Move point to first non-whitespace character or beginning-of-line.

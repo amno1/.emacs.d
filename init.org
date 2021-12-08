@@ -949,13 +949,27 @@
 (org-init-mode +1)
     #+end_src
 * Packages
-
-** [x] rustic
+** [x] doc-show-inline
+#+begin_src emacs-lisp
+(with-package doc-show-inline
+              (defkeys c-mode-map
+                       "C-;" doc-show-inline-mode)
+              (defkeys c++-mode-map
+                       "C-;" doc-show-inline-mode))
+(with-hook c-mode (doc-show-inline-mode +1))
+(with-hook c++-mode (doc-show-inline-mode +1))
+#+end_src
+** [ local ] [x] emacs-vision
+#+begin_src emacs-lisp
+(with-eval-after-load 'emacs-vision
+  (load "~/apikeys"))
+#+end_src
+** [ local ] [x] helper
 #+begin_src emacs-lisp
 
 #+end_src
 
-** [x] simple-httpd
+** [ local ] [x] peep-dired
 #+begin_src emacs-lisp
 
 #+end_src
@@ -989,20 +1003,20 @@
   #+end_src
 ** [x] auto-package-update
   #+begin_src emacs-lisp
-  (with-hook auto-package-update-after
-             (message "Refresh autoloads"))
+(with-hook auto-package-update-after
+           (message "Refresh autoloads"))
 
-  (with-package auto-package-update
-                (setq auto-package-update-delete-old-versions t
-                      auto-package-update-interval nil)
+(with-package auto-package-update
+              (setq auto-package-update-delete-old-versions t
+                    auto-package-update-interval nil)
 
-(defun apu--delete-old-versions-dirs-list ()
-  "Delete package old version dirs saved in variable apu--old-versions-dirs-list"
-  (dolist (old-version-dir-to-delete apu--old-versions-dirs-list)
-    (unless (file-symlink-p old-version-dir-to-delete)
-      (delete-directory old-version-dir-to-delete t)))
-  ;; Clear list
-  (setq apu--old-versions-dirs-list ())))
+              (defun apu--delete-old-versions-dirs-list ()
+                "Delete package old version dirs saved in variable apu--old-versions-dirs-list"
+                (dolist (old-version-dir-to-delete apu--old-versions-dirs-list)
+                  (unless (file-symlink-p old-version-dir-to-delete)
+                    (delete-directory old-version-dir-to-delete t)))
+                ;; Clear list
+                (setq apu--old-versions-dirs-list ())))
   #+end_src
 ** [x] auto-yasnippet
   #+begin_src emacs-lisp
@@ -1885,39 +1899,50 @@
                     lsp-log-io nil
                     lsp-idle-delay 0.1
                     lsp-enable-links nil
-                    lsp-enable-symbol-highlighting nil
+                    lsp-enable-symbol-highlighting t
                     lsp-keep-workspace-alive t
                     lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error")
                     ;; python
                     ;; lsp-python-executable-cmd "python3"
                     ;; lsp-python-ms-executable "~/repos/python-language-server/output/bin/Release/osx-x64/publish/Microsoft.Python.LanguageServer"
-                    lsp-enable-completion-enable t)
+                    lsp-enable-completion-enable t
+                    lsp-pyls-plugins-flake8-enabled t)
+              
+              (lsp-register-custom-settings
+               '(("pyls.plugins.pyls_mypy.enabled" t t)
+                 ("pyls.plugins.pyls_mypy.live_mode" nil t)
+                 ("pyls.plugins.pyls_black.enabled" t t)
+                 ("pyls.plugins.pyls_isort.enabled" t t)
+                 ;; Disable these as they're duplicated by flake8
+                 ("pyls.plugins.pycodestyle.enabled" nil t)
+                 ("pyls.plugins.mccabe.enabled" nil t)
+                 ("pyls.plugins.pyflakes.enabled" nil t)))
 
-              (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
-              (add-hook 'lsp-managed-mode-hook (lambda () (setq-local company-backends
-                                                                      '(company-capf))))
-              (require 'dap-cpptools)
-              (diminish 'lsp-mode))
+               (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+               (add-hook 'lsp-managed-mode-hook (lambda () (setq-local company-backends
+                                                                       '(company-capf))))
+               (require 'dap-cpptools)
+               (diminish 'lsp-mode))
 
-(with-hook python-mode
-           (lsp-deferred))
+              (with-hook python-mode
+                         (lsp-deferred))
    #+end_src
 ** [x] lsp-pyright
    #+begin_src emacs-lisp
-     (with-package lsp-pyright
-                   (setq lsp-clients-python-library-directories '("/usr"
-                                                                  "~/miniconda3/pkgs")
-                         lsp-pyright-disable-language-service nil
-                         lsp-pyright-dsable-organize-imports nil
-                         lsp-pyright-auto-import-completions t
-                         lsp-pyright-use-library-code-for-types t
-                         lsp-pyright-venv-pat "~/miniconda3/envs"))
+     ;; (with-package lsp-pyright
+     ;;               (setq lsp-clients-python-library-directories '("/usr"
+     ;;                                                              "~/miniconda3/pkgs")
+     ;;                     lsp-pyright-disable-language-service nil
+     ;;                     lsp-pyright-dsable-organize-imports nil
+     ;;                     lsp-pyright-auto-import-completions t
+     ;;                     lsp-pyright-use-library-code-for-types t
+     ;;                     lsp-pyright-venv-pat "~/miniconda3/envs"))
 
-     (with-hook python-mode
-                (require 'lsp-pyright)
-                (lsp-deferred)
-                (setq python-shell-interpreter "ipython"
-                      python-shell-interpreter-args "-i --simple-prompt"))
+     ;; (with-hook python-mode
+     ;;            (require 'lsp-pyright)
+     ;;            (lsp-deferred)
+     ;;            (setq python-shell-interpreter "ipython"
+     ;;                  python-shell-interpreter-args "-i --simple-prompt"))
    #+end_src
 ** [x] lsp-treemacs        
    #+begin_src emacs-lisp
@@ -1928,10 +1953,12 @@
 (with-package lsp-ui
               (add-hook 'lsp-mode-hook 'lsp-ui-mode)
               (setq lsp-ui-doc-enable t
+                    lsp-ui-sideline-show-hover t
                     lsp-ui-doc-header t
                     lsp-ui-doc-delay 2
                     lsp-ui-doc-include-signature t
                     lsp-ui-doc-position 'top
+                    lsp-ui-doc-alignment 'frame
                     lsp-ui-doc-border (face-foreground 'default)
                     lsp-ui-sideline-enable nil
                     lsp-ui-sideline-ignore-duplicate t
@@ -1939,6 +1966,8 @@
                     lsp-ui-sideline-ignore-duplicate t
                     ;; Use lsp-ui-doc-webkit only in GUI
                     lsp-ui-doc-use-webkit t
+                    lsp-ui-doc-include-signature t
+                    lsp-ui-doc-use-childframe t
                     ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
                     ;; https://github.com/emacs-lsp/lsp-ui/issues/243
                     ;;mode-line-format nil
@@ -2149,10 +2178,6 @@
                      ;;(pdf-tools-install)
                      (setq-default pdf-view-display-size 'fit-page)))
    #+end_src
-** [x] peep-dired
-#+begin_src emacs-lisp
-
-#+end_src
 ** [x] pfuture
    #+begin_src emacs-lisp
 
@@ -2245,7 +2270,16 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] rustic
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] s
+#+begin_src emacs-lisp
+
+#+end_src
+** [x] simple-httpd
 #+begin_src emacs-lisp
 
 #+end_src
@@ -2645,6 +2679,8 @@
              ;; "C-v h"        maximize-window-horizontally
              "C-v n"        next-buffer
              "C-v p"        previous-buffer
+             "C-v +"        text-scale-increase
+             "C-v -"        text-scale-decrease
              "C-v C-+"      enlarge-window-horizontally
              "C-v C-,"      enlarge-window-vertically
              "C-v C--"      shrink-window-horizontally
@@ -2659,7 +2695,7 @@
              "C-v <return>" delete-other-windows
              "C-v ,"        split-window-right
              "C-v ."        split-window-below
-             "C-h M-i"      help-toggle-source-view
+             ;;"C-h M-i"      help-toggle-source-view
              ;; "C-v C-s"      swap-two-buffers
              [remap other-window]  ace-window
              
@@ -2725,7 +2761,7 @@
 
 (with-package gnus
               
-              ;;(require 'nnir)
+              (require 'nnir)
 
               (setq user-full-name    "Arthur Miller"
                     user-mail-address "arthur.miller@live.com")
@@ -2735,10 +2771,8 @@
                                                 (nnimap-address "imap-mail.outlook.com")
                                                 (nnimap-server-port 993)
                                                 (nnimap-stream ssl)
-                                                ;;(nnir-search-engine imap)
+                                                (nnir-search-engine imap)
                                                 ))
-
-              (add-to-list 'gnus-secondary-select-methods '(nnhackernews ""))
               
               ;; Send email through SMTP
               (setq message-send-mail-function 'smtpmail-send-it
@@ -2754,8 +2788,20 @@
               (setq gnus-mime-display-multipart-related-as-mixed t)
               ;; http://www.gnu.org/software/emacs/manual/html_node/gnus/_005b9_002e2_005d.html
               (setq gnus-use-correct-string-widths nil)
-              (setq nnmail-expiry-wait 'immediate)
+              ;;(setq nnmail-expiry-wait 'immediate)
+              ;; set renderer for html mail to w3m in emacs
+              ;;(setq mm-text-html-renderer 'eww)
+              (setq gnus-inhibit-images nil)
+
+              ;; set gnus-parameter
+              ;; (setq gnus-parameters
+              ;;       '(("nnimap.*"
+              ;;          (gnus-use-scoring nil)
+              ;;          (expiry-wait . 2)
+              ;;          (display . all))))
               
+              ;;[[http://stackoverflow.com/questions/4982831/i-dont-want-to-expire-mail-in-gnus]]
+              ;;(setq gnus-large-newsgroup 'nil)
               ;; Smileys:
               (setq smiley-style 'medium)
               
@@ -2767,9 +2813,7 @@
                                          (nnfolder-get-new-mail nil)
                                          (nnfolder-inhibit-expiry t))))
               
-              (setq gnus-topic-topology '(;;("Gnus" visible)
-                                          ;;(("misc" visible))
-                                          ("live.com" visible)))
+              (setq gnus-topic-topology '(("live.com" visible)))
               
               ;; each topic corresponds to a public imap folder
               (setq gnus-topic-alist '(("live.com")
@@ -2824,6 +2868,54 @@
            (yas-minor-mode 1)
            (page-break-lines-mode 1))
   #+end_src
+** [ none  ] [x] package
+#+begin_src emacs-lisp
+(with-package
+ package
+ (let ((package-install-local-multifile-packages-symlinked t))
+   (defun package-unpack (pkg-desc)
+  "Install the contents of the current buffer as a package."
+  (let* ((name (package-desc-name pkg-desc))
+         (dirname (package-desc-full-name pkg-desc))
+         (pkg-dir (expand-file-name dirname package-user-dir)))
+    (pcase (package-desc-kind pkg-desc)
+      ('dir
+       (if package-install-local-multifile-packages-symlinked
+           (make-symbolic-link (expand-file-name default-directory) pkg-dir t)
+         (progn
+           (make-directory pkg-dir t)
+           (let ((file-list
+                  (directory-files
+                   default-directory 'full "\\`[^.].*\\.el\\'" 'nosort)))
+             (dolist (source-file file-list)
+               (let ((target-el-file
+                      (expand-file-name (file-name-nondirectory source-file) pkg-dir)))
+                 (copy-file source-file target-el-file t)))
+             (setf (package-desc-kind pkg-desc)
+                   (if (> (length file-list) 1) 'tar 'single))))))
+      ('tar
+       (make-directory package-user-dir t)
+       (let* ((default-directory (file-name-as-directory package-user-dir)))
+         (package-untar-buffer dirname)))
+      ('single
+       (let ((el-file (expand-file-name (format "%s.el" name) pkg-dir)))
+         (make-directory pkg-dir t)
+         (package--write-file-no-coding el-file)))
+      (kind (error "Unknown package kind: %S" kind)))
+    (package--make-autoloads-and-stuff pkg-desc pkg-dir)
+    (let ((new-desc (package-load-descriptor pkg-dir)))
+      (unless (equal (package-desc-full-name new-desc)
+                     (package-desc-full-name pkg-desc))
+        (error "The retrieved package (`%s') doesn't match what the archive offered (`%s')"
+               (package-desc-full-name new-desc) (package-desc-full-name pkg-desc)))
+      (when (package-activate-1 new-desc :reload :deps)
+        (package--compile new-desc)
+        (when package-native-compile
+          (package--native-compile-async new-desc))
+        (package--load-files-for-activation new-desc :reload)))
+    pkg-dir))))
+   
+#+end_src
 ** [ none  ] [x] speed-of-thought-lisp
 #+begin_src emacs-lisp
 
@@ -2850,3 +2942,4 @@
                 "M->"         dired-go-to-last
                 "M-p"         scroll-down-line))
   #+end_src
+
