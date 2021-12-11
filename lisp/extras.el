@@ -223,17 +223,27 @@ column narrower."
     (delete-region beg end)
     (insert replacement)))
 
+;;;###autoload
 (defun shell-command-on-buffer ()
   (interactive)
   (shell-command-on-region
    (point-min) (point-max)
    (read-shell-command "Shell command on buffer: ") ))
 
+;;;###autoload
 (defun f-to-c ()
   (interactive)
   (let* ((ftemp (read-number "Enter temperature in Fahrenheit: "))
          (ctemp (* (- ftemp 32) 0.56)))
     (message "%s degrees Fahrenheit is %s degrees Celsius." ftemp (float ctemp))
     ctemp))
+
+;;;###autoload
+(defun println (listobj &optional buffer)
+  "Print list one element per line."
+  (let ((buff (or buffer standard-output)))
+    (dolist (elt listobj)
+      (print elt buff)
+      (princ "\n" buff))))
 
 (provide 'extras)

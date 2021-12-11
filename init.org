@@ -226,8 +226,20 @@
   (if (and (consp sym) (eq (car sym) 'quote))
       sym `(quote ,sym)))
 
-(defun collect-autoloads (src index)
-  (let (sxp sym)
+(defun interactivep (form)
+  "Weather form is an interactive command."
+  (catch 'interactive
+    (dolist (sxp form)
+      (and (listp sxp) (equal 'interactive (car sxp))
+           (throw 'interactive t)))))
+
+(defun macro-p (form)
+  "Weather FORM isn a macro definition."
+  (equal (car form) 'defmacro))
+
+(defun collect-autoloads (src)
+  (verbose "Collecting autoloads for file: %s" src)
+  (let (sxp sym interactive macro file)
     (with-current-buffer (get-buffer-create "*ql-buffer*")
       (erase-buffer)
       (insert-file-contents src)
@@ -236,9 +248,13 @@
         (setq sxp nil sym nil)
         (setq sxp (ignore-errors (read (current-buffer))))
         (when (listp sxp)
-          (setq sym (quoted (cadr sxp)))
+          (setq sym (quoted (cadr sxp))
+                interactive (interactivep sxp)
+                macro (macro-p sxp)
+                file (file-name-nondirectory src))
           (unless (listp (cadr sym))
-            (puthash sym index init-file--autoloads-map)))))))
+            (puthash sym (list 'autoload sym file nil interactive macro)
+                     init-file--autoloads-map)))))))
 
 (defun generate-autoloads (dir-tree-or-dir-tree-list &optional outfile)
   (let ((index 0) srcs
@@ -248,25 +264,20 @@
           (setq srcs (nconc srcs (directory-files-recursively dir-tree "\\.el$"))))
       (setq srcs (directory-files-recursively dir-tree-or-dir-tree-list "\\.el$")))
     (dolist (src srcs)
-      (unless (or (string-match-p src "-pkg\\.el")
-                  (string-match-p src "-autoload\\.el"))
-        (puthash index (file-name-sans-extension src) init-file--loadpaths-map)
-        (collect-autoloads src index))
-      (setq index (1+ index)))
+      (when (and (not (string-match-p "-pkg\\.el" src))
+                 (not (string-match-p "-autoloads\\.el" src)))
+        (collect-autoloads src)))
     (with-temp-file tofile
-      (maphash (lambda (symbol index)
-                 (let ((path (file-name-nondirectory (gethash index init-file--loadpaths-map))))
-                   (prin1 `(autoload ,symbol ,path)
-                          (current-buffer))
-                   (insert "\n"))) init-file--autoloads-map))
+      (maphash (lambda (sym sxp)
+                 (prin1 sxp (current-buffer)) (insert "\n"))
+               init-file--autoloads-map))
     (kill-buffer (get-buffer-create "*ql-buffer*"))))
 
 (defun emit-autoloads ()
   (message "Emiting autoloads")
   (let ((al (expand-file-name "autoloads.el" user-emacs-directory)))
-    (unless (file-exists-p al)
-      (verbose "Generating autoloads: %s" al)
-      (generate-autoloads init-file-source-repositories))))
+    (verbose "Generating autoloads: %s" al)
+    (generate-autoloads init-file-source-repositories)))
 
 (defmacro maybe-remove-file (file)
   `(when (file-exists-p ,file)
@@ -949,16 +960,6 @@
 (org-init-mode +1)
     #+end_src
 * Packages
-** [x] doc-show-inline
-#+begin_src emacs-lisp
-(with-package doc-show-inline
-              (defkeys c-mode-map
-                       "C-;" doc-show-inline-mode)
-              (defkeys c++-mode-map
-                       "C-;" doc-show-inline-mode))
-(with-hook c-mode (doc-show-inline-mode +1))
-(with-hook c++-mode (doc-show-inline-mode +1))
-#+end_src
 ** [ local ] [x] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -973,6 +974,10 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] academic-phrases
+  #+begin_src emacs-lisp
+
+  #+end_src
 ** [x] ace-window
   #+begin_src emacs-lisp
   (with-package ace-window
@@ -1008,15 +1013,7 @@
 
 (with-package auto-package-update
               (setq auto-package-update-delete-old-versions t
-                    auto-package-update-interval nil)
-
-              (defun apu--delete-old-versions-dirs-list ()
-                "Delete package old version dirs saved in variable apu--old-versions-dirs-list"
-                (dolist (old-version-dir-to-delete apu--old-versions-dirs-list)
-                  (unless (file-symlink-p old-version-dir-to-delete)
-                    (delete-directory old-version-dir-to-delete t)))
-                ;; Clear list
-                (setq apu--old-versions-dirs-list ())))
+                    auto-package-update-interval nil))
   #+end_src
 ** [x] auto-yasnippet
   #+begin_src emacs-lisp
@@ -1209,6 +1206,16 @@
                 (setq dired-subtree-line-prefix "    "
                       dired-subtree-use-backgrounds nil))
   #+end_src
+** [x] doc-show-inline
+#+begin_src emacs-lisp
+(with-package doc-show-inline
+              (defkeys c-mode-map
+                       "C-;" doc-show-inline-mode)
+              (defkeys c++-mode-map
+                       "C-;" doc-show-inline-mode))
+(with-hook c-mode (doc-show-inline-mode +1))
+(with-hook c++-mode (doc-show-inline-mode +1))
+#+end_src
 ** [x] dumb-jump        
   #+begin_src emacs-lisp
 
@@ -1598,6 +1605,9 @@
                 "M-h" helm-beginning-of-buffer
                 "M-H" helm-end-of-buffer)
 
+              (defkeys shell-mode-map
+                       "C-c C-l" helm-comint-input-ring)
+              
               (defkeys helm-read-file-map
                 "C-o" my-helm-next-source
                 ;;"RET" my-helm-return
@@ -2171,6 +2181,10 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] paxedit
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] pdf-tools
    #+begin_src emacs-lisp
      (unless (equal system-type 'windows-nt)
@@ -2389,10 +2403,6 @@
 
    #+end_src
    
-** [ melpa ] [x] academic-phrases
-  #+begin_src emacs-lisp
-
-  #+end_src
 ** [ none  ] [x] c/c++
   #+begin_src emacs-lisp
   (with-hook after-init
@@ -2578,6 +2588,7 @@
              (unless (file-directory-p etc)
                (make-directory etc))
              (setq show-paren-style 'expression
+                   message-log-max 10000 ;; oriignal 1000
                    shell-file-name "bash"
                    shell-command-switch "-ic"
                    delete-exited-processes t
@@ -2838,35 +2849,58 @@
   #+end_src
 ** [ none  ] [x] lisp & elisp
   #+begin_src emacs-lisp
-(with-hook after-init
-           (set-default 'auto-mode-alist
-                        (append '(("\\.lisp" . lisp-mode)
-                                  ("\\.lsp" . lisp-mode)
-                                  ("\\.cl" . lisp-mode))
-                                auto-mode-alist)))
+    (with-hook after-init
+               (set-default 'auto-mode-alist
+                            (append '(("\\.lisp" . lisp-mode)
+                                      ("\\.lsp" . lisp-mode)
+                                      ("\\.cl" . lisp-mode))
+                                    auto-mode-alist)))
 
-(with-package elisp-mode
-              (require 'elisp-extras)
-              (require 'helm-pages)
-              ;;(require 'helm-extras)
-              (defkeys emacs-lisp-mode-map
-                "\C-c a" emacs-lisp-byte-compile-and-load
-                "\C-c b" emacs-lisp-byte-compile
-                "\C-c c" emacs-lisp-native-compile-and-load
-                "\C-c d" eval-defun
-                "\C-c e" eval-buffer
-                "\C-c i" reindent-buffer
-                "\C-c l" eval-last-sexp
-                "\C-c n" eval-next-sexp
-                "\C-c r" fc-eval-and-replace
-                "\C-c s" eval-surrounding-sexp))
+    (with-package elisp-mode
+                  (require 'elisp-extras)
+                  (require 'helm-pages)
+                  ;;(require 'helm-extras)
+              
+    ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
+                  ;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
+    ;; 	              "System Name: "
+    ;; 	              "
+    ;; (eval-when (:compile-toplevel :load-toplevel :execute)
+    ;;   (unless (find-package :" str ".system)
+    ;;     (defpackage :" str ".system
+    ;;       (:use :common-lisp :asdf))))
 
-(with-hook emacs-lisp-mode
-           (setq fill-column 80)
-           (company-mode 1)
-           (outshine-mode 1)
-           (yas-minor-mode 1)
-           (page-break-lines-mode 1))
+
+    ;; (in-package :" str ".system)
+
+    ;; (defsystem :" str " 
+    ;;   :description " ?\" (read-string "Description: ") ?\"" 
+    ;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
+    ;;   :licence \"" (read-string "License: ") "\" 
+    ;;   :version \"" (read-string "Version: ") "\" 
+    ;;   :components (()) 
+    ;;   :depends-on ())") 
+    ;;                     auto-insert-alist)
+
+              
+                  (defkeys emacs-lisp-mode-map
+                           "\C-c a" emacs-lisp-byte-compile-and-load
+                           "\C-c b" emacs-lisp-byte-compile
+                           "\C-c c" emacs-lisp-native-compile-and-load
+                           "\C-c d" eval-defun
+                           "\C-c e" eval-buffer
+                           "\C-c i" reindent-buffer
+                           "\C-c l" eval-last-sexp
+                           "\C-c n" eval-next-sexp
+                           "\C-c r" fc-eval-and-replace
+                           "\C-c s" eval-surrounding-sexp))
+
+    (with-hook emacs-lisp-mode
+               (setq fill-column 80)
+               (company-mode 1)
+               (outshine-mode 1)
+               (yas-minor-mode 1)
+               (page-break-lines-mode 1))
   #+end_src
 ** [ none  ] [x] package
 #+begin_src emacs-lisp
