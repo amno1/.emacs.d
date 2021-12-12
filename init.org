@@ -338,9 +338,9 @@
     ;; always produce elc file
     (byte-compile-file tangled-file)
     (verbose "Byte compiled %s" tangled-file)
-    (if (featurep 'comp)
-        (message "Native compiled %s" (native-compile tangled-file)))
-    (verbose "Tangled and compiled %s" tangled-file))
+    (when (featurep 'comp)
+      (native-compile tangled-file)
+      (verbose "Tangled and compiled %s" tangled-file))
   (verbose "Done.")
   (message "Compiling early-init.el ...")
   (byte-compile-file (expand-file-name "early-init.el"  user-emacs-directory))
@@ -475,7 +475,6 @@
 
 (defun install-packages (&optional packages)
   (interactive)
-  (package-initialize)
   (package-refresh-contents)
   (unless packages
     (setq packages (get-package-list)))
@@ -1217,7 +1216,7 @@
                 (setq dired-subtree-line-prefix "    "
                       dired-subtree-use-backgrounds nil))
   #+end_src
-** [x] doc-show-inline
+** [ ] doc-show-inline
 #+begin_src emacs-lisp
 (with-package doc-show-inline
               (defkeys c-mode-map
