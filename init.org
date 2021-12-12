@@ -344,7 +344,7 @@
   (verbose "Done.")
   (message "Compiling early-init.el ...")
   (byte-compile-file (expand-file-name "early-init.el"  user-emacs-directory))
-  (message "Done."))
+  (message "Done.")))
 
 (defun install-file (file)
   (when (file-exists-p file)
