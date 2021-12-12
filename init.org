@@ -128,13 +128,13 @@
   `(let ((defs '(,@body)))
      (while defs
        (define-key ,mapname
-         (if (vectorp (car defs))
-             (car defs)
-           (read-kbd-macro (car defs)))
-         (if (or (listp (cadr defs)) (functionp (cadr defs)))
-             (cadr defs)
-           (if `(keymapp (bound-and-true-p ,(cadr defs)))
-               (eval (cadr defs)))))
+                   (if (vectorp (car defs))
+                       (car defs)
+                     (read-kbd-macro (car defs)))
+                   (if (or (listp (cadr defs)) (functionp (cadr defs)))
+                       (cadr defs)
+                     (if `(keymapp (bound-and-true-p ,(cadr defs)))
+                         (eval (cadr defs)))))
        (setq defs (cddr defs)))))
 
 (defun emit-defkeys (map keys)
@@ -514,6 +514,27 @@
   (interactive)
   (generate-init-files)
   (install-init-files))
+
+(defalias 'version-lt 'version-list-<)
+
+(defun org-init-update-packages ()
+  (interactive)
+  ;;(package-refresh-contents)
+  (dolist (package package-activated-list)
+    (let* ((new (cadr (assq package package-archive-contents)))
+           (old (cadr (assq package package-alist)))
+           install)
+      (when (and new old (version-lt (package-desc-version old) (package-desc-version new)))
+        (setq install
+              (package-compute-transaction (list new) (package-desc-reqs new)))
+        (message "Installing package: %s %s" package (package-desc-version new))
+        (package-download-transaction install)
+        (message "Removed package: %S" (package-desc-dir old))
+        (and (file-directory-p (package-desc-dir old))
+             (not (file-symlink-p (package-desc-dir old)))
+             (delete-directory (package-desc-dir old) t))
+        ))))
+
 
     ;;; org hacks
 
@@ -731,13 +752,14 @@
     (define-key org-mode-map [remap org-shiftdown] #'org-init--shiftdown)
     (define-key org-mode-map [remap org-shiftleft] #'org-init--shiftleft)
     (define-key org-mode-map [remap org-shiftright] #'org-init--shiftright)
-    (define-key map (kbd "C-c C-j") 'org-init--open-in-dired)
-    (define-key map (kbd "C-c i j") 'org-init--goto-package)
     (define-key map (kbd "C-c i a") 'add-package)
     (define-key map (kbd "C-c i i") 'install-packages)
     (define-key map (kbd "C-c i p") 'add-pseudo-package)
-    (define-key map (kbd "C-c i s") 'org-init--sort-packages)
     (define-key map (kbd "C-c i g") 'generate-init-files)
+    (define-key map (kbd "C-c i j") 'org-init--goto-package)
+    (define-key map (kbd "C-c C-j") 'org-init--open-in-dired)
+    (define-key map (kbd "C-c i s") 'org-init--sort-packages)
+    (define-key map (kbd "C-c i u") 'org-init-update-packages)
     map)
   "Keymap used in `org-init-mode'.")
 
@@ -1005,15 +1027,6 @@
   (with-package async
                 (async-bytecomp-package-mode 1)
                 (diminish 'async-dired-mode))
-  #+end_src
-** [x] auto-package-update
-  #+begin_src emacs-lisp
-(with-hook auto-package-update-after
-           (message "Refresh autoloads"))
-
-(with-package auto-package-update
-              (setq auto-package-update-delete-old-versions t
-                    auto-package-update-interval nil))
   #+end_src
 ** [x] auto-yasnippet
   #+begin_src emacs-lisp
@@ -1931,6 +1944,7 @@
                (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
                (add-hook 'lsp-managed-mode-hook (lambda () (setq-local company-backends
                                                                        '(company-capf))))
+               (require 'dap-chrome)
                (require 'dap-cpptools)
                (diminish 'lsp-mode))
 
@@ -2593,6 +2607,7 @@
                    shell-command-switch "-ic"
                    delete-exited-processes t
                    echo-keystrokes 0.1
+                   create-lock-files nil
                    winner-dont-bind-my-keys t
                    auto-window-vscroll nil
                    require-final-newline t
