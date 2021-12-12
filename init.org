@@ -519,22 +519,20 @@
 
 (defun org-init-update-packages ()
   (interactive)
-  ;;(package-refresh-contents)
+  (package-refresh-contents)
   (dolist (package package-activated-list)
     (let* ((new (cadr (assq package package-archive-contents)))
            (old (cadr (assq package package-alist)))
-           install)
+           to-install)
       (when (and new old (version-lt (package-desc-version old) (package-desc-version new)))
-        (setq install
+        (setq to-install
               (package-compute-transaction (list new) (package-desc-reqs new)))
-        (message "Installing package: %s %s" package (package-desc-version new))
-        (package-download-transaction install)
+        (message "Installing package: %S" (package-desc-dir new))
+        (package-download-transaction to-install)
         (message "Removed package: %S" (package-desc-dir old))
         (and (file-directory-p (package-desc-dir old))
              (not (file-symlink-p (package-desc-dir old)))
-             (delete-directory (package-desc-dir old) t))
-        ))))
-
+             (delete-directory (package-desc-dir old) t))))))
 
     ;;; org hacks
 
