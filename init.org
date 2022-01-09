@@ -979,6 +979,12 @@
 (org-init-mode +1)
     #+end_src
 * Packages
+
+** [x] checkdoc
+#+begin_src emacs-lisp
+
+#+end_src
+#+begin_src emacs-lisp#+end_src
 ** [ local ] [x] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -992,6 +998,16 @@
 ** [ local ] [x] peep-dired
 #+begin_src emacs-lisp
 
+#+end_src
+** [ ] doc-show-inline
+#+begin_src emacs-lisp
+(with-package doc-show-inline
+              (defkeys c-mode-map
+                       "C-;" doc-show-inline-mode)
+              (defkeys c++-mode-map
+                       "C-;" doc-show-inline-mode))
+(with-hook c-mode (doc-show-inline-mode +1))
+(with-hook c++-mode (doc-show-inline-mode +1))
 #+end_src
 ** [x] academic-phrases
   #+begin_src emacs-lisp
@@ -1019,6 +1035,16 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] ascii-art-to-unicode
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] ascii-table
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] async
   #+begin_src emacs-lisp
   (with-package async
@@ -1186,6 +1212,10 @@
   #+begin_src emacs-lisp
 
   #+end_src
+** [x] devdocs-browser
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] diminish        
   #+begin_src emacs-lisp
 
@@ -1216,15 +1246,10 @@
                 (setq dired-subtree-line-prefix "    "
                       dired-subtree-use-backgrounds nil))
   #+end_src
-** [ ] doc-show-inline
+** [x] d-mode
 #+begin_src emacs-lisp
-(with-package doc-show-inline
-              (defkeys c-mode-map
-                       "C-;" doc-show-inline-mode)
-              (defkeys c++-mode-map
-                       "C-;" doc-show-inline-mode))
-(with-hook c-mode (doc-show-inline-mode +1))
-(with-hook c++-mode (doc-show-inline-mode +1))
+(with-hook after-init
+           (add-to-list 'auto-mode-alist '("\\.d[i]?\\'" . d-mode)))
 #+end_src
 ** [x] dumb-jump        
   #+begin_src emacs-lisp
@@ -2168,6 +2193,11 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] org-roam
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] org-sidebar
    #+begin_src emacs-lisp
 
@@ -2375,6 +2405,10 @@
    #+begin_src emacs-lisp
 
    #+end_src
+** [x] visual-ascii-mode
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] with-simulated-input
 #+begin_src emacs-lisp
 
@@ -2433,7 +2467,7 @@
            (defkeys global-map
              "C-x C-j"   dired-jump
              "C-x 4 C-j" dired-jump-other-window)
-           (when-idle (require 'dired-extras)))
+           (when-idle (require 'dired)))
 
 (with-package dired
               (require 'dired-extras)
@@ -2486,7 +2520,7 @@
                                                     '(file))
 
                                               (list (openwith-make-extension-regexp
-                                                     '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi"))
+                                                     '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi" "azw3"))
                                                     "okular"
                                                     '(file))))
                              (add-to-list 'openwith-associations ext)))
@@ -2495,16 +2529,16 @@
                 "C-x <M-S-return>" dired-open-current-as-sudo
                 "r"                dired-do-rename
                 "C-S-r"            wdired-change-to-wdired-mode
-                ;; "C-r C-s"          tmtxt/dired-async-get-files-size
-                ;; "C-r C-r"          tda/rsync
-                ;; "C-r C-z"          tda/zip
-                ;; "C-r C-u"          tda/unzip
-                ;; "C-r C-a"          tda/rsync-multiple-mark-file
-                ;; "C-r C-e"          tda/rsync-multiple-empty-list
-                ;; "C-r C-d"          tda/rsync-multiple-remove-item
-                ;; "C-r C-v"          tda/rsync-multiple
-                ;; "C-r C-s"          tda/get-files-size
-                ;; "C-r C-q"          tda/download-to-current-dir
+                "C-r C-s"          tmtxt/dired-async-get-files-size
+                "C-r C-r"          tda/rsync
+                "C-r C-z"          tda/zip
+                "C-r C-u"          tda/unzip
+                "C-r C-a"          tda/rsync-multiple-mark-file
+                "C-r C-e"          tda/rsync-multiple-empty-list
+                "C-r C-d"          tda/rsync-multiple-remove-item
+                "C-r C-v"          tda/rsync-multiple
+                "C-r C-s"          tda/get-files-size
+                "C-r C-q"          tda/download-to-current-dir
                 "S-<return>"       dired-openwith
                 "C-'"              dired-collapse-mode
                 "M-p"              scroll-down-line
@@ -2518,8 +2552,7 @@
                 "TAB"              dired-subtree-toggle
                 "f"                dired-subtree-fold-all
                 "z"                dired-get-size
-                "e"                dired-subtree-expand-all)
-              )
+                "e"                dired-subtree-expand-all))
 
 (with-hook dired-mode
            (dired-omit-mode t)
@@ -2551,7 +2584,8 @@
                      comp-speed 3)
 
                (when 'native-comp-compiler-options
-                 (setq native-comp-compiler-options '("-O2" "-march=skylake" "-mtune=native")))
+                 (setq native-comp-compiler-options '("-O2" "-march=skylake" "-mtune=native")
+                       native-comp-driver-options '("-O2" "-march=skylake" "-mtune=native")))
                
                (setq-default abbrev-mode t
                              indent-tabs-mode nil

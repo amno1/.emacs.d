@@ -32,7 +32,7 @@
 (require 'dired-subtree)
 (require 'dired-copy-paste)
 ;;(require 'dired+)
-;;(require 'tmtxt-dired-async)
+(require 'tmtxt-dired-async)
 
 ;; quick-hack - need to rewrite this
 (defun my-run ()

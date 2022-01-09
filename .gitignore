@@ -45,6 +45,8 @@ request/
 modules/
 elc-cache/
 elpa-bak/
+devdocs/
+devdocs-browser/
 async-bytecomp.log
 elpa-compile.log
 elpa1.txt

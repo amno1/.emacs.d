@@ -246,4 +246,16 @@ column narrower."
       (print elt buff)
       (princ "\n" buff))))
 
+;;;###autoload
+(defun longest-line ()
+  (let ((l 0) tmp b e)
+    (save-excursion
+      (goto-char 1)
+      (while (not (eobp))
+        (setq tmp (- (line-end-position) (line-beginning-position)))
+        (if (< l tmp)
+            (setq l tmp b (line-beginning-position) e (line-end-position)))
+        (forward-line)))
+    (cons l (cons b e))))
+
 (provide 'extras)

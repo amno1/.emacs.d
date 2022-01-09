@@ -1,16 +1,17 @@
-;;; an collection of functions that I developed to execute some commands
-;;; asynchronously
-;;; only run ob unix-based systems
+;;; tmtxt-dired-async.el Execyte asynchronous commands in Dired buffers.  -*- lexical-binding: t; -*-
 
-;;; TODO: stick the output window with the result buffer
-;;; using dedicated window
-;;; TODO: shortcut keys for close the result window
-;;; TODO: check process exit status, if not success, not close the result window
-;;; TODO: undo function
+;;; Comment
+;; A collection of functions that to execute some commands asynchronously.
+;; Runs only on unix-based systems.
 
-;;; ----------------------------------------------
-;;; ----------------------------------------------
-;;; get file size
+;; TODO:
+;; stick the output window with the result buffer using dedicated window
+;; shortcut keys for close the result window
+;; check process exit status, if not success, not close the result window
+;; undo function
+
+
+;;; Get file size
 (require 'tmtxt-async-tasks)
 
 (defvar tda/get-files-size-command "du"
@@ -32,8 +33,7 @@
 	;; execute the command
 	(tat/execute-async command "file size")))
 
-;;; ----------------------------------------------
-;;; ----------------------------------------------
+
 ;;; Async Rsync
 (defvar tda/rsync-command-name "rsync"
   "The name of rsync command (or the path to the rsync command).")
@@ -116,13 +116,13 @@
 	;; execute the command asynchronously
 	(tat/execute-async command "rsync")))
 
-;;; ----------------------------------------------
-;;; ----------------------------------------------
+
 ;;; async zip files
 (defvar tda/zip-command "zip"
   "The command name (or the path to the zip command")
-(defvar tda/zip-arguments
-  "-ru9" "The compression level for dired async zip command, from 0-9. This variable is a string, so if you change this value, please set it as a string.")
+(defvar tda/zip-arguments "-ru9"
+  "The compression level for dired async zip command, from 0-9. This variable is
+a string, so if you change this value, please set it as a string.")
 
 (defun tda/zip (output)
   "Asynchronously compress marked files to the output file"
@@ -147,8 +147,7 @@
 	;; execute the command asynchronously
 	(tat/execute-async command "zip")))
 
-;;; ----------------------------------------------
-;;; ----------------------------------------------
+
 ;;; Uncompress function
 (defvar tda/unzip-command "unzip"
   "The command name (or path to the unzip command)")
@@ -182,8 +181,7 @@
 	;; execute the command asynchronously
 	(tat/execute-async command "unzip")))
 
-;;; ----------------------------------------------
-;;; ----------------------------------------------
+
 ;;; Rsync from multiple directories
 (defvar tda/rsync-multiple-file-list
   () "The list of the files to be copied")
@@ -242,11 +240,11 @@
 		;; empty the waiting list
 		(tda/rsync-multiple-empty-list)))))
 
-;;; ----------------------------------------------
-;;; ----------------------------------------------
+
 ;;; download file to current dir
 (defvar tda/download-command "wget"
-  "The download program to download to current dir. The default is wget, ou can replace it to curl, aria2c,...")
+  "The download program to download to current dir. The default is wget, ou can
+replace it to curl, aria2c,...")
 (defun tda/download-to-current-dir (src)
   "Read the link and download the file to current directory"
   (interactive (list (read-from-minibuffer "Link: ")))
