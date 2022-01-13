@@ -2397,7 +2397,7 @@
    #+end_src
 ** [x] which-key        
    #+begin_src emacs-lisp
-     (with-hook after-init
+     (with-hook which-key
                 (which-key-mode t)
                 (diminish 'which-key-mode))
    #+end_src
