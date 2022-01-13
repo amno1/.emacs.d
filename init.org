@@ -2478,7 +2478,7 @@
   #+begin_src emacs-lisp
 
   #+end_src
-** [ none  ] [ ] dired
+** [ none  ] [x] dired
   #+begin_src emacs-lisp
 (with-hook after-init
            (defkeys global-map
