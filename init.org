@@ -980,11 +980,6 @@
     #+end_src
 * Packages
 
-** [x] checkdoc
-#+begin_src emacs-lisp
-
-#+end_src
-#+begin_src emacs-lisp#+end_src
 ** [ local ] [x] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -1047,9 +1042,8 @@
 
 ** [x] async
   #+begin_src emacs-lisp
-  (with-package async
-                (async-bytecomp-package-mode 1)
-                (diminish 'async-dired-mode))
+(with-package async (async-bytecomp-package-mode 1))
+(with-hook async-mode (diminish 'dired-async-mode))
   #+end_src
 ** [x] auto-yasnippet
   #+begin_src emacs-lisp
@@ -1061,10 +1055,8 @@
   #+END_SRC
 ** [x] beacon
   #+begin_src emacs-lisp
-  (with-hook after-init
-             (when-idle
-              (beacon-mode t)
-              (diminish 'beacon-mode)))
+(with-hook after-init (when-idle (beacon-mode t)))
+(with-hook beacon-mode (diminish 'beacon-mode))
   #+end_src
 ** [x] borg
   #+begin_src emacs-lisp
@@ -1082,6 +1074,11 @@
   #+begin_src emacs-lisp
 
   #+end_src
+** [x] checkdoc
+#+begin_src emacs-lisp
+
+#+end_src
+#+begin_src emacs-lisp#+end_src
 ** [x] cmake-font-lock
   #+begin_src emacs-lisp
   (with-hook prog-mode
@@ -1676,6 +1673,8 @@
              "C-z C-g" helm-ls-git-ls
              "C-z C-b" helm-git-local-branches
              "C-z SPC" helm-all-mark-rings))
+
+(with-hook helm-mode (diminish 'helm-mode))
    #+end_src
 
 ** [x] helm-ag        
@@ -2089,8 +2088,10 @@
 (with-hook org-mode
            (when (equal (buffer-name) "init.org")
              (org-babel-hide-markers-mode 1)
+             (diminish 'org-babel-hide-markers-mode)
              (page-break-lines-mode 1)
-             (org-pretty-table-mode 1)))
+             (org-pretty-table-mode 1)
+             (diminish 'org-pretty-table-mode)))
 
 (with-package org
               (require 'org-protocol)
@@ -2206,6 +2207,11 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] outhsine
+#+begin_src emacs-lisp
+(with-hook outshine-mode (diminish 'outshine-mode))
+#+end_src
+
 ** [x] overseer
 #+begin_src emacs-lisp
 
@@ -2220,7 +2226,7 @@
 #+end_src
 ** [x] page-break-lines
 #+begin_src emacs-lisp
-
+(with-hook page-break-lines-mode (diminish 'page-break-lines-mode))
 #+end_src
 ** [x] paxedit
 #+begin_src emacs-lisp
@@ -2697,15 +2703,6 @@
            (winner-mode t)
            (turn-on-auto-fill)
            
-           (diminish 'winner-mode)
-           (diminish 'eldoc-mode)
-           (diminish 'electric-pair-mode)
-           (diminish 'auto-complete-mode)
-           (diminish 'abbrev-mode)
-           (diminish 'auto-fill-function)
-           (diminish 'subword-mode)
-           (diminish 'auto-insert-mode)
-           
            (defkeys global-map
              ;; Window-buffer operations
              "C-<insert>"    term-toggle-term
@@ -2781,12 +2778,22 @@
                         (load custom-file 'noerror))
                       (add-hook 'comint-output-filter-functions
                                 #'comint-watch-for-password-prompt)
-                      (setq gc-cons-threshold       default-gc-cons-threshold
-                            gc-cons-percentage      0.1
-                            file-name-handler-alist old-file-name-handler)))
+                      )
+           
+           (setq gc-cons-threshold       default-gc-cons-threshold
+                 gc-cons-percentage      0.1
+                 file-name-handler-alist old-file-name-handler))
 
-(with-hook text-mode
-           (setq fill-column 240))
+(with-hook text-mode (setq fill-column 240))
+(with-hook abbrev-mode (diminish 'abbrev-mode))
+(with-hook auto-complete-mode (diminish 'auto-complete-mode))
+(with-hook auto-fill-mode (diminish 'auto-fill-function))
+(with-hook auto-insert-mode (diminish 'auto-insert-mode))
+(with-hook eldoc-mode (diminish 'eldoc-mode))
+(with-hook electric-pair-mode (diminish 'electric-pair-mode))
+(with-hook subword-mode (diminish 'subword-mode))
+(with-hook wrap-region-mode (diminish 'wrap-region-mode))
+(with-hook winner-mode (diminish 'winner-mode))
   #+end_src
 ** [ none  ] [x] emacs-director
   #+GIT: https://github.com/bard/emacs-director
