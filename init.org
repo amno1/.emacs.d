@@ -2478,7 +2478,7 @@
   #+begin_src emacs-lisp
 
   #+end_src
-** [ none  ] [x] dired
+** [ none  ] [ ] dired
   #+begin_src emacs-lisp
 (with-hook after-init
            (defkeys global-map
@@ -2570,10 +2570,11 @@
                 "f"                dired-subtree-fold-all
                 "z"                dired-get-size
                 "e"                dired-subtree-expand-all))
-(with-package dired-omit-mode (diminish 'dired-omit-mode))
+(with-package dired-x (diminish 'dired-omit-mode))
 (with-hook dired-omit-mode (diminish 'dired-omit-mode))
 (with-hook dired-mode
            (dired-omit-mode t)
+           (diminish 'dired-omit-mode)
            (dired-async-mode t)
            (dired-hide-details-mode)
            (dired-auto-readme-mode t))
