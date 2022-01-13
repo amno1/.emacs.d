@@ -980,6 +980,11 @@
     #+end_src
 * Packages
 
+** [ local ] [x] dired-auto-readme
+#+begin_src emacs-lisp
+(with-hook dired-auto-readme-mode (diminish 'dired-auto-readme-mode))
+#+end_src
+
 ** [ local ] [x] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -1043,7 +1048,7 @@
 ** [x] async
   #+begin_src emacs-lisp
 (with-package async (async-bytecomp-package-mode 1))
-(with-hook async-mode (diminish 'dired-async-mode))
+(with-hook dired-async-mode (diminish 'dired-async-mode))
   #+end_src
 ** [x] auto-yasnippet
   #+begin_src emacs-lisp
@@ -2207,7 +2212,7 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] outhsine
+** [x] outshine
 #+begin_src emacs-lisp
 (with-hook outshine-mode (diminish 'outshine-mode))
 #+end_src
@@ -2454,6 +2459,12 @@
 
    #+end_src
    
+** [ none  ] [x] abbrev
+#+begin_src emacs-lisp
+(with-package abbrev
+              (diminish 'abbrev-mode))
+#+end_src
+
 ** [ none  ] [x] c/c++
   #+begin_src emacs-lisp
   (with-hook after-init
@@ -2559,7 +2570,8 @@
                 "f"                dired-subtree-fold-all
                 "z"                dired-get-size
                 "e"                dired-subtree-expand-all))
-
+(with-package dired-omit-mode (diminish 'dired-omit-mode))
+(with-hook dired-omit-mode (diminish 'dired-omit-mode))
 (with-hook dired-mode
            (dired-omit-mode t)
            (dired-async-mode t)
@@ -2622,6 +2634,18 @@
   #+end_src
 ** [ none  ] [x] emacs
   #+begin_src emacs-lisp
+(with-hook text-mode (setq fill-column 240))
+(with-hook abbrev-mode (diminish 'abbrev-mode))
+(with-hook auto-complete-mode (diminish 'auto-complete-mode))
+(with-hook auto-fill-mode (diminish 'auto-fill-function))
+(with-hook auto-insert-mode (diminish 'auto-insert-mode))
+(with-hook edit-abbrevs-mode (diminish 'abbrev-mode))
+(with-hook eldoc-mode (diminish 'eldoc-mode))
+(with-hook electric-pair-mode (diminish 'electric-pair-mode))
+(with-hook subword-mode (diminish 'subword-mode))
+(with-hook wrap-region-mode (diminish 'wrap-region-mode))
+(with-hook winner-mode (diminish 'winner-mode))
+
 (with-hook after-init
            (setenv "BROWSER" "firefox-developer-edition")
            
@@ -2783,17 +2807,6 @@
            (setq gc-cons-threshold       default-gc-cons-threshold
                  gc-cons-percentage      0.1
                  file-name-handler-alist old-file-name-handler))
-
-(with-hook text-mode (setq fill-column 240))
-(with-hook abbrev-mode (diminish 'abbrev-mode))
-(with-hook auto-complete-mode (diminish 'auto-complete-mode))
-(with-hook auto-fill-mode (diminish 'auto-fill-function))
-(with-hook auto-insert-mode (diminish 'auto-insert-mode))
-(with-hook eldoc-mode (diminish 'eldoc-mode))
-(with-hook electric-pair-mode (diminish 'electric-pair-mode))
-(with-hook subword-mode (diminish 'subword-mode))
-(with-hook wrap-region-mode (diminish 'wrap-region-mode))
-(with-hook winner-mode (diminish 'winner-mode))
   #+end_src
 ** [ none  ] [x] emacs-director
   #+GIT: https://github.com/bard/emacs-director
