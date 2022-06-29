@@ -2,6 +2,9 @@
 *#
 auto-save-listg
 .cask/
+.cache/
+.extension/
+eclipse.jdt.ls/
 eln-cache/
 elpa/
 elpy/
@@ -19,6 +22,7 @@ early-init.el
 equake-persistent-display
 projects
 autoloads.el
+languagetool.service
 lisp/autoload.el
 lisp/site-autoloads.el
 lisp/lisp-autoloads.el

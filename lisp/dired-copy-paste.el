@@ -72,7 +72,7 @@
   "In dired-mode, copy a file/dir on current line or all marked file/dir(s)."
   (interactive)
   (setq dired-copy-paste-stored-file-list (dired-get-marked-files)
-        dired-copy-paste-func 'copy-file)
+        dired-copy-paste-func 'dired-copy-file)
   (message
    (format "%S is/are copied."dired-copy-paste-stored-file-list)))
 

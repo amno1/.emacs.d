@@ -84,8 +84,7 @@ string."
      (concat
       "exec nohup " command " " 
       (mapconcat 'shell-quote-argument arglist " ")
-      " >/dev/null"))
-     ))
+      " >/dev/null"))))
 
 (defun openwith-open-windows (file)
   "Run external command COMMAND, in such a way that it is
@@ -100,27 +99,33 @@ string."
   (interactive)
   (when (or (equal major-mode 'dired-mode) (equal major-mode 'wdired-mode))
     (let* ((assocs openwith-associations)
-           (file (dired-get-file-for-visit)))
-      ;; do not use `dolist' here, since some packages (like cl)
-      ;; temporarily unbind it
-      (while assocs
-        (setq oa (car assocs)
-              assocs (cdr assocs))
-        (when (save-match-data (string-match (car oa) file))
-          (let ((params (mapcar (lambda (x) (if (eq x 'file) file x))
-                                (nth 2 oa))))
-            (when (or (not openwith-confirm-invocation)
-                      (y-or-n-p (format "%s %s? " (cadr oa)
-                                        (mapconcat #'identity params " "))))
-	      (if (eq system-type 'windows-nt)
-		  (openwith-open-windows file)
-	        (openwith-open-unix (cadr oa) params))
+           (file (dired-get-file-for-visit))
+           (status
+            ;; do not use `dolist' here, since some packages (like cl)
+            ;; temporarily unbind it
+            (catch 'done
+              (while assocs
+                (setq oa (car assocs)
+                      assocs (cdr assocs))
+                (when (save-match-data (string-match (car oa) file))
+                  (let ((params (mapcar (lambda (x) (if (eq x 'file) file x))
+                                        (nth 2 oa))))
+                    (when (or (not openwith-confirm-invocation)
+                              (y-or-n-p (format "%s %s? " (cadr oa)
+                                                (mapconcat #'identity params " "))))
+	              (if (eq system-type 'windows-nt)
+		          (openwith-open-windows file)
+	                (openwith-open-unix (cadr oa) params))
 
-              (when (featurep 'recentf)
-                (recentf-add-file file))
-              ;; inhibit further actions
-              (error "Opened %s in external program"
-                     (file-name-nondirectory file)))))))))
+                      (when (featurep 'recentf)
+                        (recentf-add-file file))
+                      ;; inhibit further actions
+                      (throw 'done (cadr oa)))))))))
+      (if status
+          (message "Opened %s with %s program"
+                   (file-name-nondirectory file) status)
+        (message "Couldn't find and association for %s."
+                 (file-name-nondirectory file))))))
 
 (provide 'openwith)
 

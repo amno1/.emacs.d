@@ -29,6 +29,7 @@
 (require 'openwith)
 (require 'dired-aux)
 (require 'dired-async)
+;;(require 'org-view-mode)
 (require 'dired-subtree)
 (require 'dired-copy-paste)
 ;;(require 'dired+)
