@@ -2335,27 +2335,8 @@
                     "C-x 4 C-j" dired-jump-other-window)
            (when-idle (require 'dired)))
 (with-package dired
-              (require 'dired-extras)
-              (setq dired-dwim-target t
-                    global-auto-revert-non-file-buffers nil
-                    dired-recursive-copies  'always
-                    dired-recursive-deletes 'always
-                    dired-listing-switches "-lA --si --time-style=long-iso --group-directories-first"
-                    wdired-use-vertical-movement t
-                    wdired-allow-to-change-permissions t
-                    dired-omit-files-p t
-                    dired-omit-files (concat dired-omit-files "\\|^\\..+$"))
-              (dolist (ext  (list (list (openwith-make-extension-regexp
-                                         '("flac" "mpg" "mpeg" "mp3" "mp4"
-                                           "avi" "wmv" "wav" "mov" "flv" "ts" "m4b"
-                                           "ogm" "ogg" "mkv" "webm" "m4v" "m4a"))
-                                        "mpv"
-                                        '(file))
-                                  (list (openwith-make-extension-regexp
-                                         '("html" "htm"))
-                                        (getenv "BROWSER")
-                                        '(file))))
-                (add-to-list 'openwith-associations ext))
+              (require 'dired-setup)
+              
                 (with-system windows-nt
                              (setq ls-lisp-use-insert-directory-program "gls"))
                 
