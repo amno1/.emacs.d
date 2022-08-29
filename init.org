@@ -2571,8 +2571,8 @@
              [M-S-f10]       next-buffer-other-window
              [f10]           previous-buffer
              [M-f10]         previous-buffer-other-window
-             [f12]           kill-buffer-but-not-some
              [M-f12]         kill-buffer-other-window
+             [f12]           kill-buffer-but-not-some
              [C-M-f12]       only-current-buffer
              ;; Emacs windows
              "C-v <left>"   windmove-swap-states-left
@@ -2611,6 +2611,7 @@
              ;;"C-h M-i"      help-toggle-source-view
              ;; "C-v C-s"      swap-two-buffers
              [remap other-window]  ace-window
+             [remap find-file-other-window]  ff-other-window
              
              ;; cursor movement
              "M-n"     scroll-up-line

@@ -132,14 +132,6 @@ column narrower."
   (delete-window (window-in-direction 'below)))
 
 ;;;###autoload
-(defun kill-buffer-other-window ()
-  "Kills buffer in other window."
-  (interactive)
-  (other-window 1)
-  (kill-buffer)
-  (other-window 1))
-
-;;;###autoload
 (defun sudo-find-file (file-name)
   "Like find file, but opens the file as root."
   (interactive "FSudo Find File: ")
@@ -282,8 +274,6 @@ minibuffer window or is dedicated to its buffer."
   (interactive "p\np")
   (let ((other (other-window-for-scrolling))
         (current (selected-window)))
-    (unless other
-      (user-error "Cannot obtain other window"))
     (select-window other)
     (next-buffer arg interactive)
     (select-window current)))
@@ -296,10 +286,32 @@ minibuffer window or is dedicated to its buffer."
   (interactive "p\np")
   (let ((other (other-window-for-scrolling))
         (current (selected-window)))
-    (unless other
-      (user-error "Cannot obtain other window"))
     (select-window other)
     (previous-buffer arg interactive)
+    (select-window current)))
+
+;;;###autoload
+(defun ff-other-window ()
+  "Find file in other window."
+  (interactive)
+  (let ((other (other-window-for-scrolling))
+        (current (selected-window)))
+    (cond
+     (other
+      (select-window other)
+      (call-interactively #'find-file)
+      (select-window current))
+     (t
+      (call-interactively #'find-file-other-window)))))
+
+;;;###autoload
+(defun kill-buffer-other-window ()
+  "Kills buffer in other window."
+  (interactive)
+  (let ((other (other-window-for-scrolling))
+        (current (selected-window)))
+    (select-window other)
+    (kill-buffer)
     (select-window current)))
 
 (provide 'extras)
