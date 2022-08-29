@@ -950,6 +950,10 @@
 (org-init-mode +1)
 #+end_src
 * Packages
+** [x] corfu
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] htmlize
 #+begin_src emacs-lisp
 #+end_src
@@ -1443,10 +1447,10 @@
 #+begin_src emacs-lisp
 (with-hook after-init (when-idle
                        (require 'helm)
+                       (require 'helm-files)
                        (require 'helm-config)
                        (require 'helm-eshell)
                        (require 'helm-buffers)
-                       (require 'helm-files)
                        (message "Helm loaded on idle.")))
 (with-hook eshell-mode
            (defkeys eshell-mode-map
@@ -1598,7 +1602,9 @@
              "C-z C-g" helm-ls-git-ls
              "C-z C-b" helm-git-local-branches
              "C-z SPC" helm-all-mark-rings))
-(with-hook helm-mode (diminish 'helm-mode))
+(with-hook helm-mode
+           (diminish 'helm-mode)
+           (helm-flx-mode +1))
 #+end_src
 ** [x] helm-ag        
 #+begin_src emacs-lisp
@@ -1979,6 +1985,7 @@
              (diminish 'org-babel-hide-markers-mode)
              (auto-save-mode 1)
              (page-break-lines-mode 1))
+           (yas-minor-mode 1)
            (org-pretty-table-mode 1)
            (diminish 'org-pretty-table-mode))
 
@@ -2027,12 +2034,19 @@
                        "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
                       ("L" "Protocol Link" entry (file+headline "~/Dokument/notes.org" "Inbox")
                        "* %? [[%:link][%(transform-square-brackets-to-round-ones\"%:description\")]]\n")
-                      ("d" "Denote" plane (file "~/Dokument/notes.org")
-                       "  %<ymd:hms> %^{Description} %^g\n%? %U" :empty-lines 1)
+                      ("d" "Denote" plain (file "~/Dokument/denotes.org")
+                       "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
+                       :empty-lines 1)
+                      ("r" "To Read" plain (file "~/Dokument/reading.org")
+                       "* %A %^g\n  Created: %U\n  ID: %<%y%m%d%H%M%S>\n\n%?"
+                       :empty-lines 1)
                       ("n" "Note" entry (file+olp+datetree "~/Dokument/notes.org")
-                       "* %^{Description} %^g\n%? %U" :empty-lines 1)
+                       "* [[%:link][%:description]] %^g\n%? %U" :empty-lines 1)
                       ("e" "Email" entry (file "~/Dokument/inbox.org")
-                       "* TODO %? email |- %:from: %:subject :EMAIL:\n:PROPERTIES:\n:CREATED: %U\n:EMAIL-SOURCE: %l\n:END:\n%U\n" :clock-in t :clock-resume t)))
+                       "* TODO %? email |- %:from: %:subject
+                    :EMAIL:\n:PROPERTIES:\n:CREATED: %U\n:EMAIL-SOURCE:
+                    %l\n:END:\n%U\n"
+                       :clock-in t :clock-resume t)))
               (setq  org-log-done 'time
                      org-ditaa-jar-path "/usr/bin/ditaa"
                      org-todo-keywords '((sequence "TODO" "INPROGRESS" "DONE"))
@@ -2048,6 +2062,7 @@
                      org-startup-folded           'overview
                      org-startup-indented         nil))
 #+end_src
+
 ** [x] org-appear
 #+begin_src emacs-lisp
 #+end_src
@@ -2327,6 +2342,7 @@
 ** [ none  ] [x] dap-java
 #+begin_src emacs-lisp
 #+end_src
+
 ** [ none  ] [x] dired
 #+begin_src emacs-lisp
 (with-hook after-init
@@ -2434,6 +2450,8 @@
                              cursor-in-non-selected-windows 'hollow
                              bidi-display-reordering 'left-to-right
                              bidi-paragraph-direction 'left-to-right)
+               (push '(fullscreen . maximized) initial-frame-alist)
+               (push '(fullscreen . maximized) default-frame-alist)
                (push '(menu-bar-lines . 0) default-frame-alist)
                (push '(tool-bar-lines . 0) default-frame-alist)
                (push '(vertical-scroll-bars . nil) default-frame-alist)
@@ -2550,7 +2568,9 @@
              "C-v C-t"       term-toggle-ielm
              [f9]            ispell-word
              [S-f10]         next-buffer
+             [M-S-f10]       next-buffer-other-window
              [f10]           previous-buffer
+             [M-f10]         previous-buffer-other-window
              [f12]           kill-buffer-but-not-some
              [M-f12]         kill-buffer-other-window
              [C-M-f12]       only-current-buffer
@@ -2717,53 +2737,57 @@
 #+end_src
 ** [ none  ] [x] lisp & elisp
 #+begin_src emacs-lisp
-    (with-hook after-init
-               (set-default 'auto-mode-alist
-                            (append '(("\\.lisp" . lisp-mode)
-                                      ("\\.lsp" . lisp-mode)
-                                      ("\\.cl" . lisp-mode))
-                                    auto-mode-alist)))
-    (with-package elisp-mode
-                  (require 'elisp-extras)
-                  (require 'helm-pages)
-                  ;;(require 'helm-extras)
-              
-    ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
-                  ;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
-    ;; 	              "System Name: "
-    ;; 	              "
-    ;; (eval-when (:compile-toplevel :load-toplevel :execute)
-    ;;   (unless (find-package :" str ".system)
-    ;;     (defpackage :" str ".system
-    ;;       (:use :common-lisp :asdf))))
+(with-hook
+ after-init
+ (set-default 'auto-mode-alist
+              (append '(("\\.lisp" . lisp-mode)
+                        ("\\.lsp" . lisp-mode)
+                        ("\\.cl" . lisp-mode))
+                      auto-mode-alist)))
+(with-package
+ elisp-mode
+ (require 'elisp-extras)
+ (require 'helm-pages)
+ ;;(require 'helm-extras)
+ 
+ ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
+ ;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
+ ;; 	              "System Name: "
+ ;; 	              "
+ ;; (eval-when (:compile-toplevel :load-toplevel :execute)
+ ;;   (unless (find-package :" str ".system)
+ ;;     (defpackage :" str ".system
+ ;;       (:use :common-lisp :asdf))))
 
-    ;; (in-package :" str ".system)
-    ;; (defsystem :" str " 
-    ;;   :description " ?\" (read-string "Description: ") ?\"" 
-    ;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
-    ;;   :licence \"" (read-string "License: ") "\" 
-    ;;   :version \"" (read-string "Version: ") "\" 
-    ;;   :components (()) 
-    ;;   :depends-on ())") 
-    ;;                     auto-insert-alist)
-              
-                  (defkeys emacs-lisp-mode-map
-                           "\C-c a" emacs-lisp-byte-compile-and-load
-                           "\C-c b" emacs-lisp-byte-compile
-                           "\C-c c" emacs-lisp-native-compile-and-load
-                           "\C-c d" eval-defun
-                           "\C-c e" eval-buffer
-                           "\C-c i" reindent-buffer
-                           "\C-c l" eval-last-sexp
-                           "\C-c n" eval-next-sexp
-                           "\C-c r" fc-eval-and-replace
-                           "\C-c s" eval-surrounding-sexp))
-    (with-hook emacs-lisp-mode
-               (setq fill-column 80)
-               (company-mode 1)
-               (outshine-mode 1)
-               (yas-minor-mode 1)
-               (page-break-lines-mode 1))
+ ;; (in-package :" str ".system)
+ ;; (defsystem :" str " 
+ ;;   :description " ?\" (read-string "Description: ") ?\"" 
+ ;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
+ ;;   :licence \"" (read-string "License: ") "\" 
+ ;;   :version \"" (read-string "Version: ") "\" 
+ ;;   :components (()) 
+ ;;   :depends-on ())") 
+ ;;                     auto-insert-alist)
+ 
+ (defkeys emacs-lisp-mode-map
+          "\C-c a" emacs-lisp-byte-compile-and-load
+          "\C-c b" emacs-lisp-byte-compile
+          "\C-c c" emacs-lisp-native-compile-and-load
+          "\C-c d" eval-defun
+          "\C-c e" eval-buffer
+          "\C-c r" eval-region
+          "\C-c l" eval-last-sexp
+          "\C-c n" eval-next-sexp
+          "\C-c i" reindent-buffer
+          "\C-c p" fc-eval-and-replace
+          "\C-c s" eval-surrounding-sexp))
+(with-hook
+ emacs-lisp-mode
+ (setq fill-column 80)
+ (company-mode 1)
+ (outshine-mode 1)
+ (yas-minor-mode 1)
+ (page-break-lines-mode 1))
 #+end_src
 ** [ none  ] [x] package
 #+begin_src emacs-lisp

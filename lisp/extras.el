@@ -223,6 +223,22 @@ column narrower."
     (delete-region beg end)
     (insert replacement)))
 
+(defun plist-elts (plist elt)
+  "Return elements between ELT and next keyword in list PLIST."
+  (let ((elts (member elt plist)) ret)
+    (catch 'done ret
+           (dolist (elt (cdr elts))
+             (if (keywordp elt)
+                 (throw 'done ret)
+               (push elt ret)))
+           (throw 'done ret))
+    ret))
+
+(defun plist-elt (plist property)
+  "Return value of PROPERTY from irregular plist PLIST."
+  (cadr (member property plist)))
+
+
 ;;;###autoload
 (defun shell-command-on-buffer ()
   (interactive)
@@ -257,5 +273,33 @@ column narrower."
             (setq l tmp b (line-beginning-position) e (line-end-position)))
         (forward-line)))
     (cons l (cons b e))))
+
+;;;###autoload
+(defun next-buffer-other-window (&optional arg interactive)
+  "In other window switch to ARGth next buffer.
+Call `switch-to-next-buffer' unless the selected window is the
+minibuffer window or is dedicated to its buffer."
+  (interactive "p\np")
+  (let ((other (other-window-for-scrolling))
+        (current (selected-window)))
+    (unless other
+      (user-error "Cannot obtain other window"))
+    (select-window other)
+    (next-buffer arg interactive)
+    (select-window current)))
+
+;;;###autoload
+(defun previous-buffer-other-window (&optional arg interactive)
+  "In other window switch to ARGth previous buffer.
+Call `switch-to-prev-buffer' unless the selected window is the
+minibuffer window or is dedicated to its buffer."
+  (interactive "p\np")
+  (let ((other (other-window-for-scrolling))
+        (current (selected-window)))
+    (unless other
+      (user-error "Cannot obtain other window"))
+    (select-window other)
+    (previous-buffer arg interactive)
+    (select-window current)))
 
 (provide 'extras)
