@@ -109,29 +109,6 @@ column narrower."
   (shrink-window delta nil))
 
 ;;;###autoload
-(defun kill-window-left()
-  "Kills window on the left side of current window."
-  (interactive)
-  (delete-window (window-in-direction 'left)))
-
-;;;###autoload
-(defun kill-window-right()
-  "Kills window on the right side of current window."
-  (interactive)
-  (delete-window (window-in-direction 'right)))
-
-(defun kill-window-above()
-  "Kills window above current window."
-  (interactive)
-  (delete-window (window-in-direction 'above)))
-
-;;;###autoload
-(defun kill-window-below()
-  "Kills window below current window."
-  (interactive)
-  (delete-window (window-in-direction 'below)))
-
-;;;###autoload
 (defun sudo-find-file (file-name)
   "Like find file, but opens the file as root."
   (interactive "FSudo Find File: ")
