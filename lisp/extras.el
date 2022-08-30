@@ -2,25 +2,11 @@
 (require 'recentf)
 
 ;;;###autoload
-;; (defun replace-with-spaces (beg end)
-;;   "Replace the region with the equivalent number of spaces."
-;;   (interactive "r")
-;;   (goto-char beg)
-;;   (while (re-search-forward "." end t)
-;;     (replace-match " ")))
-
 (defun replace-with-spaces (beg end)
   "Replace the region with the equivalent number of spaces."
   (interactive "r")
   (delete-region beg end)
   (insert-char ?\s (- end beg)))
-
-;; Startup time
-;;;###autoload
-(defun efs/display-startup-time ()
-  (message "Emacs loaded in %s with %d garbage collections."
-           (format "%.2f seconds"
-                   (float-time (time-subtract after-init-time before-init-time))) gcs-done))
 
 ;;;###autoload
 (defun screenshot-svg ()
@@ -73,7 +59,6 @@ Saves to a temp file and puts the filename in the kill ring."
       (downcase-region p1 p2) (put this-command 'state "all lower")))))
 
 ;; from emacs-wiki @ https://www.emacswiki.org/emacs/RecentFiles
-
 ;;;###autoload
 (defun undo-kill-buffer (arg)
   "Re-open the last buffer killed.  With ARG, re-open the nth buffer."
@@ -124,7 +109,7 @@ column narrower."
 
 ;; you can modify that list, to fit your needs
 ;; from emacs-wiki: https://www.emacswiki.org/emacs/KillingBuffers
-(setq not-to-kill-buffer-list '("*scratch*" "#emacs" "*Messages*"))
+(defvar not-to-kill-buffer-list '("*scratch*" "#emacs" "*Messages*"))
 
 ;;;###autoload
 (defun kill-buffer-but-not-some ()

@@ -5,25 +5,25 @@
    https://github.com/clemera/helm-ido-like-guide
 ** Introduction
    A very personal and opinionated setup, based on an own code generator. The
-   idea with generator is to generate a machine specific setup, so no probig for
-   packages, files, paths etc is needed, as well as to perform some
+   idea with generator is to generate a machine specific setup, so no probing
+   for packages, files, paths etc is needed, as well as to perform some
    optimizations automatically and some that are normally not possible.
 
    This is/was mainly a learning experience to learn Emacs Lisp, but I do use it
    personally for my Emacs setup. It is a lazy-loaded setup, based on built-in
    (and hacked) package.el.
 
-   This assumes that some environment variables are defined in both GNU/Linux
-   and MS Windows:
+   The setup assumes some environment variables defined in both GNU/Linux and MS
+   Windows:
 
    - BROWSER I use firefox-developer-edition on both OS:s.
    - HOME    Need to be defined on MS Windows, I use %UserProfile%
 
    This setup also assumes Emacs to run in a Unix-like environment with all the
-   tools, bash, make & co, available, so on MS Windows mingw environemnt needs
-   to be present and configured. I haven't tested with Cygwin, but I guess it
-   should probably work. On MS Windows you also have to enable symlinks for
-   hacked package.el to work.
+   standard GNU tools available, so on MS Windows mingw environemnt needs to be
+   present and configured. I haven't tested with Cygwin, but I guess it should
+   probably work. On MS Windows you also have to enable symlinks for hacked
+   package.el to work.
    
 ** Licence
    Copyright (C) 2020  Arthur Miller
