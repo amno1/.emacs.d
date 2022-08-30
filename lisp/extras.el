@@ -271,15 +271,30 @@ minibuffer window or is dedicated to its buffer."
 (defun ff-other-window ()
   "Find file in other window."
   (interactive)
-  (let ((other (other-window-for-scrolling))
-        (current (selected-window)))
-    (cond
-     (other
+  (cond
+   ((one-window-p t)
+    (call-interactively #'find-file-other-window))
+   (t
+    (let ((other (other-window-for-scrolling))
+          (current (selected-window)))
       (select-window other)
       (call-interactively #'find-file)
-      (select-window current))
-     (t
-      (call-interactively #'find-file-other-window)))))
+      (select-window current)))))
+
+;;;###autoload
+(defun xref-find-definitions-other-pane (identifier)
+  "Like `xref-find-definitions-other-window' but only create new window if there
+is no `other-window' to switch to."
+  (interactive (list (xref--read-identifier "Find definitions of: ")))
+  (cond
+   ((one-window-p t)
+    (xref-find-definitions-other-window identifier))
+   (t
+    (let ((other (other-window-for-scrolling))
+          (current (selected-window)))
+      (xref-find-definitions identifier)
+      (select-window other)
+      (select-window current)))))
 
 ;;;###autoload
 (defun kill-buffer-other-window ()
@@ -290,5 +305,82 @@ minibuffer window or is dedicated to its buffer."
     (select-window other)
     (kill-buffer)
     (select-window current)))
+
+;; search in other-window by "karthink"
+;; https://www.reddit.com/r/emacs/comments/x0r0pe/share_your_otherwindow_commands/
+;;;###autoload
+(defun isearch-forward-other-buffer (prefix)
+  "Function to isearch-forward in other-window."
+  (interactive "P")
+  (unless (one-window-p)
+    (save-excursion
+      (let ((next (if prefix -1 1)))
+        (other-window next)
+        (isearch-forward)
+        (other-window (- next))))))
+
+;;;###autoload
+(defun isearch-backward-other-buffer (prefix)
+  "Function to isearch-backward in other-window."
+  (interactive "P")
+  (unless (one-window-p)
+    (save-excursion
+      (let ((next (if prefix 1 -1)))
+        (other-window next)
+        (isearch-backward)
+        (other-window (- next))))))
+
+;; do shit to other buffers by dbqpdb
+;; https://www.reddit.com/r/emacs/comments/x0r0pe/share_your_otherwindow_commands/
+(defvar other-prefix-ret)
+
+(defun other-pre-hook ()
+  "Hook to move to other window before executing command."
+  (setq other-prefix-ret (selected-window))
+  (if (one-window-p) (funcall split-window-preferred-function))
+  (other-window 1)
+  (remove-hook 'pre-command-hook 'other-pre-hook))
+
+(defun other-pre-hook-w-buffer ()
+  "Hook to move to other window before executing command."
+  (setq other-prefix-ret (selected-window))
+  (let ((cur (current-buffer)))
+    (if (one-window-p) (funcall split-window-preferred-function))
+    (other-window 1)
+    (set-window-buffer (selected-window) cur)
+    (other-window 0)
+    (remove-hook 'pre-command-hook 'other-pre-hook-w-buffer)))
+
+(defun other-post-hook ()
+  "Hook to move to other window after executing command."
+  (and (not (minibufferp (current-buffer)))
+       (boundp 'other-prefix-ret) other-prefix-ret
+       (progn
+         (select-window other-prefix-ret)
+         (setq other-prefix-ret nil)
+         (remove-hook 'post-command-hook 'other-post-hook)) () ))
+
+;;;###autoload
+(defun do-in-other-window ()
+  "Executes next command in other window."
+  (interactive)
+  (setq other-prefix-ret nil)
+  (add-hook 'pre-command-hook 'other-pre-hook)
+  (add-hook 'post-command-hook 'other-post-hook))
+
+;;;###autoload
+(defun do-to-this-and-stay-in-other-window ()
+  "Functions as a prefix to execute next command in other window."
+  (interactive)
+  (setq other-prefix-ret nil)
+  (add-hook 'pre-command-hook 'other-pre-hook-w-buffer))
+
+;;;###autoload
+(defun do-to-this-in-other-window ()
+  "Functions as a prefix to execute next command in other window."
+  (interactive)
+  (setq other-prefix-ret nil)
+  (add-hook 'pre-command-hook 'other-pre-hook-w-buffer)
+  (add-hook 'post-command-hook 'other-post-hook))
 
 (provide 'extras)
