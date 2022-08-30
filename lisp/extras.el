@@ -298,7 +298,7 @@ is no `other-window' to switch to."
   "Function to isearch-forward in other-window."
   (interactive "P")
   (unless (one-window-p)
-    (save-excursion
+    (save-window-excursion
       (let ((next (if prefix -1 1)))
         (other-window next)
         (isearch-forward)
@@ -309,7 +309,7 @@ is no `other-window' to switch to."
   "Function to isearch-backward in other-window."
   (interactive "P")
   (unless (one-window-p)
-    (save-excursion
+    (save-window-excursion
       (let ((next (if prefix 1 -1)))
         (other-window next)
         (isearch-backward)
