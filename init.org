@@ -24,6 +24,12 @@
    present and configured. I haven't tested with Cygwin, but I guess it should
    probably work. On MS Windows you also have to enable symlinks for hacked
    package.el to work.
+
+   Package.el is hacked so it let me use symlinks to local packages. The purpose
+   is to be able to hack on a repository without need to have two copies, one
+   working and one in elpa directory. I will though replace this with a
+   different approach I have in mind, on some beautiful day I have time to
+   implement it .. :).
    
 ** Licence
    Copyright (C) 2020  Arthur Miller
@@ -51,7 +57,7 @@
 (defvar init-file--autoloads-map (make-hash-table :test 'equal))
 (defvar init-file--loadpaths-map (make-hash-table :test 'equal))
 
-(require 'package)
+(load (expand-file-name "./lisp/package.el")) ;; use hacked-package.el
 
 (setq package-archives nil)
 (defvar site-archive '("local" . "/home/arthur/repos/"))
@@ -2591,7 +2597,6 @@
  (pixel-scroll-precision-mode +1)
  
  (defkeys global-map
-          ;; Window-buffer operations
           "C-<insert>"    term-toggle-term
           "<insert>"      term-toggle-eshell
           "C-v C-t"       term-toggle-ielm
@@ -2604,6 +2609,7 @@
           [M-f12]         kill-buffer-other-window
           [f12]           kill-buffer-but-not-some
           [C-M-f12]       only-current-buffer
+          [C-return]      other-window
           "C-;"           do-in-other-window
           "C-M-:"         do-to-this-in-other-window
           "C-:"           do-to-this-and-stay-in-other-window

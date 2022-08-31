@@ -281,6 +281,13 @@ is no `other-window' to switch to."
       (select-window other)
       (select-window current)))))
 
+(defun mp-toggle-window-dedication ()
+  "Toggles window dedication in the selected window."
+  (interactive)
+  (set-window-dedicated-p
+   (selected-window)
+   (not (window-dedicated-p (selected-window)))))
+
 ;;;###autoload
 (defun kill-buffer-other-window ()
   "Kills buffer in other window."
