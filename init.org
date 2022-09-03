@@ -976,6 +976,18 @@
 (org-init-mode +1)
 #+end_src
 * Packages
+** [x] macrostep
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ ] keg
+#+begin_src emacs-lisp
+(with-hook
+ after-init
+ (setenv "PATH" (concat (getenv "PATH")
+                        ":" (package-desc-dir (package-get-descriptor 'keg)))))
+#+end_src
 ** [x] corfu
 #+begin_src emacs-lisp
 

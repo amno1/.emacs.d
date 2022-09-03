@@ -381,7 +381,8 @@ is no `other-window' to switch to."
 If there is not a window to the left, open new one."
   (let ((wnd (or (windmove-find-other-window side)
                  (split-window nil nil side))))
-    (set-window-buffer wnd (current-buffer))))
+    (set-window-buffer wnd (current-buffer))
+      (previous-buffer)))
 
 ;;;###autoload
 (defun send-to-window-up ()
