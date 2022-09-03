@@ -1047,8 +1047,31 @@
 #+end_src
 ** [x] async
 #+begin_src emacs-lisp
-(with-package async (async-bytecomp-package-mode 1))
-(with-hook dired-async-mode (diminish 'dired-async-mode))
+(with-package
+ async
+ (async-bytecomp-package-mode 1)
+ (with-system windows-nt
+              ;; https://gist.github.com/kiennq/cfe57671bab3300d3ed849a7cbf2927c
+              (eval-when-compile
+                (require 'cl-lib))
+              (defvar async-maximum-parallel-procs 4)
+              (defvar async--parallel-procs 0)
+              (defvar async--queue nil)
+              (defvar-local async--cb nil)
+              (advice-add #'async-start :around
+                          (lambda (orig-func func &optional callback)
+                            (when (>= async--parallel-procs async-maximum-parallel-procs)
+                                (push `(,func ,callback) async--queue)
+                                (cl-incf async--parallel-procs)
+                                (let ((future (funcall orig-func func
+                                                       (lambda (re)
+                                                         (cl-decf async--parallel-procs)
+                                                         (when async--cb (funcall async--cb re))
+                                                         (when-let (args (pop async--queue))
+                                                           (apply #'async-start args))))))
+                                  (with-current-buffer (process-buffer future)
+                                    (setq async--cb callback))))))))
+ (with-hook dired-async-mode (diminish 'dired-async-mode))
 #+end_src
 ** [x] auto-yasnippet
 #+begin_src emacs-lisp
@@ -2495,7 +2518,10 @@
                ;;   (puthash 'default deff face--new-frame-defaults))
                (define-prefix-command 'C-z-map)
                (global-set-key (kbd "C-z") 'C-z-map)
-               (global-unset-key (kbd "C-v")))
+               (global-unset-key (kbd "C-v"))
+               ;; define a setc function for use in init file
+               (defalias 'setc 'customize-set-variables)
+               (put 'setc 'byte-optimizer 'byte-compile-inline-expand))
 #+end_src
 ** [ none  ] [x] emacs
 #+begin_src emacs-lisp
@@ -2623,10 +2649,10 @@
           "C-v l"        windmove-right
           "C-v i"        windmove-up
           "C-v k"        windmove-down
-          ;; "C-v a"        send-to-window-left
-          ;; "C-v d"        send-to-window-right
-          ;; "C-v w"        send-to-window-up
-          ;; "C-v s"        send-to-window-down
+          "C-v a"        send-to-window-left
+          "C-v d"        send-to-window-right
+          "C-v w"        send-to-window-up
+          "C-v s"        send-to-window-down
           ;; "C-v v"        maximize-window-vertically
           ;; "C-v h"        maximize-window-horizontally
           "C-v n"        next-buffer

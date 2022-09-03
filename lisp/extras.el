@@ -375,4 +375,44 @@ is no `other-window' to switch to."
   (add-hook 'pre-command-hook 'other-pre-hook-w-buffer)
   (add-hook 'post-command-hook 'other-post-hook))
 
+(defun send-buffer-to-side (side)
+  "Send `current-buffer' to window on SIDE from the `current-window'.
+
+If there is not a window to the left, open new one."
+  (let ((wnd (or (windmove-find-other-window side)
+                 (split-window nil nil side))))
+    (set-window-buffer wnd (current-buffer))))
+
+;;;###autoload
+(defun send-to-window-up ()
+  "Send `current-buffer' to window at the top from the `current-window'.
+
+If there is not a window at the top, open new one."
+  (interactive)
+  (send-buffer-to-side 'above))
+
+;;;###autoload
+(defun send-to-window-down ()
+  "Send `current-buffer' to window at the bottom from the `current-window'.
+
+If there is not a window at the bottom, open new one."
+  (interactive)
+  (send-buffer-to-side 'below))
+
+;;;###autoload
+(defun send-to-window-left ()
+  "Send `current-buffer' to window left from the `current-window'.
+
+If there is not a window to the left, open new one."
+  (interactive)
+  (send-buffer-to-side 'left))
+
+;;;###autoload
+(defun send-to-window-right ()
+  "Send `current-buffer' to window right from the `current-window'.
+
+If there is not a window to the right, open new one."
+  (interactive)
+  (send-buffer-to-side 'right))
+
 (provide 'extras)
