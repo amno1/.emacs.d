@@ -976,30 +976,6 @@
 (org-init-mode +1)
 #+end_src
 * Packages
-** [x] macrostep
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ ] keg
-#+begin_src emacs-lisp
-(with-hook
- after-init
- (setenv "PATH" (concat (getenv "PATH")
-                        ":" (package-desc-dir (package-get-descriptor 'keg)))))
-#+end_src
-** [x] corfu
-#+begin_src emacs-lisp
-
-#+end_src
-** [x] htmlize
-#+begin_src emacs-lisp
-#+end_src
-
-** [x] lsp-java
-#+begin_src emacs-lisp
-#+end_src
-
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -1027,6 +1003,32 @@
                        "C-;" doc-show-inline-mode))
 (with-hook c-mode (doc-show-inline-mode +1))
 (with-hook c++-mode (doc-show-inline-mode +1))
+#+end_src
+** [ ] keg
+#+begin_src emacs-lisp
+(with-hook
+ after-init
+ (setenv "PATH" (concat (getenv "PATH")
+                        ":" (package-desc-dir (package-get-descriptor 'keg)))))
+#+end_src
+** [ ] org-noter-pdftools
+#+begin_src emacs-lisp
+     (unless (equal system-type 'windows-nt)
+       (with-package pdf-annot
+                     (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+#+end_src
+** [ ] org-pdftools
+#+begin_src emacs-lisp
+     (unless (eq system-type 'windows-nt)
+       (with-hook org-load
+                  (org-pdftools-setup-link)))
+#+end_src
+** [ ] pdf-tools
+#+begin_src emacs-lisp
+     (unless (equal system-type 'windows-nt)
+       (with-package pdf-tools
+                     ;;(pdf-tools-install)
+                     (setq-default pdf-view-display-size 'fit-page)))
 #+end_src
 ** [x] academic-phrases
 #+begin_src emacs-lisp
@@ -1214,6 +1216,10 @@
 #+end_src
 ** [x] company-web
 #+begin_src emacs-lisp
+#+end_src
+** [x] corfu
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] crux
 #+begin_src emacs-lisp
@@ -1823,6 +1829,10 @@
 ** [x] ht
 #+begin_src emacs-lisp
 #+end_src
+** [x] htmlize
+#+begin_src emacs-lisp
+#+end_src
+
 ** [x] hydra
 #+begin_src emacs-lisp
 (with-package hydra
@@ -1891,6 +1901,10 @@
 ** [x] lispy
 #+begin_src emacs-lisp
 #+end_src
+** [x] lsp-java
+#+begin_src emacs-lisp
+#+end_src
+
 ** [x] lsp-java        
 #+begin_src emacs-lisp
 #+end_src
@@ -1993,6 +2007,11 @@
 ** [x] macro-math
 #+begin_src emacs-lisp
 #+end_src
+** [x] macrostep
+#+begin_src emacs-lisp
+(with-hook edebug-mode (macrostep-mode +1))
+#+end_src
+
 ** [x] magit        
 #+begin_src emacs-lisp
 #+end_src
@@ -2137,18 +2156,6 @@
 ** [x] org-download
 #+begin_src emacs-lisp
 #+end_src
-** [ ] org-noter-pdftools
-#+begin_src emacs-lisp
-     (unless (equal system-type 'windows-nt)
-       (with-package pdf-annot
-                     (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
-#+end_src
-** [ ] org-pdftools
-#+begin_src emacs-lisp
-     (unless (eq system-type 'windows-nt)
-       (with-hook org-load
-                  (org-pdftools-setup-link)))
-#+end_src
 ** [x] org-projectile
 #+begin_src emacs-lisp
      (with-package org-projectile
@@ -2196,13 +2203,6 @@
 #+end_src
 ** [x] paxedit
 #+begin_src emacs-lisp
-#+end_src
-** [ ] pdf-tools
-#+begin_src emacs-lisp
-     (unless (equal system-type 'windows-nt)
-       (with-package pdf-tools
-                     ;;(pdf-tools-install)
-                     (setq-default pdf-view-display-size 'fit-page)))
 #+end_src
 ** [x] pfuture
 #+begin_src emacs-lisp
@@ -2534,6 +2534,10 @@
                ;; define a setc function for use in init file
                (defalias 'setc 'customize-set-variables)
                (put 'setc 'byte-optimizer 'byte-compile-inline-expand))
+#+end_src
+** [ none  ] [x] edebug
+#+begin_src emacs-lisp
+(with-package edebug (require 'edebug-x))
 #+end_src
 ** [ none  ] [x] emacs
 #+begin_src emacs-lisp
