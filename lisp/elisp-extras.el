@@ -25,6 +25,9 @@
 ;;; Code:
 
 ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
+
+(require 'sotlisp)
+
 (defun fc-eval-and-replace ()
   "Replace the preceding sexp with its value."
   (interactive)

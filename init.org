@@ -2884,6 +2884,7 @@
  (company-mode 1)
  (outshine-mode 1)
  (yas-minor-mode 1)
+ (sotlisp-mode 1)
  (page-break-lines-mode 1))
 #+end_src
 ** [ none  ] [x] package
