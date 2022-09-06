@@ -976,6 +976,11 @@
 (org-init-mode +1)
 #+end_src
 * Packages
+
+** [ local ] [x] speed-of-thought-lisp
+#+begin_src emacs-lisp
+
+#+end_src
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -1276,6 +1281,11 @@
 (with-hook after-init
            (add-to-list 'auto-mode-alist '("\\.d[i]?\\'" . d-mode)))
 #+end_src
+** [x] drag-stuff
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] dumb-jump        
 #+begin_src emacs-lisp
 #+end_src
@@ -2009,7 +2019,7 @@
 #+end_src
 ** [x] macrostep
 #+begin_src emacs-lisp
-(with-hook edebug-mode (macrostep-mode +1))
+;;(with-hook edebug-mode (macrostep-mode +1))
 #+end_src
 
 ** [x] magit        
@@ -2075,6 +2085,10 @@
 (with-package org
               (require 'org-protocol)
               (require 'org-pretty-table)
+
+              (defkeys org-mode-map
+                       [C-enter] other-window
+                       [C-S-<return>] org-insert-heading-respect-content)
               
               (defun get-html-title-from-url (url)
                 "Return content in <title> tag."
@@ -2378,10 +2392,10 @@
                     ;; yas-snippet-dirs (eval-when-compile
                     ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
                     yas-expand-only-for-last-commands nil)
-              (define-key yas-minor-mode-map (kbd "C-i") nil)
-              (define-key yas-minor-mode-map (kbd "TAB") nil)
-              (define-key yas-minor-mode-map (kbd "<tab>") nil)
-              (define-key yas-minor-mode-map (kbd "C-<return>") 'yas-expand))
+              (defkeys yas-minor-mode-map
+                       "C-i" nil
+                       "TAB" nil
+                       "<tab>" nil))
 (with-hook yas-minor-mode
            (diminish 'yas-mode 'yas-minor-mode))
 #+end_src
@@ -2459,7 +2473,8 @@
                          "C-r C-q"          tda/download-to-current-dir
                          "S-<return>"       dired-openwith
                          "C-'"              dired-collapse-mode
-                         "M-p"              scroll-down-line
+                         "n"                scroll-up-line
+                         "p"                scroll-down-line
                          "M-m"              dired-mark-backward
                          "M-<"              dired-goto-first
                          "M->"              dired-goto-last
@@ -2865,6 +2880,7 @@
 (with-hook
  emacs-lisp-mode
  (setq fill-column 80)
+ (paredit-mode 1)
  (company-mode 1)
  (outshine-mode 1)
  (yas-minor-mode 1)
@@ -2917,6 +2933,21 @@
         (package--load-files-for-activation new-desc :reload)))
     pkg-dir))))
    
+#+end_src
+** [ none  ] [x] paredit
+#+begin_src emacs-lisp
+(with-package
+ paredit
+ (defkeys paredit-mode-map
+          "C-8" paredit-backward-slurp-sexp
+          "C-9" paredit-forward-slurp-sexp
+          "C-7" paredit-backward-barf-sexp
+          "C-0" paredit-forward-barf-sexp
+          "M-8" paredit-wrap-round
+          "M-9" paredit-close-round-and-newline
+          "C-." paredit-forward
+          "C-," paredit-backward
+          ))
 #+end_src
 ** [ none  ] [x] speed-of-thought-lisp
 #+begin_src emacs-lisp

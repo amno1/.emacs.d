@@ -48,7 +48,7 @@
   (save-excursion
     (up-list (abs levels))
     (eval-last-sexp nil)))
-(+ 2 2)
+
 (require 'popup)
 
 (defun describe-thing-in-popup ()

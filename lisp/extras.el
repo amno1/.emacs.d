@@ -119,9 +119,8 @@ column narrower."
     (kill-buffer (current-buffer))))
 
 ;; https://xenodium.com/emacs-clone-git-repo-from-clipboard/
-
+;; hacked by me - no deleting, do pull instead
 (defvar git-repository-dirs (expand-file-name "~/repos/"))
-
 (defun git-clone-clipboard-url ()
   "Clone git URL in clipboard asynchronously and open in dired when finished."
   (interactive)
@@ -129,21 +128,18 @@ column narrower."
     (error "No URL in clipboard"))
   (let* ((url (current-kill 0))
          (download-dir git-repository-dirs)
-         (project-dir (concat (file-name-as-directory download-dir)
-                              (file-name-base url)))
+         (project-dir (expand-file-name (file-name-base url) download-dir))                              
          (default-directory download-dir)
          (command (format "git clone %s" url))
          (buffer (generate-new-buffer (format "*%s*" command)))
          (proc))
-             (message "c: %s" command)
-    (when (file-exists-p project-dir)
-      (if (y-or-n-p (format "%s exists. delete?" (file-name-base url)))
-          ;;(delete-directory project-dir t)
-        (user-error "Bailed")))
-    (switch-to-buffer buffer)
+    (if (file-exists-p project-dir)
+        (if (y-or-n-p (format "%s exists. Pull instead?" (file-name-base url)))          
+            (setq command "git pull" default-directory project-dir)
+          (user-error "Aborted")))
     (setq proc (start-process-shell-command (nth 0 (split-string command)) buffer command))
     (with-current-buffer buffer
-      (setq default-directory download-dir)
+      (switch-to-buffer buffer)
       (shell-command-save-pos-or-erase)
       (require 'shell)
       (shell-mode)
@@ -158,8 +154,6 @@ column narrower."
                                          (dired project-dir))
                                      (user-error (format "%s\n%s" command output))))))
     (set-process-filter proc #'comint-output-filter)))
-
-;; https://xenodium.com/emacs-quote-wrap-all-in-region/
 
 (defun toggle-quote-wrap-all-in-region (beg end)
   "Toggle wrapping all items in region with double quotes."
