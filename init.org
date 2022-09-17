@@ -976,11 +976,6 @@
 (org-init-mode +1)
 #+end_src
 * Packages
-
-** [ local ] [x] speed-of-thought-lisp
-#+begin_src emacs-lisp
-
-#+end_src
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -998,6 +993,10 @@
 #+end_src
 ** [ local ] [x] peep-dired
 #+begin_src emacs-lisp
+#+end_src
+** [ local ] [x] speed-of-thought-lisp
+#+begin_src emacs-lisp
+
 #+end_src
 ** [ ] doc-show-inline
 #+begin_src emacs-lisp
@@ -1908,6 +1907,11 @@
        languagetool-console-command "/usr/share/java/languagetool/languagetool-commandline.jar"
        languagetool-server-command "/usr/share/java/languagetool/languagetool-server.jar"))
 #+end_src
+** [x] lisp-extra-font-lock
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] lispy
 #+begin_src emacs-lisp
 #+end_src
@@ -2884,7 +2888,7 @@
  (company-mode 1)
  (outshine-mode 1)
  (yas-minor-mode 1)
- (sotlisp-mode 1)
+ (speed-of-thought-mode 1)
  (page-break-lines-mode 1))
 #+end_src
 ** [ none  ] [x] package
