@@ -2889,7 +2889,8 @@
  (outshine-mode 1)
  (yas-minor-mode 1)
  (speed-of-thought-mode 1)
- (page-break-lines-mode 1))
+ (page-break-lines-mode 1)
+ (lisp-extra-font-lock-mode 1))
 #+end_src
 ** [ none  ] [x] package
 #+begin_src emacs-lisp
