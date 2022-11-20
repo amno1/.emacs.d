@@ -976,6 +976,7 @@
 (org-init-mode +1)
 #+end_src
 * Packages
+
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -984,7 +985,26 @@
 ** [ local ] [x] dired-auto-readme
 #+begin_src emacs-lisp
 (with-hook dired-auto-readme-mode (diminish 'dired-auto-readme-mode))
+
+(with-package
+ dired-auto-readme
+ (add-to-list 'dired-auto-readme-alist
+              '(org-mode . (lambda ()
+                                   (org-toggle-pretty-entities)
+                                   (setq org-link-descriptive t)
+                                   (org-pretty-table-mode)
+                                   (org-display-inline-images t t)
+                                   (org-view-mode))))
+ (add-to-list 'dired-auto-readme-alist '(markdown-mode . (lambda ()
+                                                           (markdown-view-mode)
+                                                           (font-lock-ensure)))))
 #+end_src
+** [ local ] [x] dired-git-log
+#+begin_src emacs-lisp
+(with-hook dired-git-log-mode
+           (diminish 'dired-git-log-mode))
+#+end_src
+
 ** [ local ] [x] helper
 #+begin_src emacs-lisp
 #+end_src
@@ -1146,6 +1166,10 @@
              (require 'company-cmake)
              (company-mode 1))
 #+end_src
+** [x] command-log-mode
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] company
 #+begin_src emacs-lisp
   (with-hook after-init
@@ -1154,8 +1178,7 @@
              (add-hook 'emacs-lisp-mode-hook 'company-mode)
              (add-hook 'text-mode-hook 'company-mode)
              (add-hook 'lisp-mode-hook 'company-mode)
-             (when-idle
-              (require 'company)))
+             (when-idle (require 'company)))
   (with-package company 
                 (require 'company-capf)
                 (require 'company-files)
@@ -1221,6 +1244,10 @@
 ** [x] company-web
 #+begin_src emacs-lisp
 #+end_src
+** [x] consult
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] corfu
 #+begin_src emacs-lisp
 
@@ -1251,6 +1278,11 @@
 ** [x] diminish        
 #+begin_src emacs-lisp
 #+end_src
+** [x] diredfl
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] dired-git.el
 #+begin_src emacs-lisp
 #+end_src
@@ -1326,6 +1358,11 @@
 ** [x] el-search
 #+begin_src emacs-lisp
 #+end_src
+** [x] embark
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] emms
 #+begin_src emacs-lisp
 (with-hook after-init
@@ -1403,6 +1440,10 @@
 #+end_src
 ** [x] emr
 #+begin_src emacs-lisp
+#+end_src
+** [x] engine-mode
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] equake
 #+begin_src emacs-lisp
@@ -1483,6 +1524,23 @@
 ** [x] flycheck-package
 #+begin_src emacs-lisp
 #+end_src
+** [x] geiser
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] geiser-guile
+#+begin_src emacs-lisp
+(with-hook
+ geiser-guile
+ (setq geiser-repl-use-other-window nil))
+           
+#+end_src
+** [x] geiser-racket
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] gh        
 #+begin_src emacs-lisp
 #+end_src
@@ -1527,12 +1585,13 @@
                        (require 'helm-config)
                        (require 'helm-eshell)
                        (require 'helm-buffers)
+                       (require 'helm-adaptive)
                        (message "Helm loaded on idle.")))
 (with-hook eshell-mode
            (defkeys eshell-mode-map
-             "C-c C-h" helm-eshell-history
-             "C-c C-r" helm-comint-input-ring
-             "C-c C-l" helm-minibuffer-history))
+                    "C-c C-h" helm-eshell-history
+                    "C-c C-r" helm-comint-input-ring
+                    "C-c C-l" helm-minibuffer-history))
 (with-hook helm-ff-cache-mode
            (diminish 'helm-ff-cache-mode))
 (with-package helm
@@ -1541,6 +1600,14 @@
               (require 'helm-buffers)
               (require 'helm-files)
               
+              (defun helm-buffer-p (window new-buffer bury-or-kill)
+                "Returns T when NEW-BUFFER's name matches any regex in
+`helm-boring-buffer-regexp-list'."
+                (catch 'helm-p
+                  (dolist (regex helm-boring-buffer-regexp-list)
+                    (if (string-match-p regex (buffer-name new-buffer))
+                        (throw 'helm-p t)))))
+
               (defvar helm-source-header-default-background (face-attribute
                                                              'helm-source-header :background)) 
               (defvar helm-source-header-default-foreground (face-attribute
@@ -1620,6 +1687,7 @@
                     helm-candidate-number-limit         100
                     helm-idle-delay                     0.0
                     helm-input-idle-delay               0.0
+                    switch-to-prev-buffer-skip         'helm-buffer-p
                     helm-ff-cache-mode-lighter-sleep    nil
                     helm-ff-cache-mode-lighter-updating nil
                     helm-ff-cache-mode-lighter          nil
@@ -1639,50 +1707,51 @@
                                                 helm-source-buffer-not-found
                                                 projectile-known-projects))
               (defkeys helm-map
-                "M-i" helm-previous-line
-                "M-k" helm-next-line
-                "M-I" helm-previous-page
-                "M-K" helm-next-page
-                "M-h" helm-beginning-of-buffer
-                "M-H" helm-end-of-buffer)
+                       "M-i" helm-previous-line
+                       "M-k" helm-next-line
+                       "M-I" helm-previous-page
+                       "M-K" helm-next-page
+                       "M-h" helm-beginning-of-buffer
+                       "M-H" helm-end-of-buffer)
 
               (defkeys shell-mode-map
                        "C-c C-l" helm-comint-input-ring)
               
               (defkeys helm-read-file-map
-                ;;"RET" my-helm-return
-                "C-o" my-helm-next-source))
+                       ;;"RET" my-helm-return
+                       "C-o" my-helm-next-source))
 
 (with-hook after-init
            (defkeys global-map
-             "M-x"     helm-M-x
-             "C-z ,"   helm-pages
-             "C-x C-b" helm-buffers-list
-             "C-z a"   helm-ag
-             "C-z b"   helm-filtered-bookmarks
-             "C-z c"   helm-company
-             "C-z d"   helm-dabbrev
-             "C-z e"   helm-calcul-expression
-             "C-z g"   helm-google-suggest
-             "C-z h"   helm-descbinds
-             "C-z i"   helm-imenu-anywhere
-             "C-z k"   helm-show-kill-ring
-             "C-z C-c" helm-git-local-branches
-             "C-z f"   helm-find-files
-             "C-z m"   helm-mini
-             "C-z o"   helm-occur
-             "C-z p"   helm-browse-project
-             "C-z q"   helm-apropos
-             "C-z r"   helm-recentf
-             "C-z s"   helm-swoop
-             "C-z C-c" helm-colors
-             "C-z x"   helm-M-x
-             "C-z y"   helm-yas-complete
-             "C-z C-g" helm-ls-git-ls
-             "C-z C-b" helm-git-local-branches
-             "C-z SPC" helm-all-mark-rings))
+                    "M-x"     helm-M-x
+                    "C-z ,"   helm-pages
+                    "C-x C-b" helm-buffers-list
+                    "C-z a"   helm-ag
+                    "C-z b"   helm-filtered-bookmarks
+                    "C-z c"   helm-company
+                    "C-z d"   helm-dabbrev
+                    "C-z e"   helm-calcul-expression
+                    "C-z g"   helm-google-suggest
+                    "C-z h"   helm-descbinds
+                    "C-z i"   helm-imenu-anywhere
+                    "C-z k"   helm-show-kill-ring
+                    "C-z C-c" helm-git-local-branches
+                    "C-z f"   helm-find-files
+                    "C-z m"   helm-mini
+                    "C-z o"   helm-occur
+                    "C-z p"   helm-browse-project
+                    "C-z q"   helm-apropos
+                    "C-z r"   helm-recentf
+                    "C-z s"   helm-swoop
+                    "C-z C-c" helm-colors
+                    "C-z x"   helm-M-x
+                    "C-z y"   helm-yas-complete
+                    "C-z C-g" helm-ls-git-ls
+                    "C-z C-b" helm-git-local-branches
+                    "C-z SPC" helm-all-mark-rings))
 (with-hook helm-mode
            (diminish 'helm-mode)
+           (helm-adaptive-mode 1)
            (helm-flx-mode +1))
 #+end_src
 ** [x] helm-ag        
@@ -2026,6 +2095,11 @@
 ;;(with-hook edebug-mode (macrostep-mode +1))
 #+end_src
 
+** [x] macrostep-geiser
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] magit        
 #+begin_src emacs-lisp
 #+end_src
@@ -2044,6 +2118,10 @@
 #+end_src
 ** [x] mc-extras        
 #+begin_src emacs-lisp
+#+end_src
+** [x] mini-modeline
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] mmm-mode
 #+begin_src emacs-lisp
@@ -2360,6 +2438,10 @@
            (defkeys python-mode-map
              "C-f t" treemacs))
 #+end_src
+** [x] vertico
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] visual-ascii-mode
 #+begin_src emacs-lisp
 #+end_src
@@ -2435,69 +2517,69 @@
 (with-package dired
               (require 'dired-setup)
               
-                (with-system windows-nt
-                             (setq ls-lisp-use-insert-directory-program "gls"))
-                
-                (with-system gnu/linux
-                             (dolist (ext (list (list (openwith-make-extension-regexp
-                                                       '("xbm" "pbm" "pgm" "ppm" "pnm"
-                                                         "png" "gif" "bmp" "tif" "jpeg" "jpg"))
-                                                      "feh"
-                                                      '(file))
-                                                (list (openwith-make-extension-regexp
-                                                       '("doc" "xls" "ppt" "odt" "ods" "odg" "odp" "rtf"))
-                                                      "libreoffice"
-                                                      '(file))
-                                                (list (openwith-make-extension-regexp
-                                                       '("\\.lyx"))
-                                                      "lyx"
-                                                      '(file))
-                                                (list (openwith-make-extension-regexp
-                                                       '("chm"))
-                                                      "kchmviewer"
-                                                      '(file))
-                                                (list (openwith-make-extension-regexp
-                                                       '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi" "azw3"))
-                                                      "okular"
-                                                      '(file))))
-                               (add-to-list 'openwith-associations ext)))
-                (defkeys dired-mode-map
-                         "C-x <M-S-return>" dired-open-current-as-sudo
-                         "r"                dired-do-rename
-                         "C-S-r"            wdired-change-to-wdired-mode
-                         "C-r C-s"          tmtxt/dired-async-get-files-size
-                         "C-r C-r"          tda/rsync
-                         "C-r C-z"          tda/zip
-                         "C-r C-u"          tda/unzip
-                         "C-r C-a"          tda/rsync-multiple-mark-file
-                         "C-r C-e"          tda/rsync-multiple-empty-list
-                         "C-r C-d"          tda/rsync-multiple-remove-item
-                         "C-r C-v"          tda/rsync-multiple
-                         "C-r C-s"          tda/get-files-size
-                         "C-r C-q"          tda/download-to-current-dir
-                         "S-<return>"       dired-openwith
-                         "C-'"              dired-collapse-mode
-                         "n"                scroll-up-line
-                         "p"                scroll-down-line
-                         "M-m"              dired-mark-backward
-                         "M-<"              dired-goto-first
-                         "M->"              dired-goto-last
-                         "M-<return>"       my-run
-                         "C-S-f"            dired-narrow
-                         "P"                peep-dired
-                         "<f1>"             term-toggle
-                         "TAB"              dired-subtree-toggle
-                         "f"                dired-subtree-fold-all
-                         "z"                dired-get-size
-                         "e"                dired-subtree-expand-all))
-              (with-package dired-x (diminish 'dired-omit-mode))
-              (with-hook dired-omit-mode (diminish 'dired-omit-mode))
-              (with-hook dired-mode
-                         (dired-omit-mode t)
-                         (diminish 'dired-omit-mode)
-                         (dired-async-mode t)
-                         (dired-hide-details-mode)
-                         (dired-auto-readme-mode t))
+              (with-system windows-nt
+                           (setq ls-lisp-use-insert-directory-program "gls"))
+              
+              (with-system gnu/linux
+                           (dolist (ext (list (list (openwith-make-extension-regexp
+                                                     '("xbm" "pbm" "pgm" "ppm" "pnm"
+                                                       "png" "gif" "bmp" "tif" "jpeg" "jpg"))
+                                                    "feh"
+                                                    '(file))
+                                              (list (openwith-make-extension-regexp
+                                                     '("doc" "xls" "ppt" "odt" "ods" "odg" "odp" "rtf"))
+                                                    "libreoffice"
+                                                    '(file))
+                                              (list (openwith-make-extension-regexp
+                                                     '("\\.lyx"))
+                                                    "lyx"
+                                                    '(file))
+                                              (list (openwith-make-extension-regexp
+                                                     '("chm"))
+                                                    "kchmviewer"
+                                                    '(file))
+                                              (list (openwith-make-extension-regexp
+                                                     '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi" "azw3"))
+                                                    "okular"
+                                                    '(file))))
+                             (add-to-list 'openwith-associations ext)))
+              (defkeys dired-mode-map
+                       "C-x <M-S-return>" dired-open-current-as-sudo
+                       "r"                dired-do-rename
+                       "C-S-r"            wdired-change-to-wdired-mode
+                       "C-r C-s"          tmtxt/dired-async-get-files-size
+                       "C-r C-r"          tda/rsync
+                       "C-r C-z"          tda/zip
+                       "C-r C-u"          tda/unzip
+                       "C-r C-a"          tda/rsync-multiple-mark-file
+                       "C-r C-e"          tda/rsync-multiple-empty-list
+                       "C-r C-d"          tda/rsync-multiple-remove-item
+                       "C-r C-v"          tda/rsync-multiple
+                       "C-r C-s"          tda/get-files-size
+                       "C-r C-q"          tda/download-to-current-dir
+                       "S-<return>"       dired-openwith
+                       "C-'"              dired-collapse-mode
+                       "n"                scroll-up-line
+                       "p"                scroll-down-line
+                       "M-m"              dired-mark-backward
+                       "M-<"              dired-goto-first
+                       "M->"              dired-goto-last
+                       "M-<return>"       my-run
+                       "C-S-f"            dired-narrow
+                       "P"                peep-dired
+                       "<f1>"             term-toggle
+                       "TAB"              dired-subtree-toggle
+                       "f"                dired-subtree-fold-all
+                       "z"                dired-get-size
+                       "e"                dired-subtree-expand-all))
+
+(with-hook dired-omit-mode (diminish 'dired-omit-mode))
+(with-hook dired-mode
+           (dired-omit-mode)
+           (dired-async-mode)
+           (dired-hide-details-mode)
+           ;;(dired-git-log-mode)
+           (dired-auto-readme-mode))
 #+end_src
 ** [ none  ] [x] early-init
 #+begin_src emacs-lisp
@@ -2573,7 +2655,7 @@
 (with-hook winner-mode (diminish 'winner-mode))
 (with-hook
  after-init
- 
+
  (with-system windows-nt
               ;; (global-disable-mouse-mode 1)
               (setq w32-get-true-file-attributes nil
@@ -2665,6 +2747,7 @@
           [S-f10]         next-buffer
           [C-enter]       other-window
           [M-S-f10]       next-buffer-other-window
+          [f8]            last-buffer
           [f10]           previous-buffer
           [M-f10]         previous-buffer-other-window
           [M-f12]         kill-buffer-other-window

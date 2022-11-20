@@ -1,5 +1,6 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
 (require 'recentf)
+(require 'windmove)
 
 ;;;###autoload
 (defun replace-with-spaces (beg end)
@@ -409,5 +410,10 @@ If there is not a window to the left, open new one."
 If there is not a window to the right, open new one."
   (interactive)
   (send-buffer-to-side 'right))
+
+(defun last-buffer ()
+  "Switch to last used buffer."
+  (interactive)
+  (switch-to-buffer nil))
 
 (provide 'extras)
