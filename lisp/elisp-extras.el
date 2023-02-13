@@ -24,10 +24,10 @@
 
 ;;; Code:
 
-;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
 
 (require 'sotlisp)
 
+;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
 (defun fc-eval-and-replace ()
   "Replace the preceding sexp with its value."
   (interactive)
@@ -112,6 +112,19 @@
                :scroll-bar t
                :margin t)))
 
+;;;###autoload
+(defun guile-repl ()
+  (interactive)
+  (require 'geiser)
+  (require 'geiser-guile)
+  (call-interactively #'geiser-guile))
+
+;;;###autoload
+(defun racket-repl ()
+  (interactive)
+  (require 'geiser)
+  (require 'geiser-racket)
+  (call-interactively #'geiser-racket))
 
 (provide 'elisp-extras)
 ;;; elisp-extras.el ends here

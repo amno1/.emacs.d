@@ -1,9 +1,8 @@
 ;;; calendar-hr.el --- Croatian calendar for Emacs -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2021 Daniel Jensen, Arthur Miller
+;; Copyright (C) 2021 Arthur Miller
 
 ;; Author: Arthur Miller <arthur.miller@live.com>
-;; Author: Daniel Jensen <daniel@bigwalter.net>
 ;; Version: 1.0-hr
 ;; Keywords: calendar croatian localization
 
@@ -35,24 +34,6 @@
 ;;
 ;; To use this file, save it somewhere in Emacs load-path and (load
 ;; "calendar-hr") in your Emacs init file.
-
-;;; Changelog
-
-
-;; 1.0-hr - Adapted to Croatian version.
-
-;; 1.9.1 - added provide statement
-;; 1.9 - Update for Emacs 25
-;; 1.8 - Emacs 23 support. GPLv3.
-;; 1.6 - Lunar phase names, sunrise/sunset
-;;       (månfasernas namn, soluppgång och -nedgång)
-;; 1.5 - Cleanup, introduce sv prefix (städning, nytt hr-prefix)
-;; 1.4 - Months and days use lower-case initials
-;;       (månader och dagar med små begynnelsebokstäver)
-;; 1.3 - New flag days, Easter bug fixes
-;;       (nya flaggdagar och en bugg i "mer påsk" fixad) (Alan Campbell)
-;; 1.2 - Advent Sundays fixed (adventsdagarna justerade) (Alan Campbell)
-;; 1.1 - Fat Tuesday moved back a week (fettisdagen flyttad en vecka bakåt).
 
 ;;; Code:
 

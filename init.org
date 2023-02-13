@@ -1582,7 +1582,6 @@
 (with-hook after-init (when-idle
                        (require 'helm)
                        (require 'helm-files)
-                       (require 'helm-config)
                        (require 'helm-eshell)
                        (require 'helm-buffers)
                        (require 'helm-adaptive)
@@ -1595,7 +1594,6 @@
 (with-hook helm-ff-cache-mode
            (diminish 'helm-ff-cache-mode))
 (with-package helm
-              (require 'helm-config)
               (require 'helm-eshell)
               (require 'helm-buffers)
               (require 'helm-files)
@@ -2280,6 +2278,11 @@
 ** [x] org-superstar
 #+begin_src emacs-lisp
 #+end_src
+** [x] org-view-mode
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] outshine
 #+begin_src emacs-lisp
 (with-hook outshine-mode (diminish 'outshine-mode))
@@ -2481,7 +2484,7 @@
               (defkeys yas-minor-mode-map
                        "C-i" nil
                        "TAB" nil
-                       "<tab>" nil))
+                       "C-<tab>" yas-expand))
 (with-hook yas-minor-mode
            (diminish 'yas-mode 'yas-minor-mode))
 #+end_src
@@ -2587,6 +2590,7 @@
                (defvar default-gc-cons-threshold gc-cons-threshold)
                (defvar old-file-name-handler file-name-handler-alist)
                (setq file-name-handler-alist nil
+                     debug-on-error t
                      gc-cons-threshold most-positive-fixnum
                      frame-inhibit-implied-resize t
                      bidi-inhibit-bpa t
@@ -2973,7 +2977,8 @@
  (yas-minor-mode 1)
  (speed-of-thought-mode 1)
  (page-break-lines-mode 1)
- (lisp-extra-font-lock-mode 1))
+ ;;(lisp-extra-font-lock-mode 1)
+ )
 #+end_src
 ** [ none  ] [x] package
 #+begin_src emacs-lisp
