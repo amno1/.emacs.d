@@ -24,8 +24,12 @@
 
 ;;; Code:
 
-
+(require 'paredit)
 (require 'sotlisp)
+(require 'company)
+(require 'outshine)
+(require 'yasnippet)
+(require 'helm-pages)
 
 ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
 (defun fc-eval-and-replace ()
@@ -112,19 +116,35 @@
                :scroll-bar t
                :margin t)))
 
-;;;###autoload
-(defun guile-repl ()
-  (interactive)
-  (require 'geiser)
-  (require 'geiser-guile)
-  (call-interactively #'geiser-guile))
+(defun elisp-hooks ()
+  (setq fill-column 80)
+  (paredit-mode 1)
+  (company-mode 1)
+  (outshine-mode 1)
+  (yas-minor-mode 1)
+  (speed-of-thought-mode 1)
+  (page-break-lines-mode 1)
+  ;;(lisp-extra-font-lock-mode 1)
+  )
 
-;;;###autoload
-(defun racket-repl ()
-  (interactive)
-  (require 'geiser)
-  (require 'geiser-racket)
-  (call-interactively #'geiser-racket))
+ ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
+ ;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
+ ;; 	              "System Name: "
+ ;; 	              "
+ ;; (eval-when (:compile-toplevel :load-toplevel :execute)
+ ;;   (unless (find-package :" str ".system)
+ ;;     (defpackage :" str ".system
+ ;;       (:use :common-lisp :asdf))))
+
+ ;; (in-package :" str ".system)
+ ;; (defsystem :" str " 
+ ;;   :description " ?\" (read-string "Description: ") ?\"" 
+ ;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
+ ;;   :licence \"" (read-string "License: ") "\" 
+ ;;   :version \"" (read-string "Version: ") "\" 
+ ;;   :components (()) 
+ ;;   :depends-on ())") 
+ ;;                     auto-insert-alist)
 
 (provide 'elisp-extras)
 ;;; elisp-extras.el ends here

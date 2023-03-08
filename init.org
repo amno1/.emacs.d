@@ -51,11 +51,12 @@
 (defvar init-file-verbose-messages nil)
 (defvar init-file-unroll-key-bindings t)
 (defvar init-file-use-modules nil)
-(defvar init-file-modules-directory (expand-file-name "elc-cache/" user-emacs-directory))
+(defvar init-file-etc-directory (expand-file-name "etc/" user-emacs-directory))
 (defvar init-file-lisp-directory (expand-file-name "lisp/" user-emacs-directory))
 (defvar init-file-source-repositories (list package-user-dir init-file-lisp-directory))
 (defvar init-file--autoloads-map (make-hash-table :test 'equal))
 (defvar init-file--loadpaths-map (make-hash-table :test 'equal))
+(defvar init-file--need-package-refresh t)
 
 (load (expand-file-name "./lisp/package.el")) ;; use hacked-package.el
 
@@ -72,10 +73,10 @@
 (add-to-list 'package-archives gnu-archive)
 (add-to-list 'package-archives nelpa-archive)
 (add-to-list 'package-archives melpa-archive)
-;;(add-to-list 'package-archives marmalade-archive)
 (setq package-archives (nreverse package-archives))
-(unless (file-directory-p init-file-modules-directory)
-  (make-directory init-file-modules-directory))
+
+(unless (file-directory-p init-file-etc-directory)
+  (make-directory init-file-etc-directory))
 (unless (boundp 'init-file-hooks)
   (make-variable-buffer-local 'init-file-hooks))
 (unless (boundp 'init-file-package-list)
@@ -454,10 +455,10 @@
           (when (gt (length s) 1)
             (setq s (string-trim s))
             ;; installable?
-            (if (or (equal s "local") (equal s "none"))
-                (aset package 2 t)
-              ;; pinned to repository?
-              (aset package 3 s)))
+            (when (or (equal s "local") (equal s "none"))
+              (aset package 2 t))
+            ;; pinned to repository?
+            (aset package 3 s))
           (goto-char start)
           ;; code start
           (re-search-forward "begin_src.*emacs-lisp" (eobp) t)
@@ -481,21 +482,23 @@
 
 ;; Install packages
 (defun ensure-package (package)
-  (let ((p (intern (aref package 0))))
-    (unless (package-installed-p p)
-      (message "Installing package: %s" p)
-      (package-install p))))
+  (let ((p (intern-soft (aref package 0))))
+    (message "Installing package: %s" p)
+    (package-install p)))
 
 (defun install-packages (&optional packages)
   (interactive)
-  (package-refresh-contents)
+  (when init-file--need-package-refresh
+    (package-refresh-contents)
+    (setq init-file--need-package-refresh nil))
   (unless packages
     (setq packages (get-package-list)))
   (dolist (p packages)
-    (unless (package-pseudo-p p)
-      (unless (string-empty-p (aref p 3))
-        (add-to-list 'package-pinned-packages (cons (intern (aref p 0)) (aref p 3))))
-      (ensure-package p))))
+    (unless (or (package-installed-p p) (package-pseudo-p p))
+      (when (package-enabled-p p)
+        ;;    (unless (string-empty-p (aref p 3))
+        ;;      (add-to-list 'package-pinned-packages (cons (intern-soft (aref p 0)) (aref p 3))))
+        (ensure-package p)))))
 
 (defun current-package ()
   "Return name of package the cursor is at the moment."
@@ -976,6 +979,16 @@
 (org-init-mode +1)
 #+end_src
 * Packages
+
+** [ local ] [x] org-super-links
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] easy-escape
+#+begin_src emacs-lisp
+
+#+end_src
 
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
@@ -1527,18 +1540,22 @@
 ** [x] geiser
 #+begin_src emacs-lisp
 
+ 
 #+end_src
 
 ** [x] geiser-guile
 #+begin_src emacs-lisp
 (with-hook
  geiser-guile
+ (require 'sc-extras)
  (setq geiser-repl-use-other-window nil))
            
 #+end_src
 ** [x] geiser-racket
 #+begin_src emacs-lisp
-
+(with-hook
+ geiser-racket
+ (require 'sc-extras))
 #+end_src
 
 ** [x] gh        
@@ -1678,7 +1695,7 @@
                     helm-ff-search-library-in-sexp        t
                     helm-scroll-amount                    8
                     helm-ff-file-name-history-use-recentf t
-                    helm-ff-auto-update-initial-value     t
+                    helm-ff-auto-update-initial-value     nil
                     helm-net-prefer-curl                  t
                     helm-autoresize-max-height            0
                     helm-autoresize-min-height           30
@@ -2672,8 +2689,6 @@
                     browse-url-netscape-program browse-url-galeon-program))
  
  (let ((etc (expand-file-name "etc" user-emacs-directory)))
-   (unless (file-directory-p etc)
-     (make-directory etc))
    (setq show-paren-style 'expression
          message-log-max 10000 ;; oriignal 1000
          shell-file-name "bash"
@@ -2719,8 +2734,11 @@
           (mode apropos-mode help-mode helpful-mode Info-mode
                 Man-mode)))
        display-buffer-alist)
- (push '(("*Help*" (window-parameters . ((dedicated . t))))) display-buffer-alist)
- 
+ (push '(("*Help*" (window-parameters . ((dedicated . t)))))
+display-buffer-alist)
+ (push "/home/arthur/repos/ready-lisp/doc/info" Info-directory-list)
+ (push "/home/arthur/repos/common-lisp-info" Info-directory-list)
+  
  (fset 'yes-or-no-p 'y-or-n-p)
  (electric-indent-mode 1)
  (electric-pair-mode 1)
@@ -2933,27 +2951,7 @@
 (with-package
  elisp-mode
  (require 'elisp-extras)
- (require 'helm-pages)
  ;;(require 'helm-extras)
- 
- ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
- ;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
- ;; 	              "System Name: "
- ;; 	              "
- ;; (eval-when (:compile-toplevel :load-toplevel :execute)
- ;;   (unless (find-package :" str ".system)
- ;;     (defpackage :" str ".system
- ;;       (:use :common-lisp :asdf))))
-
- ;; (in-package :" str ".system)
- ;; (defsystem :" str " 
- ;;   :description " ?\" (read-string "Description: ") ?\"" 
- ;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
- ;;   :licence \"" (read-string "License: ") "\" 
- ;;   :version \"" (read-string "Version: ") "\" 
- ;;   :components (()) 
- ;;   :depends-on ())") 
- ;;                     auto-insert-alist)
  
  (defkeys emacs-lisp-mode-map
           "\C-c a" emacs-lisp-byte-compile-and-load
@@ -2967,17 +2965,18 @@
           "\C-c i" reindent-buffer
           "\C-c p" fc-eval-and-replace
           "\C-c s" eval-surrounding-sexp))
+
+(with-package
+ lisp-mode
+ (require 'cl-extras))
+
 (with-hook
  emacs-lisp-mode
- (setq fill-column 80)
- (paredit-mode 1)
- (company-mode 1)
- (outshine-mode 1)
- (yas-minor-mode 1)
- (speed-of-thought-mode 1)
- (page-break-lines-mode 1)
- ;;(lisp-extra-font-lock-mode 1)
- )
+ (elisp-hooks))
+
+(with-hook
+ lisp-mode
+ (cl-hooks))
 #+end_src
 ** [ none  ] [x] package
 #+begin_src emacs-lisp
