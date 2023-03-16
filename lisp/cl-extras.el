@@ -41,30 +41,19 @@
 
 (add-to-list 'auto-insert-alist
              '(("\\.cl\\|\\.lisp\\'" . "CommonLisp header")
-               "Short description: "
-               ";;; " (file-name-nondirectory (buffer-file-name)) " --- " str
-               (make-string (max 2 (- 80 (current-column) 27)) ?\s)
-               "
+""
+";; " (file-name-nondirectory (buffer-file-name))
 
-;; Copyright (C) " (format-time-string "%Y") "  "
+\n
+
+";; Copyright (C) " (format-time-string "%Y") "  "
                (getenv "ORGANIZATION") | (progn user-full-name) "
 
 ;; Author: " (user-full-name)
                '(if (search-backward "&" (line-beginning-position) t)
                     (replace-match (capitalize (user-login-name)) t t))
                '(end-of-line 1) " <" (progn user-mail-address) ">
-;; Keywords: "
-               '(require 'finder)
-               ;;'(setq v1 (apply 'vector (mapcar 'car finder-known-keywords)))
-               '(setq v1 (mapcar (lambda (x) (list (symbol-name (car x))))
-		                 finder-known-keywords)
-	              v2 (mapconcat (lambda (x) (format "%12s:  %s" (car x) (cdr x)))
-	                            finder-known-keywords
-	                            "\n"))
-               ((let ((minibuffer-help-form v2))
-                  (completing-read "Keyword, C-h: " v1 nil t))
-                str ", ")
-               & -2 "
+;; Keywords: ""
 
 \;; This program is free software; you can redistribute it and/or modify
 \;; it under the terms of the GNU General Public License as published by

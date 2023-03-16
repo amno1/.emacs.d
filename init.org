@@ -60,6 +60,9 @@
 
 (load (expand-file-name "./lisp/package.el")) ;; use hacked-package.el
 
+(if (equal system-name "HP-Laptop")
+    (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
+
 (setq package-archives nil)
 (defvar site-archive '("local" . "/home/arthur/repos/"))
 (defvar org-archive '("org" . "https://orgmode.org/elpa/"))
@@ -337,6 +340,7 @@
   (emit-load-paths);; must be done after emiting hooks
   ;; fix init.el
   (append-to-init-file "\n;; Local Variables:\n")
+  (append-to-init-file ";; coding: utf-8\n")
   (append-to-init-file ";; byte-compile-warnings: '(not docstrings free-vars))\n")
   (append-to-init-file ";; End:\n")
   (clean-init-file))
@@ -468,8 +472,8 @@
           (aset package 5 (- (point) 1))
           ;; are we fetching from somewhere?
           (goto-char (aref package 5))
-          (when (re-search-backward "^[ \t].*GIT:" config-start t)
-            (search-forward "GIT:")
+          (when (re-search-backward "^[ \t].*Git:" config-start t)
+            (search-forward "Git:")
             (skip-chars-forward " \t")
             (setq start (point))
             (end-of-line)
@@ -890,7 +894,8 @@
                   "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?"
                   "[ \t]*$"))))
 
-(push "GIT" org-element-affiliated-keywords)
+(add-to-list 'org-element-affiliated-keywords "Git")
+
 ;; from J. Kitchin:
 ;; https://kitchingroup.cheme.cmu.edu/blog/2017/06/10/Adding-keymaps-to-src-blocks-via-org-font-lock-hook/
 (require 'org-mouse)
@@ -979,17 +984,6 @@
 (org-init-mode +1)
 #+end_src
 * Packages
-
-** [ local ] [x] org-super-links
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] easy-escape
-#+begin_src emacs-lisp
-
-#+end_src
-
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -1024,8 +1018,21 @@
 ** [ local ] [x] magit-gh-comments
 #+begin_src emacs-lisp
 #+end_src
+** [ local ] [x] org-super-links
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [ local ] [x] peep-dired
 #+begin_src emacs-lisp
+#+end_src
+** [ local ] [x] sly-package-inferred
+#+begin_src emacs-lisp
+
+#+end_src
+** [ local ] [x] sly-stepper
+#+begin_src emacs-lisp
+
 #+end_src
 ** [ local ] [x] speed-of-thought-lisp
 #+begin_src emacs-lisp
@@ -1333,6 +1340,11 @@
 ** [x] dumb-jump        
 #+begin_src emacs-lisp
 #+end_src
+** [x] easy-escape
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] ecukes
 #+begin_src emacs-lisp
 #+end_src
@@ -2318,6 +2330,10 @@
 #+end_src
 ** [x] paxedit
 #+begin_src emacs-lisp
+
+#+end_src
+** [x] paxedit
+#+begin_src emacs-lisp
 #+end_src
 ** [x] pfuture
 #+begin_src emacs-lisp
@@ -2416,11 +2432,19 @@
               (defkeys sly-prefix-map
                 "M-h" sly-documentation-lookup))
 #+end_src
+** [x] sly-asdf
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] sly-macrostep
 #+begin_src emacs-lisp
 #+end_src
 ** [x] sly-named-readtables
 #+begin_src emacs-lisp
+#+end_src
+** [x] sly-quicklisp
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] smart-jump        
 #+begin_src emacs-lisp
@@ -2433,8 +2457,9 @@
 #+end_src
 ** [x] solarized-theme        
 #+begin_src emacs-lisp
-     (with-hook after-init
-                (load-theme 'solarized-dark t))
+     (with-package
+      solarized
+      (load-theme 'solarized-dark t))
 #+end_src
 ** [x] sphinx-doc        
 #+begin_src emacs-lisp
@@ -2678,6 +2703,8 @@
 
  (with-system windows-nt
               ;; (global-disable-mouse-mode 1)
+              (when (equal system-name "HP-Laptop")
+                (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
               (setq w32-get-true-file-attributes nil
                     w32-pipe-read-delay 0
                     w32-pipe-buffer-size (* 64 1024)
@@ -2841,6 +2868,7 @@ display-buffer-alist)
             (add-hook 'comint-output-filter-functions
                       #'comint-watch-for-password-prompt))
  
+ (require 'solarized-theme)
  (setq gc-cons-threshold       default-gc-cons-threshold
        ;;gc-cons-percentage      0.1
        file-name-handler-alist old-file-name-handler))
@@ -2967,12 +2995,22 @@ display-buffer-alist)
           "\C-c s" eval-surrounding-sexp))
 
 (with-package
+ inf-lisp
+ (require 'sly)
+ (require 'cl-extras))
+
+(with-package
  lisp-mode
+ (require 'sly)
  (require 'cl-extras))
 
 (with-hook
  emacs-lisp-mode
  (elisp-hooks))
+
+(with-hook
+ inf-lisp
+ (cl-hooks))
 
 (with-hook
  lisp-mode
@@ -3064,4 +3102,6 @@ display-buffer-alist)
                 "M->"         dired-go-to-last
                 "M-p"         scroll-down-line))
 #+end_src
+
+
 
