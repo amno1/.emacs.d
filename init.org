@@ -984,6 +984,15 @@
 (org-init-mode +1)
 #+end_src
 * Packages
+** [ local ] [x] clede
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] wgrep
+#+begin_src emacs-lisp
+
+#+end_src
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
@@ -997,14 +1006,19 @@
  dired-auto-readme
  (add-to-list 'dired-auto-readme-alist
               '(org-mode . (lambda ()
-                                   (org-toggle-pretty-entities)
-                                   (setq org-link-descriptive t)
-                                   (org-pretty-table-mode)
-                                   (org-display-inline-images t t)
-                                   (org-view-mode))))
- (add-to-list 'dired-auto-readme-alist '(markdown-mode . (lambda ()
-                                                           (markdown-view-mode)
-                                                           (font-lock-ensure)))))
+                             (org-toggle-pretty-entities)
+                             ;; (setq org-descriptive-links t)
+                             (org-toggle-link-display)
+                             (org-pretty-table-mode t)
+                             (org-display-inline-images t t)
+                             (font-lock-mode +1)
+                             (font-lock-ensure)
+                             (org-view-mode))))
+ (add-to-list 'dired-auto-readme-alist
+              '(markdown-mode . (lambda ()
+                                  (font-lock-mode +1)
+                                  (font-lock-ensure)
+                                  (markdown-view-mode)))))
 #+end_src
 ** [ local ] [x] dired-git-log
 #+begin_src emacs-lisp
@@ -1208,23 +1222,23 @@
                       company-require-match         nil
                       company-minimum-prefix-length 2
                       company-show-quick-access     t
-                      company-tooltip-limit         20
-                      company-async-timeout         6
+                      company-tooltip-limit         30
+                      company-async-timeout         10
                       company-dabbrev-downcase      nil
                       tab-always-indent 'complete
                       company-global-modes '(not term-mode)
-                      company-backends (delete 'company-semantic
-                                               company-backends))
+                      company-backends (delete 'company-semantic company-backends))
               
                 (setq company-backends '(company-capf
                                          company-keywords
                                          company-semantic
-                                         company-files
+                                         ;; company-files
                                          company-etags
                                          company-elisp
                                          company-clang
                                          company-ispell
-                                         company-yasnippet))
+                                         company-yasnippet
+                                         ))
                 (define-key company-mode-map
                   [remap indent-for-tab-command] 'company-indent-or-complete-common)
                 (defkeys company-active-map
@@ -1657,17 +1671,17 @@
                                       :box nil
                                       :height 0.1)))
               ;; https://xenodium.com/change-emacs-shells-cwd-with-helm-projectile/
-              (require 'helm-projectile)
-              (defun shell-cd (dir-path)
-                "Like shell-pop--cd-to-cwd-shell, but without recentering."
-                (unless (string-equal mode-name "Shell")
-                  (error "Not in Shell mode"))
-                (message mode-name)
-                (goto-char (point-max))
-                (comint-kill-input)
-                (insert (concat "cd " (shell-quote-argument dir-path)))
-                (let ((comint-process-echoes t))
-                  (comint-send-input)))
+              ;; (require 'helm-projectile)
+              ;; (defun shell-cd (dir-path)
+              ;;   "Like shell-pop--cd-to-cwd-shell, but without recentering."
+              ;;   (unless (string-equal mode-name "Shell")
+              ;;     (error "Not in Shell mode"))
+              ;;   (message mode-name)
+              ;;   (goto-char (point-max))
+              ;;   (comint-kill-input)
+              ;;   (insert (concat "cd " (shell-quote-argument dir-path)))
+              ;;   (let ((comint-process-echoes t))
+              ;;     (comint-send-input)))
               ;; (defun helm-projectile-shell-cd ()
               ;;   "Change shell current working directory using helm projectile."
               ;;   (interactive)
@@ -1692,16 +1706,16 @@
               
               (setq helm-completion-style             'emacs
                     helm-display-header-line              nil
-                    helm-completion-in-region-fuzzy-match t
-                    helm-recentf-fuzzy-match              t
-                    helm-buffers-fuzzy-matching           t
-                    helm-locate-fuzzy-match               t
-                    helm-lisp-fuzzy-completion            t
-                    helm-session-fuzzy-match              t
-                    helm-apropos-fuzzy-match              t
-                    helm-imenu-fuzzy-match                t
-                    helm-semantic-fuzzy-match             t
-                    helm-M-x-fuzzy-match                  t
+                    ;; helm-completion-in-region-fuzzy-match t
+                    ;; helm-recentf-fuzzy-match              t
+                    ;; helm-buffers-fuzzy-matching           t
+                    ;; helm-locate-fuzzy-match               t
+                    ;; helm-lisp-fuzzy-completion            t
+                    ;; helm-session-fuzzy-match              t
+                    ;; helm-apropos-fuzzy-match              t
+                    ;; helm-imenu-fuzzy-match                t
+                    ;; helm-semantic-fuzzy-match             t
+                    ;; helm-M-x-fuzzy-match                  t
                     helm-split-window-inside-p            t
                     helm-move-to-line-cycle-in-source     t
                     helm-ff-search-library-in-sexp        t
@@ -1777,9 +1791,9 @@
                     "C-z C-b" helm-git-local-branches
                     "C-z SPC" helm-all-mark-rings))
 (with-hook helm-mode
+           ;; (helm-flx-mode +1)
            (diminish 'helm-mode)
-           (helm-adaptive-mode 1)
-           (helm-flx-mode +1))
+           (helm-adaptive-mode 1))
 #+end_src
 ** [x] helm-ag        
 #+begin_src emacs-lisp
@@ -2687,191 +2701,191 @@
 #+end_src
 ** [ none  ] [x] emacs
 #+begin_src emacs-lisp
-(with-hook text-mode (setq fill-column 80))
-(with-hook abbrev-mode (diminish 'abbrev-mode))
-(with-hook auto-complete-mode (diminish 'auto-complete-mode))
-(with-hook auto-fill-mode (diminish 'auto-fill-function))
-(with-hook auto-insert-mode (diminish 'auto-insert-mode))
-(with-hook edit-abbrevs-mode (diminish 'abbrev-mode))
-(with-hook eldoc-mode (diminish 'eldoc-mode))
-(with-hook electric-pair-mode (diminish 'electric-pair-mode))
-(with-hook subword-mode (diminish 'subword-mode))
-(with-hook wrap-region-mode (diminish 'wrap-region-mode))
-(with-hook winner-mode (diminish 'winner-mode))
-(with-hook
- after-init
-
- (with-system windows-nt
-              ;; (global-disable-mouse-mode 1)
-              (when (equal system-name "HP-Laptop")
-                (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
-              (setq w32-get-true-file-attributes nil
-                    w32-pipe-read-delay 0
-                    w32-pipe-buffer-size (* 64 1024)
-                    ;;package-gnupghome-dir "c:/Users/arthu/.emacs.d/elpa/gnupg"
-                    source-directory "c:/emacs/emsrc/emacs"
-                    command-line-x-option-alist nil
-                    command-line-ns-option-alist nil
-                    browse-url-galeon-program (getenv "BROWSER")
-                    browse-url-netscape-program browse-url-galeon-program))
+  (with-hook text-mode (setq fill-column 80))
+  (with-hook abbrev-mode (diminish 'abbrev-mode))
+  (with-hook auto-complete-mode (diminish 'auto-complete-mode))
+  (with-hook auto-fill-mode (diminish 'auto-fill-function))
+  (with-hook auto-insert-mode (diminish 'auto-insert-mode))
+  (with-hook edit-abbrevs-mode (diminish 'abbrev-mode))
+  (with-hook eldoc-mode (diminish 'eldoc-mode))
+  (with-hook electric-pair-mode (diminish 'electric-pair-mode))
+  (with-hook subword-mode (diminish 'subword-mode))
+  (with-hook wrap-region-mode (diminish 'wrap-region-mode))
+  (with-hook winner-mode (diminish 'winner-mode))
+  (with-hook
+   after-init
+   (with-system windows-nt
+		;; (global-disable-mouse-mode 1)
+		(when (equal system-name "HP-Laptop")
+		  (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
+		(setq w32-get-true-file-attributes nil
+		      w32-pipe-read-delay 0
+		      w32-pipe-buffer-size (* 64 1024)
+		      ;;package-gnupghome-dir "c:/Users/arthu/.emacs.d/elpa/gnupg"
+		      source-directory "c:/emacs/emsrc/emacs"
+		      command-line-x-option-alist nil
+		      command-line-ns-option-alist nil
+		      browse-url-galeon-program (getenv "BROWSER")
+		      browse-url-netscape-program browse-url-galeon-program))
  
- (let ((etc (expand-file-name "etc" user-emacs-directory)))
-   (setq show-paren-style 'expression
-         message-log-max 10000 ;; oriignal 1000
-         shell-file-name "bash"
-         shell-command-switch "-ic"
-         delete-exited-processes t
-         echo-keystrokes 0.1
-         create-lock-files nil
-         winner-dont-bind-my-keys t
-         auto-windo-vscroll nil
-         split-width-threshold 0
-         split-height-threshold nil
-         require-final-newline t
-         next-line-add-newlines t
-         bookmark-save-flag 1
-         delete-selection-mode t
-         initial-major-mode 'emacs-lisp-mode
-         confirm-kill-processes nil
-         help-enable-symbol-autoload t
-         large-file-warning-threshold nil
-         save-abbrevs 'silent
-         save-interprogram-paste-before-kill t
-         save-place-file (expand-file-name "places" etc)
-         max-lisp-eval-depth '100000
-         max-specpdl-size '1000000
-         scroll-preserve-screen-position 'always
-         scroll-conservatively 1
-         maximum-scroll-margin 1
-         mouse-autoselect-window t
-         scroll-margin 0
-         make-backup-files nil
-         kill-buffer-delete-auto-save-files t
-         backup-directory-alist `(("." . ,etc))
-         custom-file (expand-file-name "custom.el" etc)
-         abbrev-file-name (expand-file-name "abbrevs.el" etc)
-         bookmark-default-file (expand-file-name "bookmarks" etc)))
+   (let ((etc (expand-file-name "etc" user-emacs-directory)))
+     (setq show-paren-style 'expression
+	   message-log-max 10000 ;; oriignal 1000
+	   undo-outer-limit 37000000
+	   shell-file-name "bash"
+	   shell-command-switch "-ic"
+	   delete-exited-processes t
+	   echo-keystrokes 0.1
+	   create-lock-files nil
+	   winner-dont-bind-my-keys t
+	   auto-windo-vscroll nil
+	   split-width-threshold 0
+	   split-height-threshold nil
+	   require-final-newline t
+	   next-line-add-newlines t
+	   bookmark-save-flag 1
+	   delete-selection-mode t
+	   initial-major-mode 'emacs-lisp-mode
+	   confirm-kill-processes nil
+	   help-enable-symbol-autoload t
+	   large-file-warning-threshold nil
+	   save-abbrevs 'silent
+	   save-interprogram-paste-before-kill t
+	   save-place-file (expand-file-name "places" etc)
+	   max-lisp-eval-depth '100000
+	   max-specpdl-size '1000000
+	   scroll-preserve-screen-position 'always
+	   scroll-conservatively 1
+	   maximum-scroll-margin 1
+	   mouse-autoselect-window t
+	   scroll-margin 0
+	   make-backup-files nil
+	   kill-buffer-delete-auto-save-files t
+	   backup-directory-alist `(("." . ,etc))
+	   custom-file (expand-file-name "custom.el" etc)
+	   abbrev-file-name (expand-file-name "abbrevs.el" etc)
+	   bookmark-default-file (expand-file-name "bookmarks" etc)))
  
- (push '("\\*Compile-Log\\*" (display-buffer-no-window)) display-buffer-alist)
- (push `((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*")
-               (0+ not-newline))
-          (display-buffer-same-window
-           display-buffer-reuse-mode-window
-           display-buffer-pop-up-window)
-          (mode apropos-mode help-mode helpful-mode Info-mode
-                Man-mode)))
-       display-buffer-alist)
- (push '(("*Help*" (window-parameters . ((dedicated . t)))))
-display-buffer-alist)
- (push "/home/arthur/repos/ready-lisp/doc/info" Info-directory-list)
- (push "/home/arthur/repos/common-lisp-info" Info-directory-list)
+   (push '("\\*Compile-Log\\*" (display-buffer-no-window)) display-buffer-alist)
+   (push `((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*")
+		 (0+ not-newline))
+	    (display-buffer-same-window
+	     display-buffer-reuse-mode-window
+	     display-buffer-pop-up-window)
+	    (mode apropos-mode help-mode helpful-mode Info-mode
+		  Man-mode)))
+	 display-buffer-alist)
+   (push '(("*Help*" (window-parameters . ((dedicated . t)))))
+  display-buffer-alist)
+   (push "/home/arthur/repos/ready-lisp/doc/info" Info-directory-list)
+   (push "/home/arthur/repos/common-lisp-info" Info-directory-list)
   
- (fset 'yes-or-no-p 'y-or-n-p)
- (electric-indent-mode 1)
- (electric-pair-mode 1)
- (global-auto-revert-mode)
- (global-hl-line-mode 1)
- (global-subword-mode 1)
- (auto-compression-mode 1)
- (auto-image-file-mode)
- (auto-insert-mode 1)
- (auto-save-visited-mode 1)
- (blink-cursor-mode 1)
- (column-number-mode 1)
- (delete-selection-mode 1)
- (display-time-mode 1)
- (pending-delete-mode 1)
- (show-paren-mode t)
- (save-place-mode 1)
- (winner-mode t)
- (turn-on-auto-fill)
- (pixel-scroll-precision-mode +1)
+   (fset 'yes-or-no-p 'y-or-n-p)
+   (electric-indent-mode 1)
+   (electric-pair-mode 1)
+   (global-auto-revert-mode)
+   (global-hl-line-mode 1)
+   (global-subword-mode 1)
+   (auto-compression-mode 1)
+   (auto-image-file-mode)
+   (auto-insert-mode 1)
+   (auto-save-visited-mode 1)
+   (blink-cursor-mode 1)
+   (column-number-mode 1)
+   (delete-selection-mode 1)
+   (display-time-mode 1)
+   (pending-delete-mode 1)
+   (show-paren-mode t)
+   (save-place-mode 1)
+   (winner-mode t)
+   (turn-on-auto-fill)
+   (pixel-scroll-precision-mode +1)
  
- (defkeys global-map
-          "C-<insert>"    term-toggle-term
-          "<insert>"      term-toggle-eshell
-          "C-v C-t"       term-toggle-ielm
-          [f9]            ispell-word
-          [S-f10]         next-buffer
-          [C-enter]       other-window
-          [M-S-f10]       next-buffer-other-window
-          [f8]            last-buffer
-          [f10]           previous-buffer
-          [M-f10]         previous-buffer-other-window
-          [M-f12]         kill-buffer-other-window
-          [f12]           kill-buffer-but-not-some
-          [C-M-f12]       only-current-buffer
-          [C-return]      other-window
-          "C-;"           do-in-other-window
-          "C-M-:"         do-to-this-in-other-window
-          "C-:"           do-to-this-and-stay-in-other-window
-          ;; Emacs windows
-          "C-v <left>"   windmove-swap-states-left
-          "C-v <right>"  windmove-swap-states-right
-          "C-v <up>"     windmove-swap-states-up
-          "C-v <down>"   windmove-swap-states-down
-          "C-v o"        other-window
-          "C-v j"        windmove-left
-          "C-v l"        windmove-right
-          "C-v i"        windmove-up
-          "C-v k"        windmove-down
-          "C-v a"        send-to-window-left
-          "C-v d"        send-to-window-right
-          "C-v w"        send-to-window-up
-          "C-v s"        send-to-window-down
-          ;; "C-v v"        maximize-window-vertically
-          ;; "C-v h"        maximize-window-horizontally
-          "C-v n"        next-buffer
-          "C-v p"        previous-buffer
-          "C-v +"        text-scale-increase
-          "C-v -"        text-scale-decrease
-          "C-v C-+"      enlarge-window-horizontally
-          "C-v C-,"      enlarge-window-vertically
-          "C-v C--"      shrink-window-horizontally
-          "C-v C-."      shrink-window-vertically
-          "C-v u"        winner-undo
-          "C-v r"        winner-redo
-          "C-v C-k"      delete-window
-          "C-v C-l"      windmove-delete-left
-          "C-v C-r"      windmove-delete-right
-          "C-v C-a"      windmove-delete-up
-          "C-v C-b"      windmove-delete-down
-          "C-v <return>" delete-other-windows
-          "C-v ,"        split-window-right
-          "C-v ."        split-window-below
-          ;;"C-h M-i"      help-toggle-source-view
-          ;; "C-v C-s"      swap-two-buffers
-          [remap other-window]  ace-window
-          [remap find-file-other-window]  ff-other-window          
-          ;; cursor movement
-          "M-n"     scroll-up-line
-          "M-N"     scroll-up-command
-          "M-p"     scroll-down-line
-          "M-P"     scroll-down-command
-          "C-v c"   org-capture
-          "C-v C-c" avy-goto-char
-          "C-v C-v" avy-goto-word-1
-          "C-v C-w" avy-goto-word-0
-          "C-v C-g" avy-goto-line
-          ;; some random stuff
-          "C-h C-i" (lambda() 
-                      (interactive)
-                      (find-file (expand-file-name
-                                  "init.org"
-                                  user-emacs-directory))))
+   (defkeys global-map
+	    "C-<insert>"    term-toggle-term
+	    "<insert>"      term-toggle-eshell
+	    "C-v C-t"       term-toggle-ielm
+	    [f9]            ispell-word
+	    [S-f10]         next-buffer
+	    [C-enter]       other-window
+	    [M-S-f10]       next-buffer-other-window
+	    [f8]            last-buffer
+	    [f10]           previous-buffer
+	    [M-f10]         previous-buffer-other-window
+	    [M-f12]         kill-buffer-other-window
+	    [f12]           kill-buffer-but-not-some
+	    [C-M-f12]       only-current-buffer
+	    [C-return]      other-window
+	    "C-;"           do-in-other-window
+	    "C-M-:"         do-to-this-in-other-window
+	    "C-:"           do-to-this-and-stay-in-other-window
+	    ;; Emacs windows
+	    "C-v <left>"   windmove-swap-states-left
+	    "C-v <right>"  windmove-swap-states-right
+	    "C-v <up>"     windmove-swap-states-up
+	    "C-v <down>"   windmove-swap-states-down
+	    "C-v o"        other-window
+	    "C-v j"        windmove-left
+	    "C-v l"        windmove-right
+	    "C-v i"        windmove-up
+	    "C-v k"        windmove-down
+	    "C-v a"        send-to-window-left
+	    "C-v d"        send-to-window-right
+	    "C-v w"        send-to-window-up
+	    "C-v s"        send-to-window-down
+	    ;; "C-v v"        maximize-window-vertically
+	    ;; "C-v h"        maximize-window-horizontally
+	    "C-v n"        next-buffer
+	    "C-v p"        previous-buffer
+	    "C-v +"        text-scale-increase
+	    "C-v -"        text-scale-decrease
+	    "C-v C-+"      enlarge-window-horizontally
+	    "C-v C-,"      enlarge-window-vertically
+	    "C-v C--"      shrink-window-horizontally
+	    "C-v C-."      shrink-window-vertically
+	    "C-v u"        winner-undo
+	    "C-v r"        winner-redo
+	    "C-v C-k"      delete-window
+	    "C-v C-l"      windmove-delete-left
+	    "C-v C-r"      windmove-delete-right
+	    "C-v C-a"      windmove-delete-up
+	    "C-v C-b"      windmove-delete-down
+	    "C-v <return>" delete-other-windows
+	    "C-v ,"        split-window-right
+	    "C-v ."        split-window-below
+	    ;;"C-h M-i"      help-toggle-source-view
+	    ;; "C-v C-s"      swap-two-buffers
+	    [remap other-window]  ace-window
+	    [remap find-file-other-window]  ff-other-window          
+	    ;; cursor movement
+	    "M-n"     scroll-up-line
+	    "M-N"     scroll-up-command
+	    "M-p"     scroll-down-line
+	    "M-P"     scroll-down-command
+	    "C-v c"   org-capture
+	    "C-v C-c" avy-goto-char
+	    "C-v C-v" avy-goto-word-1
+	    "C-v C-w" avy-goto-word-0
+	    "C-v C-g" avy-goto-line
+	    ;; some random stuff
+	    "C-h C-i" (lambda() 
+			(interactive)
+			(find-file (expand-file-name
+				    "init.org"
+				    user-emacs-directory))))
  
- (when-idle (require 'extras))
- (when-idle (require 'sv-kalender)
-            ;;(add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
-            (when (and custom-file (file-exists-p custom-file))
-              (load custom-file 'noerror))
-            (add-hook 'comint-output-filter-functions
-                      #'comint-watch-for-password-prompt))
+   (when-idle (require 'extras))
+   (when-idle (require 'sv-kalender)
+	      ;;(add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
+	      (when (and custom-file (file-exists-p custom-file))
+		(load custom-file 'noerror))
+	      (add-hook 'comint-output-filter-functions
+			#'comint-watch-for-password-prompt))
  
- (require 'solarized-theme)
- (setq gc-cons-threshold       default-gc-cons-threshold
-       ;;gc-cons-percentage      0.1
-       file-name-handler-alist old-file-name-handler))
+   (require 'solarized-theme)
+   (setq gc-cons-threshold       default-gc-cons-threshold
+	 ;;gc-cons-percentage      0.1
+	 file-name-handler-alist old-file-name-handler))
 #+end_src
 ** [ none  ] [x] emacs-director
   #+GIT: https://github.com/bard/emacs-director

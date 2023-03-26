@@ -242,8 +242,7 @@ newly-created file's Dired entry with the character MARKER-CHAR,
 or with the current marker character if MARKER-CHAR is t."
   (let (dired-create-files-failures failures
     skipped (success-count 0) (total (length fn-list)))
-    (let (to overwrite-query
-         _overwrite-backup-query)    ; for dired-handle-overwrite
+    (let (to)    ; for dired-handle-overwrite
       (dolist (from fn-list)
         ;; Position point on the current file -- this is useful if
         ;; handling a number of files to show where we're working at.
@@ -374,6 +373,8 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
                           (getenv "BROWSER")
                           '(file))))
   (add-to-list 'openwith-associations ext))
+
+(add-hook 'dired-mode-hook 'auto-revert-mode)
 
 (provide 'dired-setup)
 ;;; dired-setup.el ends here

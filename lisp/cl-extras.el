@@ -31,9 +31,9 @@
 
 (defun cl-hooks ()  
   (setq fill-column 80)
-  (paredit-mode 1)
-  (company-mode 1)
-  (outshine-mode 1)
+;;  (paredit-mode 1)
+  ;;(company-mode 1)
+;;  (outshine-mode 1)
   (yas-minor-mode 1)
   ;;(lisp-extra-font-lock-mode 1)
   (speed-of-thought-mode 1)
@@ -79,6 +79,28 @@
 ""
 \;;; " (file-name-nondirectory (buffer-file-name)) " ends here\n"))
 
+
+;;; A template for ASDF system files:
+;; https://www.emacswiki.org/emacs/auto-insert-for-asdf
+(push `(("\\.asd\\'" . "ASDF Skeleton") 
+	"System Name: "
+	"
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (unless (find-package :" str ".system)
+    (defpackage :" str ".system
+      (:use :common-lisp :asdf))))
+
+
+(in-package :" str ".system)
+
+(defsystem :" str " 
+  :description " ?\" (read-string "Description: ") ?\"" 
+  :author \"" (user-full-name) " <" user-mail-address ">\" 
+  :licence \"" (read-string "License: ") "\" 
+  :version \"" (read-string "Version: ") "\" 
+  :components (()) 
+  :depends-on ())") 
+  auto-insert-alist) 
 
 (provide 'cl-extras)
 ;;; cl-extrasl.el ends here

@@ -24,11 +24,12 @@
 
 ;;; Code:
 
-(require 'paredit)
+;;(require 'paredit)
 (require 'sotlisp)
-(require 'company)
-(require 'outshine)
+;;(require 'company)
+;;(require 'outshine)
 (require 'yasnippet)
+(require 'page-break-lines)
 (require 'helm-pages)
 
 ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
@@ -119,7 +120,7 @@
 (defun elisp-hooks ()
   (setq fill-column 80)
   (paredit-mode 1)
-  (company-mode 1)
+;;  (company-mode 1)
   (outshine-mode 1)
   (yas-minor-mode 1)
   (speed-of-thought-mode 1)
