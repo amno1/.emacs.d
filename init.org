@@ -241,19 +241,19 @@
                                ")\n")
                        "early-init.el"))
 
-(defun quoted (sym)
+(defun quotedp (sym)
   (if (and (consp sym) (eq (car sym) 'quote))
       sym `(quote ,sym)))
 
 (defun interactivep (form)
-  "Weather form is an interactive command."
+  "Wether form is an interactive command."
   (catch 'interactive
     (dolist (sxp form)
       (and (listp sxp) (equal 'interactive (car sxp))
            (throw 'interactive t)))))
 
 (defun macro-p (form)
-  "Weather FORM isn a macro definition."
+  "Wether FORM is a macro definition."
   (equal (car form) 'defmacro))
 
 (defun collect-autoloads (src)
@@ -267,7 +267,7 @@
         (setq sxp nil sym nil)
         (setq sxp (ignore-errors (read (current-buffer))))
         (when (listp sxp)
-          (setq sym (quoted (cadr sxp))
+          (setq sym (quotedp (cadr sxp))
                 interactive (interactivep sxp)
                 macro (macro-p sxp)
                 file (file-name-nondirectory src))
@@ -298,7 +298,8 @@
                  (append ',package-activated-list
                          package-activated-list))
           (current-buffer)))
-    (kill-buffer (get-buffer-create "*ql-buffer*"))))
+    (kill-buffer (get-buffer-create "*ql-buffer*")))
+  (message "gen autoloads done"))
 
 (defun emit-autoloads ()
   (message "Emiting autoloads")
@@ -366,13 +367,14 @@
     ;; always produce elc file
     (byte-compile-file tangled-file)
     (verbose "Byte compiled %s" tangled-file)
-    (when (featurep 'comp)
+    (when (featurep 'native-compile)
       (native-compile tangled-file)
       (verbose "Tangled and compiled %s" tangled-file))
   (verbose "Done.")
   (message "Compiling early-init.el ...")
   (byte-compile-file (expand-file-name "early-init.el"  user-emacs-directory))
   (message "Done.")))
+
 (defun install-file (file)
   (when (file-exists-p file)
     (unless (equal (file-name-directory buffer-file-name)
@@ -534,7 +536,7 @@
   (generate-init-files)
   (install-init-files))
 
-(defalias 'version-lt 'version-list-<)
+(defalias 'vlt 'version-list-<)
 (defun org-init-update-packages ()
   (interactive)
   (package-refresh-contents)
@@ -542,7 +544,7 @@
     (let* ((new (cadr (assq package package-archive-contents)))
            (old (cadr (assq package package-alist)))
            to-install)
-      (when (and new old (version-lt (package-desc-version old) (package-desc-version new)))
+      (when (and new old (vlt (package-desc-version old) (package-desc-version new)))
         (setq to-install
               (package-compute-transaction (list new) (package-desc-reqs new)))
         (message "Installing package: %S" (package-desc-dir new))
@@ -984,19 +986,25 @@
 (org-init-mode +1)
 #+end_src
 * Packages
-** [ local ] [x] clede
+** [ local ] [ ] dired-git-log
 #+begin_src emacs-lisp
-
+(with-hook dired-git-log-mode
+           (diminish 'dired-git-log-mode))
 #+end_src
 
-** [x] wgrep
-#+begin_src emacs-lisp
-
-#+end_src
 ** [ local ] [ ] emacs-vision
 #+begin_src emacs-lisp
 (with-eval-after-load 'emacs-vision
   (load "~/apikeys"))
+#+end_src
+** [ local ] [ ] helper
+#+begin_src emacs-lisp
+#+end_src
+** [ local ] [ ] magit-gh-comments
+#+begin_src emacs-lisp
+#+end_src
+** [ local ] [x] clede
+#+begin_src emacs-lisp
 #+end_src
 ** [ local ] [x] dired-auto-readme
 #+begin_src emacs-lisp
@@ -1006,31 +1014,18 @@
  dired-auto-readme
  (add-to-list 'dired-auto-readme-alist
               '(org-mode . (lambda ()
+                             ;;(org-toggle-link-display)
                              (org-toggle-pretty-entities)
-                             ;; (setq org-descriptive-links t)
-                             (org-toggle-link-display)
-                             (org-pretty-table-mode t)
-                             (org-display-inline-images t t)
-                             (font-lock-mode +1)
-                             (font-lock-ensure)
+                             ;;(org-pretty-table-mode)
+                             ;;(org-display-inline-images t t)
+                             (org-fold-core-initialize)
                              (org-view-mode))))
+ 
  (add-to-list 'dired-auto-readme-alist
               '(markdown-mode . (lambda ()
-                                  (font-lock-mode +1)
-                                  (font-lock-ensure)
+                                  ;;(font-lock-mode +1)
+                                  ;;(font-lock-ensure)
                                   (markdown-view-mode)))))
-#+end_src
-** [ local ] [x] dired-git-log
-#+begin_src emacs-lisp
-(with-hook dired-git-log-mode
-           (diminish 'dired-git-log-mode))
-#+end_src
-
-** [ local ] [x] helper
-#+begin_src emacs-lisp
-#+end_src
-** [ local ] [x] magit-gh-comments
-#+begin_src emacs-lisp
 #+end_src
 ** [ local ] [x] org-super-links
 #+begin_src emacs-lisp
@@ -1052,6 +1047,19 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [ ] borg
+#+begin_src emacs-lisp
+#+end_src
+** [ ] bui
+#+begin_src emacs-lisp
+#+end_src
+** [ ] corfu
+#+begin_src emacs-lisp
+
+#+end_src
+** [ ] dired-git.el
+#+begin_src emacs-lisp
+#+end_src
 ** [ ] doc-show-inline
 #+begin_src emacs-lisp
 (with-package doc-show-inline
@@ -1062,12 +1070,52 @@
 (with-hook c-mode (doc-show-inline-mode +1))
 (with-hook c++-mode (doc-show-inline-mode +1))
 #+end_src
+** [ ] elpy        
+#+begin_src emacs-lisp
+  (with-package elpy
+                (elpy-enable)
+                (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+              
+                (defkeys elpy-mode-map
+                  "C-M-n" elpy-nav-forward-block
+                  "C-M-p" elpy-nav-backward-block))
+  (with-hook elpy-mode
+             ;;(company-mode 1)           
+             (flycheck-mode 1)
+             ;;(make-local-variable 'company-backends)
+             ;;(setq company-backends '((elpy-company-backend :with company-yasnippet)))
+             )
+#+end_src
+** [ ] espuds
+#+begin_src emacs-lisp
+#+end_src
+** [ ] esup        
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-exchange
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-matchit
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-multiedit
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-snipe
+#+begin_src emacs-lisp
+#+end_src
 ** [ ] keg
 #+begin_src emacs-lisp
 (with-hook
  after-init
  (setenv "PATH" (concat (getenv "PATH")
                         ":" (package-desc-dir (package-get-descriptor 'keg)))))
+#+end_src
+** [ ] lispy
+#+begin_src emacs-lisp
 #+end_src
 ** [ ] org-noter-pdftools
 #+begin_src emacs-lisp
@@ -1087,6 +1135,13 @@
        (with-package pdf-tools
                      ;;(pdf-tools-install)
                      (setq-default pdf-view-display-size 'fit-page)))
+#+end_src
+** [ ] rainbow-mode
+#+begin_src emacs-lisp
+#+end_src
+
+** [ ] run-command
+#+begin_src emacs-lisp
 #+end_src
 ** [x] academic-phrases
 #+begin_src emacs-lisp
@@ -1160,13 +1215,7 @@
 #+begin_src emacs-lisp
 #+end_src
 
-** [x] borg
-#+begin_src emacs-lisp
-#+end_src
 ** [x] bug-hunter
-#+begin_src emacs-lisp
-#+end_src
-** [x] bui
 #+begin_src emacs-lisp
 #+end_src
 ** [x] cfrs
@@ -1282,10 +1331,6 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] corfu
-#+begin_src emacs-lisp
-
-#+end_src
 ** [x] crux
 #+begin_src emacs-lisp
 #+end_src
@@ -1317,9 +1362,6 @@
 
 #+end_src
 
-** [x] dired-git.el
-#+begin_src emacs-lisp
-#+end_src
 ** [x] dired-hacks-utils        
 #+begin_src emacs-lisp
 #+end_src
@@ -1331,15 +1373,15 @@
 #+end_src
 ** [x] dired-rsync
 #+begin_src emacs-lisp
-  (with-hook after-init (when-idle (require 'dired-async)))
-  (with-package dired (require 'dired-async))
+(with-hook after-init (when-idle (require 'dired-async)))
+(with-package dired (require 'dired-async))
 #+end_src
 ** [x] dired-subtree
 #+begin_src emacs-lisp
-  (with-hook after-init (when-idle (require 'dired-subtree)))
-  (with-package dired-subtree
-                (setq dired-subtree-line-prefix "    "
-                      dired-subtree-use-backgrounds nil))
+(with-hook after-init (when-idle (require 'dired-subtree)))
+(with-package dired-subtree
+              (setq dired-subtree-line-prefix "    "
+                    dired-subtree-use-backgrounds nil))
 #+end_src
 ** [x] d-mode
 #+begin_src emacs-lisp
@@ -1377,22 +1419,6 @@
 #+end_src
 ** [x] elnode
 #+begin_src emacs-lisp
-#+end_src
-** [x] elpy        
-#+begin_src emacs-lisp
-  (with-package elpy
-                (elpy-enable)
-                (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-              
-                (defkeys elpy-mode-map
-                  "C-M-n" elpy-nav-forward-block
-                  "C-M-p" elpy-nav-backward-block))
-  (with-hook elpy-mode
-             ;;(company-mode 1)           
-             (flycheck-mode 1)
-             ;;(make-local-variable 'company-backends)
-             ;;(setq company-backends '((elpy-company-backend :with company-yasnippet)))
-             )
 #+end_src
 ** [x] el-search
 #+begin_src emacs-lisp
@@ -1435,14 +1461,8 @@
               (emms-history-load)
               (emms-default-players)
               (helm-mode 1)
-              ;;(emms-mode-line 1)
-              ;;(emms-playing-time-mode 1)
               (setq-default emms-player-list '(emms-player-mpv)
                             emms-player-mpv-environment '("PULSE_PROP_media.role=music"))
-              ;;emms-player-mpv-ipc-method nil)
-              ;; emms-player-mpv-debug t
-              ;;     emms-player-mpv-environment '("PULSE_PROP_media.role=music")
-              ;;     emms-player-mpv-parameters '("--quiet" "--really-quiet" "--no-audio-display" "--force-window=no" "--vo=null"))
               
               (setq emms-source-file-default-directory (expand-file-name "~/Musik"))
               (setq emms-directory (expand-file-name "etc/emms/" user-emacs-directory)
@@ -1502,28 +1522,7 @@
 ** [x] ert-runner
 #+begin_src emacs-lisp
 #+end_src
-** [x] espuds
-#+begin_src emacs-lisp
-#+end_src
-** [x] esup        
-#+begin_src emacs-lisp
-#+end_src
 ** [x] esxml
-#+begin_src emacs-lisp
-#+end_src
-** [x] evil
-#+begin_src emacs-lisp
-#+end_src
-** [x] evil-exchange
-#+begin_src emacs-lisp
-#+end_src
-** [x] evil-matchit
-#+begin_src emacs-lisp
-#+end_src
-** [x] evil-multiedit
-#+begin_src emacs-lisp
-#+end_src
-** [x] evil-snipe
 #+begin_src emacs-lisp
 #+end_src
 ** [x] ewmctrl
@@ -1559,7 +1558,6 @@
  (setq flycheck-languagetool-server-jar
        "/usr/share/java/languagetool/languagetool-server.jar"))
 #+end_src
-
 ** [x] flycheck-package
 #+begin_src emacs-lisp
 #+end_src
@@ -1574,8 +1572,7 @@
 (with-hook
  geiser-guile
  (require 'sc-extras)
- (setq geiser-repl-use-other-window nil))
-           
+ (setq geiser-repl-use-other-window nil))           
 #+end_src
 ** [x] geiser-racket
 #+begin_src emacs-lisp
@@ -1614,8 +1611,8 @@
 #+end_src
 ** [x] google-c-style        
 #+begin_src emacs-lisp
-     (with-hook google-c-style-mode
-                (diminish 'google-c-style-mode))
+(with-hook google-c-style-mode
+           (diminish 'google-c-style-mode))
 #+end_src
 ** [x] goto-last-change        
 #+begin_src emacs-lisp
@@ -1670,39 +1667,6 @@
                                       :background (face-attribute 'helm-selection :background)
                                       :box nil
                                       :height 0.1)))
-              ;; https://xenodium.com/change-emacs-shells-cwd-with-helm-projectile/
-              ;; (require 'helm-projectile)
-              ;; (defun shell-cd (dir-path)
-              ;;   "Like shell-pop--cd-to-cwd-shell, but without recentering."
-              ;;   (unless (string-equal mode-name "Shell")
-              ;;     (error "Not in Shell mode"))
-              ;;   (message mode-name)
-              ;;   (goto-char (point-max))
-              ;;   (comint-kill-input)
-              ;;   (insert (concat "cd " (shell-quote-argument dir-path)))
-              ;;   (let ((comint-process-echoes t))
-              ;;     (comint-send-input)))
-              ;; (defun helm-projectile-shell-cd ()
-              ;;   "Change shell current working directory using helm projectile."
-              ;;   (interactive)
-              ;;   (unless (string-equal mode-name "Shell")
-              ;;     (error "Not in Shell mode"))
-              ;;   (let ((helm-dir-source (copy-tree  helm-source-projectile-directories-list)))
-              ;;     (add-to-list '(action . shell-cd) helm-dir-source)
-              ;;     (add-to-list '(keymap . nil) helm-dir-source)
-              ;;     (add-to-list '(header-line . "cd to directory...") helm-dir-source)
-              ;;     (helm :sources helm-dir-source
-              ;;           :buffer "*helm-dirs*"
-              ;;           :candidate-number-limit 10000)))
-              
-              (defun my-helm-next-source ()
-                (interactive)
-                (helm-next-source)
-                (helm-next-line))
-              
-              ;; (defun my-helm-return ()
-              ;;   (interactive)
-              ;;   (helm-select-nth-action 0))
               
               (setq helm-completion-style             'emacs
                     helm-display-header-line              nil
@@ -1797,18 +1761,18 @@
 #+end_src
 ** [x] helm-ag        
 #+begin_src emacs-lisp
-     (with-package helm-ag
-                   (setq helm-ag-use-agignore t
-                         helm-ag-base-command 
-                         "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*"))
+(with-package helm-ag
+              (setq helm-ag-use-agignore t
+                    helm-ag-base-command 
+                    "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*"))
 #+end_src
 ** [x] helm-company
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-c-yasnippet        
 #+begin_src emacs-lisp
-     (with-package helm-c-yasnippet
-                   (setq helm-yas-space-match-any-greedy t))
+(with-package helm-c-yasnippet
+              (setq helm-yas-space-match-any-greedy t))
 #+end_src
 ** [x] helm-dash        
 #+begin_src emacs-lisp
@@ -1818,14 +1782,14 @@
 #+end_src
 ** [x] helm-dired-history       
 #+begin_src emacs-lisp
-     (with-package helm-dired-history
-                   (require 'savehist)
-                   (add-to-list 'savehist-additional-variables
-                                'helm-dired-history-variable)
-                   (savehist-mode 1)
-                   (with-eval-after-load "dired"
-                     (require 'helm-dired-history)
-                     (define-key dired-mode-map "," 'dired)))
+(with-package helm-dired-history
+              (require 'savehist)
+              (add-to-list 'savehist-additional-variables
+                           'helm-dired-history-variable)
+              (savehist-mode 1)
+              (with-eval-after-load "dired"
+                (require 'helm-dired-history)
+                (define-key dired-mode-map "," 'dired)))
 #+end_src
 ** [x] helm-emms        
 #+begin_src emacs-lisp
@@ -1855,48 +1819,48 @@
 #+end_src
 ** [x] helm-lsp
 #+begin_src emacs-lisp
-     (with-package helm-lsp
-                   (defun netrom/helm-lsp-workspace-symbol-at-point ()
-                     (interactive)
-                     (let ((current-prefix-arg t))
-                       (call-interactively 'helm-lsp-workspace-symbol)))
-                   (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
-                     (interactive)
-                     (let ((current-prefix-arg t))
-                       (call-interactively 'helm-lsp-global-workspace-symbol)))
-                   (setq netrom--general-lsp-hydra-heads
-                         '(;; Xref
-                           ("d" xref-find-definitions "Definitions" :column "Xref")
-                           ("D" xref-find-definitions-other-window "-> other win")
-                           ("r" xref-find-references "References")
-                           ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
-                           ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
-                           ;; Peek
-                           ("C-d" lsp-ui-peek-find-definitions "Definitions" :column "Peek")
-                           ("C-r" lsp-ui-peek-find-references "References")
-                           ("C-i" lsp-ui-peek-find-implementation "Implementation")
-                           ;; LSP
-                           ("p" lsp-describe-thing-at-point "Describe at point" :column "LSP")
-                           ("C-a" lsp-execute-code-action "Execute code action")
-                           ("R" lsp-rename "Rename")
-                           ("t" lsp-goto-type-definition "Type definition")
-                           ("i" lsp-goto-implementation "Implementation")
-                           ("f" helm-imenu "Filter funcs/classes (Helm)")
-                           ("C-c" lsp-describe-session "Describe session")
-                           ;; Flycheck
-                           ("l" lsp-ui-flycheck-list "List errs/warns/notes" :column "Flycheck"))
-                         netrom--misc-lsp-hydra-heads
-                         '(;; Misc
-                           ("q" nil "Cancel" :column "Misc")
-                           ("b" pop-tag-mark "Back")))
-                   ;; Create general hydra.
-                   (eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
-                            ,@(append
-                               netrom--general-lsp-hydra-heads
-                               netrom--misc-lsp-hydra-heads)))
-                   (defkeys lsp-mode-map
-                     [remap xref-find-apropos] helm-lsp-workspace-symbol
-                     "C-c C-l" netrom/lsp-hydra/body))
+(with-package helm-lsp
+              (defun netrom/helm-lsp-workspace-symbol-at-point ()
+                (interactive)
+                (let ((current-prefix-arg t))
+                  (call-interactively 'helm-lsp-workspace-symbol)))
+              (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
+                (interactive)
+                (let ((current-prefix-arg t))
+                  (call-interactively 'helm-lsp-global-workspace-symbol)))
+              (setq netrom--general-lsp-hydra-heads
+                    '(;; Xref
+                      ("d" xref-find-definitions "Definitions" :column "Xref")
+                      ("D" xref-find-definitions-other-window "-> other win")
+                      ("r" xref-find-references "References")
+                      ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
+                      ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
+                      ;; Peek
+                      ("C-d" lsp-ui-peek-find-definitions "Definitions" :column "Peek")
+                      ("C-r" lsp-ui-peek-find-references "References")
+                      ("C-i" lsp-ui-peek-find-implementation "Implementation")
+                      ;; LSP
+                      ("p" lsp-describe-thing-at-point "Describe at point" :column "LSP")
+                      ("C-a" lsp-execute-code-action "Execute code action")
+                      ("R" lsp-rename "Rename")
+                      ("t" lsp-goto-type-definition "Type definition")
+                      ("i" lsp-goto-implementation "Implementation")
+                      ("f" helm-imenu "Filter funcs/classes (Helm)")
+                      ("C-c" lsp-describe-session "Describe session")
+                      ;; Flycheck
+                      ("l" lsp-ui-flycheck-list "List errs/warns/notes" :column "Flycheck"))
+                    netrom--misc-lsp-hydra-heads
+                    '(;; Misc
+                      ("q" nil "Cancel" :column "Misc")
+                      ("b" pop-tag-mark "Back")))
+              ;; Create general hydra.
+              (eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
+                       ,@(append
+                          netrom--general-lsp-hydra-heads
+                          netrom--misc-lsp-hydra-heads)))
+              (defkeys lsp-mode-map
+                       [remap xref-find-apropos] helm-lsp-workspace-symbol
+                       "C-c C-l" netrom/lsp-hydra/body))
 #+end_src
 ** [x] helm-make        
 #+begin_src emacs-lisp
@@ -2021,9 +1985,6 @@
 
 #+end_src
 
-** [x] lispy
-#+begin_src emacs-lisp
-#+end_src
 ** [x] lsp-java
 #+begin_src emacs-lisp
 #+end_src
@@ -2070,8 +2031,9 @@
                (require 'dap-chrome)
                (require 'dap-cpptools)
                (diminish 'lsp-mode))
-              (with-hook python-mode
-                         (lsp-deferred))
+
+(with-hook python-mode
+           (lsp-deferred))
 #+end_src
 ** [x] lsp-pyright
 #+begin_src emacs-lisp
@@ -2168,8 +2130,8 @@
 #+end_src
 ** [x] modern-cpp-font-lock        
 #+begin_src emacs-lisp
-     (with-hook modern-cpp-font-lock-mode
-                (diminish 'modern-cpp-font-lock-mode))
+(with-hook modern-cpp-font-lock-mode
+           (diminish 'modern-cpp-font-lock-mode))
 #+end_src
 ** [x] multiple-cursors        
 #+begin_src emacs-lisp
@@ -2182,8 +2144,8 @@
 #+end_src
 ** [x] nov        
 #+begin_src emacs-lisp
-     (with-hook after-init
-                (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+(with-hook after-init
+           (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 #+end_src
 ** [x] oauth2 :disable
 #+begin_src emacs-lisp
@@ -2281,9 +2243,12 @@
                      org-startup-folded           'overview
                      org-startup-indented         nil))
 #+end_src
-
 ** [x] org-appear
 #+begin_src emacs-lisp
+#+end_src
+** [x] org-bullets
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] org-contrib
 #+begin_src emacs-lisp
@@ -2294,15 +2259,15 @@
 #+end_src
 ** [x] org-projectile
 #+begin_src emacs-lisp
-     (with-package org-projectile
-                   (require 'org-projectile)
-                   (setq org-projectile-projects-file "~Dokument/todos.org"
-                         org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-                   (push (org-projectile-project-todo-entry) org-capture-templates)
+(with-package org-projectile
+              (require 'org-projectile)
+              (setq org-projectile-projects-file "~Dokument/todos.org"
+                    org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+              (push (org-projectile-project-todo-entry) org-capture-templates)
               
-                   (defkeys global-map
-                     "C-c n p" org-projectile-project-todo-completing-read
-                     "C-c c" org-capture))
+              (defkeys global-map
+                       "C-c n p" org-projectile-project-todo-completing-read
+                       "C-c c" org-capture))
 #+end_src
 ** [x] org-projectile-helm
 #+begin_src emacs-lisp
@@ -2346,9 +2311,6 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] paxedit
-#+begin_src emacs-lisp
-#+end_src
 ** [x] pfuture
 #+begin_src emacs-lisp
 #+end_src
@@ -2375,8 +2337,8 @@
 #+end_src
 ** [x] projectile        
 #+begin_src emacs-lisp
-     (with-package projectile
-                   (setq projectile-indexing-method 'alien))
+(with-package projectile
+              (setq projectile-indexing-method 'alien))
 #+end_src
 ** [x] pulseaudio-control
 #+begin_src emacs-lisp
@@ -2400,11 +2362,7 @@
 ** [x] qrencode
 #+begin_src emacs-lisp
 #+end_src
-** [x] rainbow-mode
-#+begin_src emacs-lisp
-#+end_src
-
-** [x] recentf        
+** [x] recentf 
 #+begin_src emacs-lisp
 #+end_src
 ** [x] refine
@@ -2426,9 +2384,6 @@
      (with-hook after-init
                 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
                 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode)))
-#+end_src
-** [x] run-command
-#+begin_src emacs-lisp
 #+end_src
 ** [x] rustic
 #+begin_src emacs-lisp
@@ -2502,6 +2457,10 @@
 #+end_src
 ** [x] visual-ascii-mode
 #+begin_src emacs-lisp
+#+end_src
+** [x] wgrep
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] which-key        
 #+begin_src emacs-lisp
@@ -2680,13 +2639,13 @@
                (push '(tool-bar-lines . 0) default-frame-alist)
                (push '(vertical-scroll-bars . nil) default-frame-alist)
                (push '(font . "Anonymous Pro-16") default-frame-alist)
-               ;; (push '(font . "Some imaginary font") default-frame-alist)
-               ;;(custom-set-faces '(default ((t (:height 120)))))
+               ;; (push '(font . "Some imaginary font") default-frame-alist))
+               (custom-set-faces '(default ((t (:height 120)))))
                ;; (let ((default-directory  (expand-file-name "lisp" user-emacs-directory)))
                ;;   (normal-top-level-add-to-load-path '("."))
                ;;   (normal-top-level-add-subdirs-to-load-path))
                ;; (let ((deff (gethash 'default face--new-frame-defaults)))
-               ;;   (aset (cdr deff) 4 240)
+               ;;   (aset (cdr deff) 4 440)
                ;;   (puthash 'default deff face--new-frame-defaults))
                (define-prefix-command 'C-z-map)
                (global-set-key (kbd "C-z") 'C-z-map)
@@ -2772,11 +2731,9 @@
 	    (display-buffer-same-window
 	     display-buffer-reuse-mode-window
 	     display-buffer-pop-up-window)
-	    (mode apropos-mode help-mode helpful-mode Info-mode
-		  Man-mode)))
+	    (mode apropos-mode help-mode helpful-mode Info-mode Man-mode)))
 	 display-buffer-alist)
-   (push '(("*Help*" (window-parameters . ((dedicated . t)))))
-  display-buffer-alist)
+   (push '(("*Help*" (window-parameters . ((dedicated . t))))) display-buffer-alist)
    (push "/home/arthur/repos/ready-lisp/doc/info" Info-directory-list)
    (push "/home/arthur/repos/common-lisp-info" Info-directory-list)
   
@@ -2983,13 +2940,6 @@
 #+end_src
 ** [ none  ] [x] lisp & elisp
 #+begin_src emacs-lisp
-(with-hook
- after-init
- (set-default 'auto-mode-alist
-              (append '(("\\.lisp" . lisp-mode)
-                        ("\\.lsp" . lisp-mode)
-                        ("\\.cl" . lisp-mode))
-                      auto-mode-alist)))
 (with-package
  elisp-mode
  (require 'elisp-extras)
@@ -3007,6 +2957,14 @@
           "\C-c i" reindent-buffer
           "\C-c p" fc-eval-and-replace
           "\C-c s" eval-surrounding-sexp))
+
+(with-hook
+ after-init
+ (set-default 'auto-mode-alist
+              (append '(("\\.lisp" . lisp-mode)
+                        ("\\.lsp" . lisp-mode)
+                        ("\\.cl" . lisp-mode))
+                      auto-mode-alist)))
 
 (with-package
  inf-lisp
@@ -3030,7 +2988,7 @@
  lisp-mode
  (cl-hooks))
 #+end_src
-** [ none  ] [x] package
+** [ none  ] [ ] package
 #+begin_src emacs-lisp
 (with-package
  package
@@ -3075,8 +3033,7 @@
         (when package-native-compile
           (package--native-compile-async new-desc))
         (package--load-files-for-activation new-desc :reload)))
-    pkg-dir))))
-   
+    pkg-dir)))
 #+end_src
 ** [ none  ] [x] paredit
 #+begin_src emacs-lisp
@@ -3092,9 +3049,6 @@
           "C-." paredit-forward
           "C-," paredit-backward
           ))
-#+end_src
-** [ none  ] [x] speed-of-thought-lisp
-#+begin_src emacs-lisp
 #+end_src
 ** [ none  ] [x] system-cores.el
 #+begin_src emacs-lisp
@@ -3116,6 +3070,3 @@
                 "M->"         dired-go-to-last
                 "M-p"         scroll-down-line))
 #+end_src
-
-
-

@@ -2,6 +2,17 @@
 (require 'recentf)
 (require 'windmove)
 
+;; This was constantly throwing into debugger in latest versions because of
+;;missing argument (was &rest _)
+;;;###autoload
+(defun ignore-preserving-kill-region (&optional _)
+  "Like `ignore', but don't overwrite `last-event' if it's `kill-region'."
+  (declare (completion ignore))
+  (interactive)
+  (when (eq last-command 'kill-region)
+    (setq this-command 'kill-region))
+  nil)
+
 ;;;###autoload
 (defun replace-with-spaces (beg end)
   "Replace the region with the equivalent number of spaces."
@@ -411,9 +422,16 @@ If there is not a window to the right, open new one."
   (interactive)
   (send-buffer-to-side 'right))
 
+;;;###autoload
 (defun last-buffer ()
   "Switch to last used buffer."
   (interactive)
   (switch-to-buffer nil))
+
+;;;###autoload
+(defun my-helm-next-source ()
+  (interactive)
+  (helm-next-source)
+  (helm-next-line))
 
 (provide 'extras)
