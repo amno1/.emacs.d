@@ -2949,6 +2949,7 @@
 (with-package
  ielm
  (advice-add 'ielm :around #'ielm-use-current-buffer)
+ ;;(advice-add 'ielm-eval-inpu :after #'paredit-open-round)
  (defkeys ielm-map
           "\C-c a" emacs-lisp-byte-compile-and-load
           "\C-c b" emacs-lisp-byte-compile
@@ -2960,7 +2961,10 @@
           "\C-c n" eval-next-sexp
           "\C-c i" reindent-buffer
           "\C-c p" fc-eval-and-replace
-          "\C-c s" eval-surrounding-sexp))
+          "\C-c s" eval-surrounding-sexp)
+ (require 'paredit)
+ (define-key paredit-mode-map (kbd "RET") nil)
+ (define-key paredit-mode-map (kbd "C-j") 'paredit-newline))
 
 (with-hook ielm-mode
            ;;(ielm-change-working-buffer (other-window-buffer -1))
