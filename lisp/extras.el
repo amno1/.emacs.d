@@ -2,8 +2,84 @@
 (require 'recentf)
 (require 'windmove)
 
+(defun ielm-use-current-buffer (fn &rest args)
+  (let ((working-buffer (current-buffer)))
+    (funcall fn args)
+    (ielm-change-working-buffer working-buffer)))
+
+(defun other-window-buffer (count &optional all-frames interactive)
+  "Select another window in cyclic ordering of windows.
+COUNT specifies the number of windows to skip, starting with the
+selected window, before making the selection.  If COUNT is
+positive, skip COUNT windows forwards.  If COUNT is negative,
+skip -COUNT windows backwards.  COUNT zero means do not skip any
+window, so select the selected window.  In an interactive call,
+COUNT is the numeric prefix argument.  Return nil.
+
+If the `other-window' parameter of the selected window is a
+function and `ignore-window-parameters' is nil, call that
+function with the arguments COUNT and ALL-FRAMES.
+
+This function does not select a window whose `no-other-window'
+window parameter is non-nil.
+
+This function uses `next-window' for finding the window to
+select.  The argument ALL-FRAMES has the same meaning as in
+`next-window', but the MINIBUF argument of `next-window' is
+always effectively nil."
+  (interactive "p\ni\np")
+  (let* ((window (selected-window))
+         (original-window window)
+	 (function (and (not ignore-window-parameters)
+			(window-parameter window 'other-window)))
+	 old-window old-count)
+    (if (functionp function)
+	(funcall function count all-frames)
+      ;; `next-window' and `previous-window' may return a window we are
+      ;; not allowed to select.  Hence we need an exit strategy in case
+      ;; all windows are non-selectable.
+      (catch 'exit
+	(while (> count 0)
+	  (setq window (next-window window nil all-frames))
+	  (cond
+	   ((eq window old-window)
+	    (when (= count old-count)
+	      ;; Keep out of infinite loops.  When COUNT has not changed
+	      ;; since we last looked at `window' we're probably in one.
+	      (throw 'exit nil)))
+	   ((window-parameter window 'no-other-window)
+	    (unless old-window
+	      ;; The first non-selectable window `next-window' got us:
+	      ;; Remember it and the current value of COUNT.
+	      (setq old-window window)
+	      (setq old-count count)))
+	   (t
+	    (setq count (1- count)))))
+	(while (< count 0)
+	  (setq window (previous-window window nil all-frames))
+	  (cond
+	   ((eq window old-window)
+	    (when (= count old-count)
+	      ;; Keep out of infinite loops.  When COUNT has not changed
+	      ;; since we last looked at `window' we're probably in one.
+	      (throw 'exit nil)))
+	   ((window-parameter window 'no-other-window)
+	    (unless old-window
+	      ;; The first non-selectable window `previous-window' got
+	      ;; us: Remember it and the current value of COUNT.
+	      (setq old-window window)
+	      (setq old-count count)))
+	   (t
+	    (setq count (1+ count)))))
+        (when (and (eq window original-window)
+                   interactive
+                   (not (or executing-kbd-macro noninteractive)))
+          (message "No other window to select"))
+        ;; return the buffer
+	(window-buffer window)))))
+
 ;; This was constantly throwing into debugger in latest versions because of
-;;missing argument (was &rest _)
+;; wrong argument nil; fix: change argument from &rest -> &optional
 ;;;###autoload
 (defun ignore-preserving-kill-region (&optional _)
   "Like `ignore', but don't overwrite `last-event' if it's `kill-region'."

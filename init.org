@@ -986,6 +986,21 @@
 (org-init-mode +1)
 #+end_src
 * Packages
+
+** [x] window-layout
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ ] org-quick-peek
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] quick-peek
+#+begin_src emacs-lisp
+
+#+end_src
 ** [ local ] [ ] dired-git-log
 #+begin_src emacs-lisp
 (with-hook dired-git-log-mode
@@ -2467,6 +2482,7 @@
 (with-hook which-key
            (diminish 'which-key-mode))
 (with-hook after-init
+           (which-key-setup-minibuffer)
            (which-key-mode))
 #+end_src
 ** [x] winum
@@ -2930,7 +2946,25 @@
 #+end_src
 ** [ none  ] [x] ielm
 #+begin_src emacs-lisp
-(with-hook ielm
+(with-package
+ ielm
+ (advice-add 'ielm :around #'ielm-use-current-buffer)
+ (defkeys ielm-map
+          "\C-c a" emacs-lisp-byte-compile-and-load
+          "\C-c b" emacs-lisp-byte-compile
+          "\C-c c" emacs-lisp-native-compile-and-load
+          "\C-c d" eval-defun
+          "\C-c e" eval-buffer
+          "\C-c r" eval-region
+          "\C-c l" eval-last-sexp
+          "\C-c n" eval-next-sexp
+          "\C-c i" reindent-buffer
+          "\C-c p" fc-eval-and-replace
+          "\C-c s" eval-surrounding-sexp))
+
+(with-hook ielm-mode
+           ;;(ielm-change-working-buffer (other-window-buffer -1))
+           (paredit-mode +1)
            (turn-on-eldoc-mode))
 #+end_src
 ** [ none  ] [x] inferior-python-mode
