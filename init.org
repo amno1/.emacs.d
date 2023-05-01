@@ -555,6 +555,10 @@
              (delete-directory (package-desc-dir old) t))))))
 
 ;;; org hacks
+
+;; https://www.reddit.com/message/unread/
+(require 'cape)
+
 (if (featurep 'org-heading-checkbox)
     (unload-feature 'org-heading-checkbox))
 (defvar org-init--enabled-re "^[ \t]*\\*+.*?[ \t]*\\[x\\]")
@@ -987,6 +991,70 @@
 #+end_src
 * Packages
 
+** [x] jinx
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] embark
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] alchemist
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] inf-elixir
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] elfeed
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] reddigg
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] hnreader
+#+begin_src emacs-lisp
+
+#+end_src
+
+
+** [x] jinx
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] cape
+#+begin_src emacs-lisp
+;; Add `completion-at-point-functions', used by `completion-at-point'.
+  ;; NOTE: The order matters!
+(with-package cape
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  ;;(add-to-list 'completion-at-point-functions #'cape-history)
+  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
+  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
+  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+  ;;(add-to-list 'completion-at-point-functions #'cape-symbol)
+  ;;(add-to-list 'completion-at-point-functions #'cape-line)
+  (setq-local completion-at-point-functions
+  (mapcar #'cape-company-to-capf
+    (list #'company-files #'company-ispell #'company-dabbrev)))
+  )
+#+end_src
+
 ** [x] window-layout
 #+begin_src emacs-lisp
 
@@ -1416,7 +1484,7 @@
 
 #+end_src
 
-** [x] ecukes
+** [ ] ecukes
 #+begin_src emacs-lisp
 #+end_src
 ** [x] eldev
@@ -2766,7 +2834,7 @@
    (blink-cursor-mode 1)
    (column-number-mode 1)
    (delete-selection-mode 1)
-   (display-time-mode 1)
+   (display-time-mode t)
    (pending-delete-mode 1)
    (show-paren-mode t)
    (save-place-mode 1)
@@ -2847,6 +2915,7 @@
 				    "init.org"
 				    user-emacs-directory))))
  
+   (when-idle (require 'cape))
    (when-idle (require 'extras))
    (when-idle (require 'sv-kalender)
 	      ;;(add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
