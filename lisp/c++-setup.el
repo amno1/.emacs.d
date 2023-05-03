@@ -47,7 +47,7 @@
         (modify-frame-parameters
          frame (list (cons 'background-color orig)))))))
 
-(defun qtmstr-compile-finish (buf status))
+(defun qtmstr-compile-finish (_buf _status))
   ;; (with-current-buffer buf
   ;;   (let* ((color (if (string-match "^finished\\b" status)
   ;;                     "#dfd" "#fdd"))
@@ -114,7 +114,7 @@
                  special-display-buffer-names))
   
   (add-hook 'c-mode-common-hook 'company-mode)
-  (add-hook 'c-mode-hook 'lsp)
+  (add-hook 'c-mode-common-hook 'eglot-ensure)
   (add-hook 'c-mode-hook 'c-modes-keys)
   (add-hook 'c-mode-hook 'hs-minor-mode)
   (add-hook 'c-mode-hook 'yas-minor-mode)
@@ -139,7 +139,6 @@
   (message "Running c++-init")
   (require 'member-functions)
   ;; display-buffer-alist)
-  (add-hook 'c++-mode-hook 'lsp)
   (add-hook 'c++-mode-hook 'c-modes-keys)
   (add-hook 'c++-mode-hook 'hs-minor-mode)
   (add-hook 'c++-mode-hook 'yas-minor-mode)

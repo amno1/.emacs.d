@@ -991,11 +991,6 @@
 #+end_src
 * Packages
 
-** [x] jinx
-#+begin_src emacs-lisp
-
-#+end_src
-
 ** [x] embark
 #+begin_src emacs-lisp
 
@@ -2068,14 +2063,10 @@
 
 #+end_src
 
-** [x] lsp-java
+** [ ] lsp-java        
 #+begin_src emacs-lisp
 #+end_src
-
-** [x] lsp-java        
-#+begin_src emacs-lisp
-#+end_src
-** [x] lsp-mode        
+** [ ] lsp-mode        
 #+begin_src emacs-lisp
 (with-package lsp-mode
               (setq lsp-diagnostic-provider :none
@@ -2118,7 +2109,7 @@
 (with-hook python-mode
            (lsp-deferred))
 #+end_src
-** [x] lsp-pyright
+** [ ] lsp-pyright
 #+begin_src emacs-lisp
      ;; (with-package lsp-pyright
      ;;               (setq lsp-clients-python-library-directories '("/usr"
@@ -2134,10 +2125,10 @@
      ;;            (setq python-shell-interpreter "ipython"
      ;;                  python-shell-interpreter-args "-i --simple-prompt"))
 #+end_src
-** [x] lsp-treemacs        
+** [ ] lsp-treemacs        
 #+begin_src emacs-lisp
 #+end_src
-** [x] lsp-ui
+** [ ] lsp-ui
 #+begin_src emacs-lisp
 (with-package lsp-ui
               (add-hook 'lsp-mode-hook 'lsp-ui-mode)
@@ -2723,7 +2714,6 @@
                (push '(tool-bar-lines . 0) default-frame-alist)
                (push '(vertical-scroll-bars . nil) default-frame-alist)
                (push '(font . "Anonymous Pro-16") default-frame-alist)
-               ;; (push '(font . "Some imaginary font") default-frame-alist))
                (custom-set-faces '(default ((t (:height 120)))))
                ;; (let ((default-directory  (expand-file-name "lisp" user-emacs-directory)))
                ;;   (normal-top-level-add-to-load-path '("."))
