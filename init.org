@@ -1032,7 +1032,7 @@
 ;; Add `completion-at-point-functions', used by `completion-at-point'.
   ;; NOTE: The order matters!
 (with-package cape
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev 90)
   (add-to-list 'completion-at-point-functions #'cape-file)
   (add-to-list 'completion-at-point-functions #'cape-elisp-block)
   ;;(add-to-list 'completion-at-point-functions #'cape-history)
@@ -1046,8 +1046,11 @@
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
   (setq-local completion-at-point-functions
   (mapcar #'cape-company-to-capf
-    (list #'company-files #'company-ispell #'company-dabbrev)))
-  )
+    (list #'company-files #'company-ispell #'company-dabbrev))))
+
+(with-hook
+ prog-mode-hook
+ (add-hook 'completion-at-point-functions #'cape-keyword nil t))
 #+end_src
 
 ** [x] window-layout
@@ -1131,9 +1134,22 @@
 ** [ ] bui
 #+begin_src emacs-lisp
 #+end_src
-** [ ] corfu
+** [x] corfu
 #+begin_src emacs-lisp
+(with-package
+ corfu
+ (setq corfu-auto t
+       corf-auto-prefix 2
+       corfu-quit-no-match t
+       ompletion-cycle-threshold 3
+       corfu-quit-at-boundary 'separator)
+ (define-key corfu-map (kbd "SPC") #'corfu-insert-separator)
+ (global-corfu-mode))
 
+(with-hook
+ minibuffer-setup-hook
+ (when (memq #'completion-at-point (flatten-tree (current-local-map)))
+   (corfu-mode)))
 #+end_src
 ** [ ] dired-git.el
 #+begin_src emacs-lisp
@@ -1331,7 +1347,7 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] company
+** [ ] company
 #+begin_src emacs-lisp
   (with-hook after-init
              (add-hook 'c-mode-common-hook 'company-mode)
@@ -1372,37 +1388,37 @@
                   "C-n" company-select-next
                   "C-p" company-select-previous))
 #+end_src
-** [x] company-c-headers        
+** [ ] company-c-headers        
 #+begin_src emacs-lisp
   (with-hook company-c-headers-mode
              (diminish 'company-c-headers-mode)
              (add-to-list 'company-backends 'company-c-headers))
 #+end_src
-** [x] company-flx
+** [ ] company-flx
 #+begin_src emacs-lisp
   (with-hook company
              (company-flx-mode +1))
 #+end_src
-** [x] company-math
+** [ ] company-math
 #+begin_src emacs-lisp
   (with-package company-math
                 (diminish 'company-math-mode)
                 (add-to-list 'company-backends 'company-math-symbols-latex)
                 (add-to-list 'company-backends 'company-math-symbols-unicode))
 #+end_src
-** [x] company-quickhelp
+** [ ] company-quickhelp
 #+begin_src emacs-lisp
   (with-package company-quickhelp-mode
                 (diminish 'company-quickhelp-mode)
                 (add-hook 'global-company-mode-hook 'company-quickhelp-mode))
 #+end_src
-** [x] company-statistics
+** [ ] company-statistics
 #+begin_src emacs-lisp
 #+end_src
-** [x] company-try-hard
+** [ ] company-try-hard
 #+begin_src emacs-lisp
 #+end_src
-** [x] company-web
+** [ ] company-web
 #+begin_src emacs-lisp
 #+end_src
 ** [x] consult
@@ -1844,7 +1860,7 @@
                     helm-ag-base-command 
                     "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*"))
 #+end_src
-** [x] helm-company
+** [ ] helm-company
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-c-yasnippet        
@@ -1895,7 +1911,7 @@
 ** [x] helm-ls-git        
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-lsp
+** [ ] helm-lsp
 #+begin_src emacs-lisp
 (with-package helm-lsp
               (defun netrom/helm-lsp-workspace-symbol-at-point ()
@@ -2943,7 +2959,7 @@
            (setq fill-column 80))
 (with-package gnus
               
-              (require 'nnir)
+              ;; (require 'nnir)
               (setq user-full-name    "Arthur Miller"
                     user-mail-address "arthur.miller@live.com")
               
@@ -3084,53 +3100,6 @@
 (with-hook
  lisp-mode
  (cl-hooks))
-#+end_src
-** [ none  ] [ ] package
-#+begin_src emacs-lisp
-(with-package
- package
- (let ((package-install-local-multifile-packages-symlinked t))
-   (defun package-unpack (pkg-desc)
-  "Install the contents of the current buffer as a package."
-  (let* ((name (package-desc-name pkg-desc))
-         (dirname (package-desc-full-name pkg-desc))
-         (pkg-dir (expand-file-name dirname package-user-dir)))
-    (pcase (package-desc-kind pkg-desc)
-      ('dir
-       (if package-install-local-multifile-packages-symlinked
-           (make-symbolic-link (expand-file-name default-directory) pkg-dir t)
-         (progn
-           (make-directory pkg-dir t)
-           (let ((file-list
-                  (directory-files
-                   default-directory 'full "\\`[^.].*\\.el\\'" 'nosort)))
-             (dolist (source-file file-list)
-               (let ((target-el-file
-                      (expand-file-name (file-name-nondirectory source-file) pkg-dir)))
-                 (copy-file source-file target-el-file t)))
-             (setf (package-desc-kind pkg-desc)
-                   (if (> (length file-list) 1) 'tar 'single))))))
-      ('tar
-       (make-directory package-user-dir t)
-       (let* ((default-directory (file-name-as-directory package-user-dir)))
-         (package-untar-buffer dirname)))
-      ('single
-       (let ((el-file (expand-file-name (format "%s.el" name) pkg-dir)))
-         (make-directory pkg-dir t)
-         (package--write-file-no-coding el-file)))
-      (kind (error "Unknown package kind: %S" kind)))
-    (package--make-autoloads-and-stuff pkg-desc pkg-dir)
-    (let ((new-desc (package-load-descriptor pkg-dir)))
-      (unless (equal (package-desc-full-name new-desc)
-                     (package-desc-full-name pkg-desc))
-        (error "The retrieved package (`%s') doesn't match what the archive offered (`%s')"
-               (package-desc-full-name new-desc) (package-desc-full-name pkg-desc)))
-      (when (package-activate-1 new-desc :reload :deps)
-        (package--compile new-desc)
-        (when package-native-compile
-          (package--native-compile-async new-desc))
-        (package--load-files-for-activation new-desc :reload)))
-    pkg-dir)))
 #+end_src
 ** [ none  ] [x] paredit
 #+begin_src emacs-lisp
