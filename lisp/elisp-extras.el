@@ -22,6 +22,7 @@
 
 ;;  FIXME remove popup package requirement (use tooltip.el)
 
+;; This file is always loaded in my Emacs, so I don't use autoload cookies here
 ;;; Code:
 
 ;;(require 'paredit)
@@ -128,24 +129,36 @@
   ;;(lisp-extra-font-lock-mode 1)
   )
 
- ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
- ;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
- ;; 	              "System Name: "
- ;; 	              "
- ;; (eval-when (:compile-toplevel :load-toplevel :execute)
- ;;   (unless (find-package :" str ".system)
- ;;     (defpackage :" str ".system
- ;;       (:use :common-lisp :asdf))))
+(defun elisp-gen-autoload-cookie ()
+  "Generate an autoload cookie for the defun at point."
+  (interactive)
+  (save-excursion
+    (beginning-of-defun)
+    (forward-char)
+    (let ((sym (read (current-buffer))))
+      (if (not (eq sym 'defun))
+          (user-error "Not in a defun.")
+        (beginning-of-defun)
+        (insert ";;;###autoload\n")))))
 
- ;; (in-package :" str ".system)
- ;; (defsystem :" str " 
- ;;   :description " ?\" (read-string "Description: ") ?\"" 
- ;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
- ;;   :licence \"" (read-string "License: ") "\" 
- ;;   :version \"" (read-string "Version: ") "\" 
- ;;   :components (()) 
- ;;   :depends-on ())") 
- ;;                     auto-insert-alist)
+;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
+;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
+;; 	              "System Name: "
+;; 	              "
+;; (eval-when (:compile-toplevel :load-toplevel :execute)
+;;   (unless (find-package :" str ".system)
+;;     (defpackage :" str ".system
+;;       (:use :common-lisp :asdf))))
+
+;; (in-package :" str ".system)
+;; (defsystem :" str " 
+;;   :description " ?\" (read-string "Description: ") ?\"" 
+;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
+;;   :licence \"" (read-string "License: ") "\" 
+;;   :version \"" (read-string "Version: ") "\" 
+;;   :components (()) 
+;;   :depends-on ())") 
+;;                     auto-insert-alist)
 
 (provide 'elisp-extras)
 ;;; elisp-extras.el ends here

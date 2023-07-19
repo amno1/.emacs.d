@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; 
+;; This file is always loaded in my Emacs, so no autload cookies needed
 
 ;;; Code:
 
