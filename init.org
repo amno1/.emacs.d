@@ -2280,10 +2280,11 @@
  (require 'org-extras)
  
  (defkeys org-mode-map
-          "SPC" yas-maybe-expand
           [C-enter] other-window
           [C-S-<return>] org-insert-heading-respect-content)
- 
+
+ (define-key yas-minor-mode-map (kbd "SPC") yas-maybe-expand)
+
  (setq org-capture-templates
        `(("p" "Protocol" entry (file+headline "~/Dokument/notes.org" "Inbox")
           "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
