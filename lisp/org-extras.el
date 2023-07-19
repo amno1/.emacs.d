@@ -44,6 +44,27 @@
          (title (get-html-title-from-url url)))
     (org-insert-link nil url title)))
 
+(defun org-link-from-clipboard ()
+  "Insert an org link into current buffer from an URL in clipboard."
+  (interactive)
+  (let ((marker (point-marker))
+        (url
+         (if (string-match-p "^\\(http\\|https\\)://" (current-kill 0))
+             (current-kill 0)
+           (read-string "URL: ")))
+        (title nil))
+    (when url
+      (url-retrieve url
+       (lambda (buffer)
+         (goto-char (point-min))
+         (when (re-search-forward "<title>\\(.*\\)</title>" nil t)
+           (setq title (string-trim (match-string-no-properties 1))))
+         (with-current-buffer (marker-buffer marker)
+           (save-excursion
+             (goto-char (marker-position marker))
+             (org-insert-link
+              nil url (or title (read-string "Description: "))))))
+       nil t t))))
 
 (defun org-agenda-show-agenda-and-todo (&optional arg)
   ""
