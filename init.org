@@ -2269,6 +2269,7 @@
    (auto-save-mode 1)
    (page-break-lines-mode 1))
  (yas-minor-mode 1)
+ (yas-activate-extra-mode 'emacs-lisp-mode)
  (org-pretty-table-mode 1)
  (diminish 'org-pretty-table-mode))
 
@@ -2279,6 +2280,7 @@
  (require 'org-extras)
  
  (defkeys org-mode-map
+          "SPC" yas-maybe-expand
           [C-enter] other-window
           [C-S-<return>] org-insert-heading-respect-content)
  
