@@ -991,6 +991,13 @@
 #+end_src
 * Packages
 
+** [ none  ] [x] eglot
+#+begin_src emacs-lisp
+(with-hook
+ eglot-mode
+ (eglot-inlay-hints-mode))
+#+end_src
+
 ** [x] eat
 #+begin_src emacs-lisp
 
@@ -1156,7 +1163,7 @@
  (setq corfu-auto t
        corf-auto-prefix 2
        corfu-quit-no-match t
-       ompletion-cycle-threshold 3
+       completion-cycle-threshold 3
        corfu-quit-at-boundary 'separator)
  (define-key corfu-map (kbd "SPC") #'corfu-insert-separator)
  (global-corfu-mode))
@@ -2571,18 +2578,22 @@
 ** [x] yasnippet
 #+begin_src emacs-lisp
 (when-idle (require 'yasnippet))
-(with-package yasnippet
-              (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
-              (setq yas-key-syntaxes '("w_" "w_." "^ ")
-                    ;; yas-snippet-dirs (eval-when-compile
-                    ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
-                    yas-expand-only-for-last-commands nil)
-              (defkeys yas-minor-mode-map
-                       "C-i" nil
-                       "TAB" nil
-                       "C-<tab>" yas-expand))
-(with-hook yas-minor-mode
-           (diminish 'yas-mode 'yas-minor-mode))
+(with-package
+ yasnippet
+ (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+ (setq yas-key-syntaxes '("w_" "w_." "^ ")
+       ;; yas-snippet-dirs (eval-when-compile
+       ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
+       yas-expand-only-for-last-commands nil)
+ (defkeys
+  yas-minor-mode-map
+  "C-i" nil
+  "TAB" nil
+  "C-<tab>" yas-expand
+  "M-_" yas-undo-expand))
+(with-hook
+ yas-minor-mode
+ (diminish 'yas-mode 'yas-minor-mode))
 #+end_src
 ** [x] yasnippet-snippets
 #+begin_src emacs-lisp

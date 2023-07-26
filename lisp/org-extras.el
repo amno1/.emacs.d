@@ -40,31 +40,61 @@
 (defun my-org-insert-link ()
   "Insert org link where default description is set to html title."
   (interactive)
-  (let* ((url (read-string "URL: "))
-         (title (get-html-title-from-url url)))
-    (org-insert-link nil url title)))
+  (let* ((url (or (current-kill 0) (read-string "URL: "))))
+    (org-insert-link nil url)))
+
+(defun org-desc-from-clipboard (url _desc)
+  "Insert an org link into current buffer from an URL in clipboard."
+  (with-current-buffer (url-retrieve-synchronously url t)
+    (goto-char (point-min))
+    (let ((title "<title>\\(.*\\)\\(/>\\|</title>\\)"))
+      (if (re-search-forward title nil t)
+          (string-trim (match-string-no-properties 1))
+        url))))
+
+(org-link-set-parameters "http" :insert-description #'org-desc-from-clipboard)
+(org-link-set-parameters "https" :insert-description #'org-desc-from-clipboard)
+
+;; http://www.gnu.org
+
+
+(defun org-desc-from-clipbard (url)
+  (url-retrieve
+   url
+   (lambda (_status title)
+     (goto-char (point-min))
+     (if (re-search-forward title nil t)
+         (string-trim (match-string-no-properties 1))
+       url))
+   '("<title>\\(.*\\)\\(/>\\|</title>\\)") t t))
+
+(defun org-link-from-clipboard ()
+  "Insert an org link into current buffer from an URL in clipboard."
+  (interactive)
+  (let* ((marker (point-marker))
+         (url (or (current-kill 0) (read-string "URL: "))))
+    (with-current-buffer (marker-buffer marker)
+      (save-excursion
+        (goto-char (marker-position marker))
+        (org-insert-link nil url (org-desc-from-clipboard))))))
 
 (defun org-link-from-clipboard ()
   "Insert an org link into current buffer from an URL in clipboard."
   (interactive)
   (let ((marker (point-marker))
-        (url
-         (if (string-match-p "^\\(http\\|https\\)://" (current-kill 0))
-             (current-kill 0)
-           (read-string "URL: ")))
-        (title nil))
-    (when url
-      (url-retrieve url
-       (lambda (buffer)
-         (goto-char (point-min))
-         (when (re-search-forward "<title>\\(.*\\)</title>" nil t)
-           (setq title (string-trim (match-string-no-properties 1))))
-         (with-current-buffer (marker-buffer marker)
-           (save-excursion
-             (goto-char (marker-position marker))
-             (org-insert-link
-              nil url (or title (read-string "Description: "))))))
-       nil t t))))
+        (url (or (current-kill 0) (read-string "URL: "))))
+    (url-retrieve
+     url
+     (lambda (_status title)
+       (goto-char (point-min))
+       (when (re-search-forward title nil t)
+         (setq title (string-trim (match-string-no-properties 1))))
+       (with-current-buffer (marker-buffer marker)
+         (save-excursion
+           (goto-char (marker-position marker))
+           (org-insert-link
+            nil url (or title url)))))
+     '("<title>\\(.*\\)\\(/>\\|</title>\\)") t t)))
 
 (defun org-agenda-show-agenda-and-todo (&optional arg)
   ""

@@ -141,6 +141,11 @@
         (beginning-of-defun)
         (insert ";;;###autoload\n")))))
 
+(defun yas-undo-expand ()
+  (interactive)
+  (undo)
+  (insert " "))
+
 ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
 ;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
 ;; 	              "System Name: "
