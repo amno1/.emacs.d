@@ -1,4 +1,5 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
+(require 'corfu)
 (require 'recentf)
 (require 'windmove)
 
@@ -509,5 +510,17 @@ If there is not a window to the right, open new one."
   (interactive)
   (helm-next-source)
   (helm-next-line))
+
+;;;###autoload
+(defun corfu-enable-always-in-minibuffer ()
+  "Enable Corfu in the minibuffer if Vertico/Mct are not active."
+  (unless (or (bound-and-true-p helm-alive-p)
+              (bound-and-true-p mct--active)
+              (bound-and-true-p vertico--input)
+              (eq (current-local-map) read-passwd-map))
+    ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+    (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                corfu-popupinfo-delay nil)
+    (corfu-mode 1)))
 
 (provide 'extras)

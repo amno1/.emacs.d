@@ -993,6 +993,11 @@
 
 ** [ none  ] [x] eglot
 #+begin_src emacs-lisp
+(with-package
+ eglot
+ (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+ (advice-add 'eglot-completion-at-point :around #'cape-wrap-noninterruptible))
+
 (with-hook
  eglot-mode
  (eglot-inlay-hints-mode))
@@ -1168,10 +1173,7 @@
  (define-key corfu-map (kbd "SPC") #'corfu-insert-separator)
  (global-corfu-mode))
 
-(with-hook
- minibuffer-setup-hook
- (when (memq #'completion-at-point (flatten-tree (current-local-map)))
-   (corfu-mode)))
+(add-hook 'minibuffer-setup-hook 'corfu-enable-always-in-minibuffer)
 #+end_src
 ** [ ] dired-git.el
 #+begin_src emacs-lisp
