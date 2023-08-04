@@ -122,7 +122,7 @@
   (setq fill-column 80)
   (paredit-mode 1)
 ;;  (company-mode 1)
-  (outshine-mode 1)
+  ;; (outshine-mode 1)
   (yas-minor-mode 1)
   (speed-of-thought-mode 1)
   (page-break-lines-mode 1)

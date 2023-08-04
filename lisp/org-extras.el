@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'ob-core)
+
 ;; https://lists.gnu.org/archive/html/emacs-orgmode/2012-09/msg01435.html
 (defun get-html-title-from-url (url)
   "Return content in <title> tag."
@@ -114,6 +116,16 @@
    (mapcar
     (lambda (c)
       (if (equal c ?[) ?\( (if (equal c ?]) ?\) c ))) string-to-transform)))
+
+;;;###autoload
+(defun yas-org-expand ()
+  (interactive)
+  
+  (let* ((info (org-babel-get-src-block-info 'no-eval))
+         (major-mode (if info
+                         (intern-soft (concat (car info) "-mode"))
+                       (intern-soft "org-mode"))))
+    (yas-expand)))
 
 (provide 'org-extras)
 ;;; org-extras.el ends here

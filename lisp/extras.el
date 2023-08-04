@@ -523,4 +523,18 @@ If there is not a window to the right, open new one."
                 corfu-popupinfo-delay nil)
     (corfu-mode 1)))
 
+;;;###autoload
+(defun import-rsa-key (&optional beg end)
+  "Import RSA key from region or under the cursor."
+  (interactive "r")
+  (require 'package)
+  (let* ((dir (expand-file-name "gnupg" package-user-dir))
+         (beg (or beg (save-excursion (1+ (re-search-backward "[[:blank:]]")))))
+         (end (or end (save-excursion (1- (re-search-forward "[[:blank:]]")))))
+         (key (buffer-substring-no-properties beg end))
+         (shell-command-switch "-c"))
+    (shell-command-on-region
+     beg end (format "gpg --homedir %s --receive-keys " dir key))))
+
+
 (provide 'extras)

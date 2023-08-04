@@ -995,12 +995,9 @@
 #+begin_src emacs-lisp
 (with-package
  eglot
+ (push :inlayHintProvider eglot-ignored-server-capabilities)
  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
  (advice-add 'eglot-completion-at-point :around #'cape-wrap-noninterruptible))
-
-(with-hook
- eglot-mode
- (eglot-inlay-hints-mode))
 #+end_src
 
 ** [x] eat
@@ -2277,8 +2274,8 @@
    (diminish 'org-babel-hide-markers-mode)
    (auto-save-mode 1)
    (page-break-lines-mode 1))
- (yas-minor-mode 1)
- (yas-activate-extra-mode 'emacs-lisp-mode)
+ ;; (yas-minor-mode 1)
+ ;; (yas-activate-extra-mode 'emacs-lisp-mode)
  (org-pretty-table-mode 1)
  (diminish 'org-pretty-table-mode))
 
@@ -2292,7 +2289,7 @@
           [C-enter] other-window
           [C-S-<return>] org-insert-heading-respect-content)
 
- (define-key yas-minor-mode-map (kbd "SPC") yas-maybe-expand)
+ (define-key org-mode-map (kbd "SPC") #'yas-org-expand)
 
  (setq org-capture-templates
        `(("p" "Protocol" entry (file+headline "~/Dokument/notes.org" "Inbox")
@@ -2375,7 +2372,7 @@
 
 #+end_src
 
-** [x] outshine
+** [ ] outshine
 #+begin_src emacs-lisp
 (with-hook outshine-mode (diminish 'outshine-mode))
 #+end_src

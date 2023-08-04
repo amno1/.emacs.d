@@ -102,5 +102,11 @@
   :depends-on ())") 
   auto-insert-alist) 
 
+;;;###autoload
+(defun make-cl-scratch ()
+  (interactive)
+  (with-current-buffer  (get-buffer-create "*cl-scratch*")
+    (common-lisp-mode)))
+
 (provide 'cl-extras)
 ;;; cl-extrasl.el ends here
