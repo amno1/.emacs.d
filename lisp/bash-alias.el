@@ -79,18 +79,29 @@
         (buffer-substring-no-properties (point-min) (point-max))))))
 
 ;;;###autoload
+(defun shell-command-with-aliases ()
+  "Like `shell-command' but understands Bash aliases."
+  (interactive)
+  (let ((args (eval (cadr (interactive-form 'shell-command)))))
+    (apply #'shell-command (bash-command-from-alias (pop args)) args)))
+
+;;;###autoload
 (defun async-shell-command-with-aliases ()
   "Like `shell-command' but understands Bash aliases."
   (interactive)
   (let ((args (eval (cadr (interactive-form 'shell-command)))))
     (apply #'async-shell-command (bash-command-from-alias (pop args)) args)))
 
+
+
 ;;;###autoload
-(defun shell-command-with-aliases ()
-  "Like `shell-command' but understands Bash aliases."
+(defun dired-smart-shell-command-with-aliases ()
+  "Like `dired-smart-shell-command' but understands Bash aliases."
   (interactive)
-  (let ((args (eval (cadr (interactive-form 'shell-command)))))
-    (apply #'shell-command (bash-command-from-alias (pop args)) args)))
+  (unless (bound-and-true-p dired-mode)
+    (user-error "This command runs only in Dired-mode."))
+  (let ((args (eval (cadr (interactive-form 'dired-smart-shell-command)))))
+    (apply #'dired-smart-shell-command (bash-command-from-alias (pop args)) args)))
 
 (defvar bash-alias-mode-map
   (let ((map (make-sparse-keymap)))
@@ -98,17 +109,42 @@
     (define-key map [remap async-shell-command] #'async-shell-command-with-aliases)
     map))
 
+(defun bash-alias--onload-hook ()
+  "Hook to run in eval-after-load."
+  (define-key dired-mode-map [remap dired-smart-shell-command]
+              #'dired-smart-shell-command-with-aliases))
+
 ;;;###autoload
 (define-minor-mode bash-alias-mode
   "Enable Bash aliases in shell-command and async-shell-command"
   :global t :lighter " alias")
 
-(progn ;; init the table
+(defun bash-alias-mode-on ()
+  "Init bash-alias mode."
   (unless (file-exists-p bash-alias-file)
     (bash-aliases))
   (with-temp-buffer
     (insert-file-contents bash-alias-file)
-    (setq bash-alias-table (read (current-buffer)))))
+    (setq bash-alias-table (read (current-buffer))))
+  ;; install ourselves into dired-mode-map when dired is loaded
+  (when (bound-and-true-p dired-mode)
+    (define-key dired-mode-map [remap dired-smart-shell-command]
+                #'dired-smart-shell-command-with-aliases))
+  ;; unless dired is not loaded, install ourselves in the future
+  (with-eval-after-load 'dired
+    (define-key dired-mode-map [remap dired-smart-shell-command]
+                #'dired-smart-shell-command-with-aliases)))
+
+(defun bash-alias-mode-off ()
+  "Turn off bash alias mode."
+  ;; install ourselves into dired-mode-map when dired is loaded
+  (when (bound-and-true-p dired-mode)
+    (define-key dired-mode-map [remap dired-smart-shell-command] nil))
+  ;; unless dired is not loaded, install ourselves in the future
+  (dolist (elt after-load-alist)
+    (cond
+     ((stringp (car elt))
+      (when (string-match-p "dired"))))))
 
 (provide 'bash-alias)
 ;;; bash-alias.el ends here
