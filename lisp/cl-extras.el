@@ -24,29 +24,37 @@
 
 ;;; Code:
 
-
+(require 'sly)
+(require 'clede)
+(require 'clede-sly)
+(require 'clede-asdf)
+(require 'clede-fiveam)
 (require 'sotlisp)
 (require 'autoinsert)
 (require 'helm-pages)
 
 (defun cl-hooks ()  
   (setq fill-column 80)
-;;  (paredit-mode 1)
+  (paredit-mode 1)
   ;;(company-mode 1)
-;;  (outshine-mode 1)
+  ;;  (outshine-mode 1)
   (yas-minor-mode 1)
   ;;(lisp-extra-font-lock-mode 1)
   (speed-of-thought-mode 1)
   (page-break-lines-mode 1))
 
+(setq sly-lisp-implementations
+  '((sbcl-patched ("~/repos/sbcl-statat/run-sbcl.sh" "--noinform"))
+    (sbcl-clean ("/usr/bin/sbcl" "--noinform"))))
+
 (add-to-list 'auto-insert-alist
              '(("\\.cl\\|\\.lisp\\'" . "CommonLisp header")
-""
-";; " (file-name-nondirectory (buffer-file-name))
+               ""
+               ";; " (file-name-nondirectory (buffer-file-name))
 
-\n
+               \n
 
-";; Copyright (C) " (format-time-string "%Y") "  "
+               ";; Copyright (C) " (format-time-string "%Y") "  "
                (getenv "ORGANIZATION") | (progn user-full-name) "
 
 ;; Author: " (user-full-name)
@@ -103,10 +111,60 @@
   auto-insert-alist) 
 
 ;;;###autoload
-(defun make-cl-scratch ()
+(defun new-cl-scratch ()
+  "Create new scratch buffer in Common Lisp major mode."
   (interactive)
   (with-current-buffer  (get-buffer-create "*cl-scratch*")
     (common-lisp-mode)))
+
+(defun find-systems-in-buffer (&optional asdf-buffer)
+  "Find all systems in ASDF-BUFFER.
+If not specified, ASDF-BUFFER defaults to current buffer."
+  (with-current-buffer (get-buffer (or asdf-buffer (current-buffer)))
+    (save-excursion
+      (goto-char (point-min))
+      (let (systems)
+        (while
+            (condition-case _
+                (progn
+                  (down-list)
+                  (when (eq 'defsystem (read (current-buffer)))
+                    (push (read (current-buffer)) systems))
+                  (up-list)
+                  t)
+              (scan-error nil)))
+        (nreverse systems)))))
+
+(defun find-systems-in-file (asdf-file)
+  "Find all systems in ASDF-FILE."
+  (with-temp-buffer
+    (insert-file-contents-literally asdf-file)
+    (find-systems-in-buffer)))
+
+(defun sly-start-connects ()
+  "New connection with one of compilers specified in `sly-lisp-implementations'"
+  (interactive)
+  (let* ((ask (completing-read "Choose compiler: " sly-lisp-implementations))
+         (opt (cadr (assoc (intern-soft ask) sly-lisp-implementations)))
+         (cmd (expand-file-name (car opt)))
+         (args (cdr opt)))
+    (apply #'sly-start `(:program ,cmd :program-args ,args))))
+
+;;;###autoload
+(defun sly-new-from-system (&optional dir)
+  "Load .asd file in current folder."
+  (interactive)
+  (let* ((dir (or dir default-directory))
+         (asd-path
+          (or (and buffer-file-name
+                   (equal "asd" (file-name-extension buffer-file-name))
+                   buffer-file-name)
+              (read-file-name "Choose asdf-file: " (expand-file-name dir))))
+         (default-directory (file-name-directory asd-path)))
+    (find-file asd-path)
+    (sly)
+    (while (not (sly-connected-p)) (sleep-for 0.1)) ; is there a better way?
+    (call-interactively #'sly-compile-and-load-file)))
 
 (provide 'cl-extras)
 ;;; cl-extrasl.el ends here

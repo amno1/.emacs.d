@@ -23,7 +23,7 @@
 ;; This file is always loaded in my Emacs, so no autload cookies needed
 
 ;;; Code:
-
+(require 'org)
 (require 'ob-core)
 
 ;; https://lists.gnu.org/archive/html/emacs-orgmode/2012-09/msg01435.html
@@ -70,15 +70,15 @@
        url))
    '("<title>\\(.*\\)\\(/>\\|</title>\\)") t t))
 
-(defun org-link-from-clipboard ()
-  "Insert an org link into current buffer from an URL in clipboard."
-  (interactive)
-  (let* ((marker (point-marker))
-         (url (or (current-kill 0) (read-string "URL: "))))
-    (with-current-buffer (marker-buffer marker)
-      (save-excursion
-        (goto-char (marker-position marker))
-        (org-insert-link nil url (org-desc-from-clipboard))))))
+;; (defun org-link-from-clipboard ()
+;;   "Insert an org link into current buffer from an URL in clipboard."
+;;   (interactive)
+;;   (let* ((marker (point-marker))
+;;          (url (or (current-kill 0) (read-string "URL: "))))
+;;     (with-current-buffer (marker-buffer marker)
+;;       (save-excursion
+;;         (goto-char (marker-position marker))
+;;         (org-insert-link nil url (org-desc-from-clipboard))))))
 
 (defun org-link-from-clipboard ()
   "Insert an org link into current buffer from an URL in clipboard."
@@ -115,17 +115,25 @@
   (concat
    (mapcar
     (lambda (c)
-      (if (equal c ?[) ?\( (if (equal c ?]) ?\) c ))) string-to-transform)))
+      (if (equal c ?\[) ?\( (if (equal c ?\]) ?\) c ))) string-to-transform)))
+
+;; ;;;###autoload
+;; (defun yas-org-expand ()
+;;   (interactive)
+  
+;;   (let* ((info (org-babel-get-src-block-info 'no-eval))
+;;          (major-mode (if info
+;;                          (intern-soft (concat (car info) "-mode"))
+;;                        (intern-soft "org-mode"))))
+;;     (yas-expand)))
 
 ;;;###autoload
 (defun yas-org-expand ()
   (interactive)
-  
-  (let* ((info (org-babel-get-src-block-info 'no-eval))
-         (major-mode (if info
-                         (intern-soft (concat (car info) "-mode"))
-                       (intern-soft "org-mode"))))
-    (yas-expand)))
+  (require 'yas)
+  (let* ((info (car (org-babel-get-src-block-info 'no-eval)))
+         (major-mode (if info (intern-soft (concat info "-mode")) major-mode)))
+    (yas-expand-from-trigger-key)))
 
 (provide 'org-extras)
 ;;; org-extras.el ends here

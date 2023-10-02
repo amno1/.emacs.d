@@ -557,7 +557,7 @@
 ;;; org hacks
 
 ;; https://www.reddit.com/message/unread/
-(require 'cape)
+;;(require 'cape)
 
 (if (featurep 'org-heading-checkbox)
     (unload-feature 'org-heading-checkbox))
@@ -991,106 +991,16 @@
 #+end_src
 * Packages
 
-** [ none  ] [x] eglot
-#+begin_src emacs-lisp
-(with-package
- eglot
- (push :inlayHintProvider eglot-ignored-server-capabilities)
- (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
- (advice-add 'eglot-completion-at-point :around #'cape-wrap-noninterruptible))
-#+end_src
-
-** [x] eat
+** [x] clede
 #+begin_src emacs-lisp
 
 #+end_src
 
-** [x] clause
+** [x] helm-bibtex
 #+begin_src emacs-lisp
 
 #+end_src
 
-** [x] sentex
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] embark
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] alchemist
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] inf-elixir
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] elfeed
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] reddigg
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] hnreader
-#+begin_src emacs-lisp
-
-#+end_src
-
-
-** [x] jinx
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] cape
-#+begin_src emacs-lisp
-;; Add `completion-at-point-functions', used by `completion-at-point'.
-  ;; NOTE: The order matters!
-(with-package cape
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev 90)
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-  ;;(add-to-list 'completion-at-point-functions #'cape-history)
-  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
-  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
-  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
-  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
-  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
-  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
-  ;;(add-to-list 'completion-at-point-functions #'cape-symbol)
-  ;;(add-to-list 'completion-at-point-functions #'cape-line)
-  (setq-local completion-at-point-functions
-  (mapcar #'cape-company-to-capf
-    (list #'company-files #'company-ispell #'company-dabbrev))))
-
-(with-hook
- prog-mode-hook
- (add-hook 'completion-at-point-functions #'cape-keyword nil t))
-#+end_src
-
-** [x] window-layout
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ ] org-quick-peek
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] quick-peek
-#+begin_src emacs-lisp
-
-#+end_src
 ** [ local ] [ ] dired-git-log
 #+begin_src emacs-lisp
 (with-hook dired-git-log-mode
@@ -1157,216 +1067,6 @@
 #+end_src
 ** [ ] bui
 #+begin_src emacs-lisp
-#+end_src
-** [x] corfu
-#+begin_src emacs-lisp
-(with-package
- corfu
- (setq corfu-auto t
-       corf-auto-prefix 2
-       corfu-quit-no-match t
-       completion-cycle-threshold 3
-       corfu-quit-at-boundary 'separator)
- (define-key corfu-map (kbd "SPC") #'corfu-insert-separator)
- (global-corfu-mode))
-
-(add-hook 'minibuffer-setup-hook 'corfu-enable-always-in-minibuffer)
-#+end_src
-** [ ] dired-git.el
-#+begin_src emacs-lisp
-#+end_src
-** [ ] doc-show-inline
-#+begin_src emacs-lisp
-(with-package doc-show-inline
-              (defkeys c-mode-map
-                       "C-;" doc-show-inline-mode)
-              (defkeys c++-mode-map
-                       "C-;" doc-show-inline-mode))
-(with-hook c-mode (doc-show-inline-mode +1))
-(with-hook c++-mode (doc-show-inline-mode +1))
-#+end_src
-** [ ] elpy        
-#+begin_src emacs-lisp
-  (with-package elpy
-                (elpy-enable)
-                (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-              
-                (defkeys elpy-mode-map
-                  "C-M-n" elpy-nav-forward-block
-                  "C-M-p" elpy-nav-backward-block))
-  (with-hook elpy-mode
-             ;;(company-mode 1)           
-             (flycheck-mode 1)
-             ;;(make-local-variable 'company-backends)
-             ;;(setq company-backends '((elpy-company-backend :with company-yasnippet)))
-             )
-#+end_src
-** [ ] espuds
-#+begin_src emacs-lisp
-#+end_src
-** [ ] esup        
-#+begin_src emacs-lisp
-#+end_src
-** [ ] evil
-#+begin_src emacs-lisp
-#+end_src
-** [ ] evil-exchange
-#+begin_src emacs-lisp
-#+end_src
-** [ ] evil-matchit
-#+begin_src emacs-lisp
-#+end_src
-** [ ] evil-multiedit
-#+begin_src emacs-lisp
-#+end_src
-** [ ] evil-snipe
-#+begin_src emacs-lisp
-#+end_src
-** [ ] keg
-#+begin_src emacs-lisp
-(with-hook
- after-init
- (setenv "PATH" (concat (getenv "PATH")
-                        ":" (package-desc-dir (package-get-descriptor 'keg)))))
-#+end_src
-** [ ] lispy
-#+begin_src emacs-lisp
-#+end_src
-** [ ] org-noter-pdftools
-#+begin_src emacs-lisp
-     (unless (equal system-type 'windows-nt)
-       (with-package pdf-annot
-                     (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
-#+end_src
-** [ ] org-pdftools
-#+begin_src emacs-lisp
-     (unless (eq system-type 'windows-nt)
-       (with-hook org-load
-                  (org-pdftools-setup-link)))
-#+end_src
-** [ ] pdf-tools
-#+begin_src emacs-lisp
-     (unless (equal system-type 'windows-nt)
-       (with-package pdf-tools
-                     ;;(pdf-tools-install)
-                     (setq-default pdf-view-display-size 'fit-page)))
-#+end_src
-** [ ] rainbow-mode
-#+begin_src emacs-lisp
-#+end_src
-
-** [ ] run-command
-#+begin_src emacs-lisp
-#+end_src
-** [x] academic-phrases
-#+begin_src emacs-lisp
-#+end_src
-** [x] ace-window
-#+begin_src emacs-lisp
-  (with-package ace-window
-                (ace-window-display-mode 1)
-                ;;(setq aw-dispatch-always t)
-                (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
-#+end_src
-** [x] aggressive-indent
-#+begin_src emacs-lisp
-#+end_src
-** [x] all-the-icons
-#+begin_src emacs-lisp
-  (with-package all-the-icons
-                (diminish 'all-the-icons-mode)
-                (setq neo-theme 'arrow)
-                (setq neo-window-fixed-size nil))
-#+end_src
-** [x] anaphora
-#+begin_src emacs-lisp
-#+end_src
-** [x] ascii-art-to-unicode
-#+begin_src emacs-lisp
-#+end_src
-** [x] ascii-table
-#+begin_src emacs-lisp
-#+end_src
-** [x] async
-#+begin_src emacs-lisp
-(with-package
- async
- (async-bytecomp-package-mode 1)
- (with-system windows-nt
-              ;; https://gist.github.com/kiennq/cfe57671bab3300d3ed849a7cbf2927c
-              (eval-when-compile
-                (require 'cl-lib))
-              (defvar async-maximum-parallel-procs 4)
-              (defvar async--parallel-procs 0)
-              (defvar async--queue nil)
-              (defvar-local async--cb nil)
-              (advice-add #'async-start :around
-                          (lambda (orig-func func &optional callback)
-                            (when (>= async--parallel-procs async-maximum-parallel-procs)
-                                (push `(,func ,callback) async--queue)
-                                (cl-incf async--parallel-procs)
-                                (let ((future (funcall orig-func func
-                                                       (lambda (re)
-                                                         (cl-decf async--parallel-procs)
-                                                         (when async--cb (funcall async--cb re))
-                                                         (when-let (args (pop async--queue))
-                                                           (apply #'async-start args))))))
-                                  (with-current-buffer (process-buffer future)
-                                    (setq async--cb callback))))))))
- (with-hook dired-async-mode (diminish 'dired-async-mode))
-#+end_src
-** [x] auto-yasnippet
-#+begin_src emacs-lisp
-#+end_src
-** [x] avy
-#+BEGIN_SRC emacs-lisp
-#+END_SRC
-** [x] beacon
-#+begin_src emacs-lisp
-(with-hook after-init (when-idle (beacon-mode t)))
-(with-hook beacon-mode (diminish 'beacon-mode))
-#+end_src
-** [x] blamer
-#+begin_src emacs-lisp
-#+end_src
-
-** [x] bug-hunter
-#+begin_src emacs-lisp
-#+end_src
-** [x] cfrs
-#+begin_src emacs-lisp
-#+end_src
-** [x] checkdoc
-#+begin_src emacs-lisp
-#+end_src
-** [x] cider
-#+begin_src emacs-lisp
-#+end_src
-** [x] cmake-font-lock
-#+begin_src emacs-lisp
-  (with-hook prog-mode
-             ;; Highlighting in cmake-mode this way interferes with
-             ;; cmake-font-lock, which is something I dont yet understand.
-             (when (not (derived-mode-p 'cmake-mode))
-               (font-lock-add-keywords nil
-                                       '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
-                                          1 font-lock-warning-face t)))))
-  (with-hook cmake-mode
-             (cmake-font-lock-activate))
-#+end_src
-** [x] cmake-mode
-#+begin_src emacs-lisp
-  (with-hook after-init
-             (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
-             (add-to-list 'auto-mode-alist '("\\CMakeLists.txt\\'" . cmake-mode)))
-  (with-hook cmake
-             (require 'company)
-             (require 'company-cmake)
-             (company-mode 1))
-#+end_src
-** [x] command-log-mode
-#+begin_src emacs-lisp
-
 #+end_src
 ** [ ] company
 #+begin_src emacs-lisp
@@ -1442,9 +1142,412 @@
 ** [ ] company-web
 #+begin_src emacs-lisp
 #+end_src
+** [ ] dired-git.el
+#+begin_src emacs-lisp
+#+end_src
+** [ ] doc-show-inline
+#+begin_src emacs-lisp
+(with-package doc-show-inline
+              (defkeys c-mode-map
+                       "C-;" doc-show-inline-mode)
+              (defkeys c++-mode-map
+                       "C-;" doc-show-inline-mode))
+(with-hook c-mode (doc-show-inline-mode +1))
+(with-hook c++-mode (doc-show-inline-mode +1))
+#+end_src
+** [ ] ecukes
+#+begin_src emacs-lisp
+#+end_src
+** [ ] elpy        
+#+begin_src emacs-lisp
+  (with-package elpy
+                (elpy-enable)
+                (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+              
+                (defkeys elpy-mode-map
+                  "C-M-n" elpy-nav-forward-block
+                  "C-M-p" elpy-nav-backward-block))
+  (with-hook elpy-mode
+             ;;(company-mode 1)           
+             (flycheck-mode 1)
+             ;;(make-local-variable 'company-backends)
+             ;;(setq company-backends '((elpy-company-backend :with company-yasnippet)))
+             )
+#+end_src
+** [ ] espuds
+#+begin_src emacs-lisp
+#+end_src
+** [ ] esup        
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-exchange
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-matchit
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-multiedit
+#+begin_src emacs-lisp
+#+end_src
+** [ ] evil-snipe
+#+begin_src emacs-lisp
+#+end_src
+** [ ] helm-company
+#+begin_src emacs-lisp
+#+end_src
+** [ ] helm-lsp
+#+begin_src emacs-lisp
+(with-package helm-lsp
+              (defun netrom/helm-lsp-workspace-symbol-at-point ()
+                (interactive)
+                (let ((current-prefix-arg t))
+                  (call-interactively 'helm-lsp-workspace-symbol)))
+              (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
+                (interactive)
+                (let ((current-prefix-arg t))
+                  (call-interactively 'helm-lsp-global-workspace-symbol)))
+              (setq netrom--general-lsp-hydra-heads
+                    '(;; Xref
+                      ("d" xref-find-definitions "Definitions" :column "Xref")
+                      ("D" xref-find-definitions-other-window "-> other win")
+                      ("r" xref-find-references "References")
+                      ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
+                      ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
+                      ;; Peek
+                      ("C-d" lsp-ui-peek-find-definitions "Definitions" :column "Peek")
+                      ("C-r" lsp-ui-peek-find-references "References")
+                      ("C-i" lsp-ui-peek-find-implementation "Implementation")
+                      ;; LSP
+                      ("p" lsp-describe-thing-at-point "Describe at point" :column "LSP")
+                      ("C-a" lsp-execute-code-action "Execute code action")
+                      ("R" lsp-rename "Rename")
+                      ("t" lsp-goto-type-definition "Type definition")
+                      ("i" lsp-goto-implementation "Implementation")
+                      ("f" helm-imenu "Filter funcs/classes (Helm)")
+                      ("C-c" lsp-describe-session "Describe session")
+                      ;; Flycheck
+                      ("l" lsp-ui-flycheck-list "List errs/warns/notes" :column "Flycheck"))
+                    netrom--misc-lsp-hydra-heads
+                    '(;; Misc
+                      ("q" nil "Cancel" :column "Misc")
+                      ("b" pop-tag-mark "Back")))
+              ;; Create general hydra.
+              (eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
+                       ,@(append
+                          netrom--general-lsp-hydra-heads
+                          netrom--misc-lsp-hydra-heads)))
+              (defkeys lsp-mode-map
+                       [remap xref-find-apropos] helm-lsp-workspace-symbol
+                       "C-c C-l" netrom/lsp-hydra/body))
+#+end_src
+** [ ] keg
+#+begin_src emacs-lisp
+(with-hook
+ after-init
+ (setenv "PATH" (concat (getenv "PATH")
+                        ":" (package-desc-dir (package-get-descriptor 'keg)))))
+#+end_src
+** [ ] lispy
+#+begin_src emacs-lisp
+#+end_src
+** [ ] lsp-java        
+#+begin_src emacs-lisp
+#+end_src
+** [ ] lsp-mode        
+#+begin_src emacs-lisp
+(with-package lsp-mode
+              (setq lsp-diagnostic-provider :none
+                    lsp-keymap-prefix "C-f"
+                    lsp-completion-provider t
+                    lsp-enable-xref t
+                    lsp-auto-configure t
+                    lsp-auto-guess-root t
+                    ;;lsp-inhibit-message t
+                    lsp-enable-snippet t
+                    lsp-restart 'interactive
+                    lsp-log-io nil
+                    lsp-idle-delay 0.1
+                    lsp-enable-links nil
+                    lsp-enable-symbol-highlighting t
+                    lsp-keep-workspace-alive t
+                    lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error")
+                    ;; python
+                    ;; lsp-python-executable-cmd "python3"
+                    ;; lsp-python-ms-executable "~/repos/python-language-server/output/bin/Release/osx-x64/publish/Microsoft.Python.LanguageServer"
+                    lsp-enable-completion-enable t
+                    lsp-pyls-plugins-flake8-enabled t)
+              
+              (lsp-register-custom-settings
+               '(("pyls.plugins.pyls_mypy.enabled" t t)
+                 ("pyls.plugins.pyls_mypy.live_mode" nil t)
+                 ("pyls.plugins.pyls_black.enabled" t t)
+                 ("pyls.plugins.pyls_isort.enabled" t t)
+                 ;; Disable these as they're duplicated by flake8
+                 ("pyls.plugins.pycodestyle.enabled" nil t)
+                 ("pyls.plugins.mccabe.enabled" nil t)
+                 ("pyls.plugins.pyflakes.enabled" nil t)))
+               (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+               (add-hook 'lsp-managed-mode-hook (lambda () (setq-local company-backends
+                                                                       '(company-capf))))
+               (require 'dap-chrome)
+               (require 'dap-cpptools)
+               (diminish 'lsp-mode))
+
+(with-hook python-mode
+           (lsp-deferred))
+#+end_src
+** [ ] lsp-pyright
+#+begin_src emacs-lisp
+     ;; (with-package lsp-pyright
+     ;;               (setq lsp-clients-python-library-directories '("/usr"
+     ;;                                                              "~/miniconda3/pkgs")
+     ;;                     lsp-pyright-disable-language-service nil
+     ;;                     lsp-pyright-dsable-organize-imports nil
+     ;;                     lsp-pyright-auto-import-completions t
+     ;;                     lsp-pyright-use-library-code-for-types t
+     ;;                     lsp-pyright-venv-pat "~/miniconda3/envs"))
+     ;; (with-hook python-mode
+     ;;            (require 'lsp-pyright)
+     ;;            (lsp-deferred)
+     ;;            (setq python-shell-interpreter "ipython"
+     ;;                  python-shell-interpreter-args "-i --simple-prompt"))
+#+end_src
+** [ ] lsp-treemacs        
+#+begin_src emacs-lisp
+#+end_src
+** [ ] lsp-ui
+#+begin_src emacs-lisp
+(with-package lsp-ui
+              (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+              (setq lsp-ui-doc-enable t
+                    lsp-ui-sideline-show-hover t
+                    lsp-ui-doc-header t
+                    lsp-ui-doc-delay 2
+                    lsp-ui-doc-include-signature t
+                    lsp-ui-doc-position 'top
+                    lsp-ui-doc-alignment 'frame
+                    lsp-ui-doc-border (face-foreground 'default)
+                    lsp-ui-sideline-enable nil
+                    lsp-ui-sideline-ignore-duplicate t
+                    lsp-ui-sideline-show-code-actions nil
+                    lsp-ui-sideline-ignore-duplicate t
+                    ;; Use lsp-ui-doc-webkit only in GUI
+                    lsp-ui-doc-use-webkit t
+                    lsp-ui-doc-include-signature t
+                    lsp-ui-doc-use-childframe t
+                    ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
+                    ;; https://github.com/emacs-lsp/lsp-ui/issues/243
+                    ;;mode-line-format nil
+                    )
+              (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate))
+           (defkeys lsp-ui-mode-map
+             [remap xref-find-references]  lsp-ui-peek-find-references
+             [remap xref-find-definitions] lsp-ui-peek-find-definitions
+             "C-c u" lsp-ui-imenu))
+(with-hook lsp-ui-mode
+           (diminish 'lsp-ui-mode))
+#+end_src
+** [ ] org-noter-pdftools
+#+begin_src emacs-lisp
+     (unless (equal system-type 'windows-nt)
+       (with-package pdf-annot
+                     (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+#+end_src
+** [ ] org-pdftools
+#+begin_src emacs-lisp
+     (unless (eq system-type 'windows-nt)
+       (with-hook org-load
+                  (org-pdftools-setup-link)))
+#+end_src
+** [ ] org-quick-peek
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ ] outshine
+#+begin_src emacs-lisp
+;;(with-hook outshine-mode (diminish 'outshine-mode))
+#+end_src
+** [ ] pdf-tools
+#+begin_src emacs-lisp
+     (unless (equal system-type 'windows-nt)
+       (with-package pdf-tools
+                     ;;(pdf-tools-install)
+                     (setq-default pdf-view-display-size 'fit-page)))
+#+end_src
+** [ ] rainbow-mode
+#+begin_src emacs-lisp
+#+end_src
+
+** [ ] run-command
+#+begin_src emacs-lisp
+#+end_src
+** [x] academic-phrases
+#+begin_src emacs-lisp
+#+end_src
+** [x] ace-window
+#+begin_src emacs-lisp
+  (with-package ace-window
+                (ace-window-display-mode 1)
+                ;;(setq aw-dispatch-always t)
+                (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+#+end_src
+** [x] aggressive-indent
+#+begin_src emacs-lisp
+#+end_src
+** [x] alchemist
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] all-the-icons
+#+begin_src emacs-lisp
+  (with-package all-the-icons
+                (diminish 'all-the-icons-mode)
+                (setq neo-theme 'arrow)
+                (setq neo-window-fixed-size nil))
+#+end_src
+** [x] anaphora
+#+begin_src emacs-lisp
+#+end_src
+** [x] ascii-art-to-unicode
+#+begin_src emacs-lisp
+#+end_src
+** [x] ascii-table
+#+begin_src emacs-lisp
+#+end_src
+** [x] async
+#+begin_src emacs-lisp
+(with-package
+ async
+ (async-bytecomp-package-mode 1)
+ (with-system windows-nt
+              ;; https://gist.github.com/kiennq/cfe57671bab3300d3ed849a7cbf2927c
+              (eval-when-compile
+                (require 'cl-lib))
+              (defvar async-maximum-parallel-procs 4)
+              (defvar async--parallel-procs 0)
+              (defvar async--queue nil)
+              (defvar-local async--cb nil)
+              (advice-add #'async-start :around
+                          (lambda (orig-func func &optional callback)
+                            (when (>= async--parallel-procs async-maximum-parallel-procs)
+                                (push `(,func ,callback) async--queue)
+                                (cl-incf async--parallel-procs)
+                                (let ((future (funcall orig-func func
+                                                       (lambda (re)
+                                                         (cl-decf async--parallel-procs)
+                                                         (when async--cb (funcall async--cb re))
+                                                         (when-let (args (pop async--queue))
+                                                           (apply #'async-start args))))))
+                                  (with-current-buffer (process-buffer future)
+                                    (setq async--cb callback))))))))
+ (with-hook dired-async-mode (diminish 'dired-async-mode))
+#+end_src
+** [x] auto-yasnippet
+#+begin_src emacs-lisp
+#+end_src
+** [x] avy
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+** [x] beacon
+#+begin_src emacs-lisp
+(with-hook after-init (when-idle (beacon-mode t)))
+(with-hook beacon-mode (diminish 'beacon-mode))
+#+end_src
+** [x] blamer
+#+begin_src emacs-lisp
+#+end_src
+
+** [x] bug-hunter
+#+begin_src emacs-lisp
+#+end_src
+** [x] cape
+#+begin_src emacs-lisp
+;; Add `completion-at-point-functions', used by `completion-at-point'.
+  ;; NOTE: The order matters!
+(with-package cape
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev 90)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  ;;(add-to-list 'completion-at-point-functions #'cape-history)
+  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
+  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
+  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+  ;;(add-to-list 'completion-at-point-functions #'cape-symbol)
+  ;;(add-to-list 'completion-at-point-functions #'cape-line)
+  (setq-local completion-at-point-functions
+  (mapcar #'cape-company-to-capf
+    (list #'company-files #'company-ispell #'company-dabbrev))))
+
+(with-hook
+ prog-mode-hook
+ (add-hook 'completion-at-point-functions #'cape-keyword nil t))
+#+end_src
+
+** [x] cfrs
+#+begin_src emacs-lisp
+#+end_src
+** [x] checkdoc
+#+begin_src emacs-lisp
+#+end_src
+** [x] cider
+#+begin_src emacs-lisp
+#+end_src
+** [x] clause
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] cmake-font-lock
+#+begin_src emacs-lisp
+  (with-hook prog-mode
+             ;; Highlighting in cmake-mode this way interferes with
+             ;; cmake-font-lock, which is something I dont yet understand.
+             (when (not (derived-mode-p 'cmake-mode))
+               (font-lock-add-keywords nil
+                                       '(("\\<\\(FIXME\\|TODO\\|BUG\\|DONE\\)"
+                                          1 font-lock-warning-face t)))))
+  (with-hook cmake-mode
+             (cmake-font-lock-activate))
+#+end_src
+** [x] cmake-mode
+#+begin_src emacs-lisp
+  (with-hook after-init
+             (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
+             (add-to-list 'auto-mode-alist '("\\CMakeLists.txt\\'" . cmake-mode)))
+  (with-hook cmake
+             (require 'company)
+             (require 'company-cmake)
+             (company-mode 1))
+#+end_src
+** [x] command-log-mode
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] consult
 #+begin_src emacs-lisp
 
+#+end_src
+** [x] corfu
+#+begin_src emacs-lisp
+(with-package
+ corfu
+ (setq corfu-auto t
+       corf-auto-prefix 2
+       corfu-quit-no-match t
+       completion-cycle-threshold 3
+       corfu-quit-at-boundary 'separator)
+ (define-key corfu-map (kbd "SPC") #'corfu-insert-separator)
+ (global-corfu-mode))
+
+(add-hook 'minibuffer-setup-hook 'corfu-enable-always-in-minibuffer)
 #+end_src
 ** [x] crux
 #+begin_src emacs-lisp
@@ -1516,12 +1619,19 @@
 
 #+end_src
 
-** [ ] ecukes
+** [x] eat
 #+begin_src emacs-lisp
+
 #+end_src
+
 ** [x] eldev
 #+begin_src emacs-lisp
 #+end_src
+** [x] elfeed
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] elisp-benchmarks
 #+begin_src emacs-lisp
 #+end_src
@@ -1538,6 +1648,11 @@
 ** [x] el-search
 #+begin_src emacs-lisp
 #+end_src
+** [x] embark
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] embark
 #+begin_src emacs-lisp
 
@@ -1881,9 +1996,6 @@
                     helm-ag-base-command 
                     "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*"))
 #+end_src
-** [ ] helm-company
-#+begin_src emacs-lisp
-#+end_src
 ** [x] helm-c-yasnippet        
 #+begin_src emacs-lisp
 (with-package helm-c-yasnippet
@@ -1932,51 +2044,6 @@
 ** [x] helm-ls-git        
 #+begin_src emacs-lisp
 #+end_src
-** [ ] helm-lsp
-#+begin_src emacs-lisp
-(with-package helm-lsp
-              (defun netrom/helm-lsp-workspace-symbol-at-point ()
-                (interactive)
-                (let ((current-prefix-arg t))
-                  (call-interactively 'helm-lsp-workspace-symbol)))
-              (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
-                (interactive)
-                (let ((current-prefix-arg t))
-                  (call-interactively 'helm-lsp-global-workspace-symbol)))
-              (setq netrom--general-lsp-hydra-heads
-                    '(;; Xref
-                      ("d" xref-find-definitions "Definitions" :column "Xref")
-                      ("D" xref-find-definitions-other-window "-> other win")
-                      ("r" xref-find-references "References")
-                      ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
-                      ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
-                      ;; Peek
-                      ("C-d" lsp-ui-peek-find-definitions "Definitions" :column "Peek")
-                      ("C-r" lsp-ui-peek-find-references "References")
-                      ("C-i" lsp-ui-peek-find-implementation "Implementation")
-                      ;; LSP
-                      ("p" lsp-describe-thing-at-point "Describe at point" :column "LSP")
-                      ("C-a" lsp-execute-code-action "Execute code action")
-                      ("R" lsp-rename "Rename")
-                      ("t" lsp-goto-type-definition "Type definition")
-                      ("i" lsp-goto-implementation "Implementation")
-                      ("f" helm-imenu "Filter funcs/classes (Helm)")
-                      ("C-c" lsp-describe-session "Describe session")
-                      ;; Flycheck
-                      ("l" lsp-ui-flycheck-list "List errs/warns/notes" :column "Flycheck"))
-                    netrom--misc-lsp-hydra-heads
-                    '(;; Misc
-                      ("q" nil "Cancel" :column "Misc")
-                      ("b" pop-tag-mark "Back")))
-              ;; Create general hydra.
-              (eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
-                       ,@(append
-                          netrom--general-lsp-hydra-heads
-                          netrom--misc-lsp-hydra-heads)))
-              (defkeys lsp-mode-map
-                       [remap xref-find-apropos] helm-lsp-workspace-symbol
-                       "C-c C-l" netrom/lsp-hydra/body))
-#+end_src
 ** [x] helm-make        
 #+begin_src emacs-lisp
 #+end_src
@@ -2023,6 +2090,10 @@
 #+end_src
 ** [x] hide-mode-line
 #+begin_src emacs-lisp
+#+end_src
+** [x] hnreader
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] ht
 #+begin_src emacs-lisp
@@ -2075,12 +2146,27 @@
 ** [x] iedit        
 #+begin_src emacs-lisp
 #+end_src
+** [x] igist
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] imenu-anywhere        
 #+begin_src emacs-lisp
 #+end_src
 ** [x] import-js        
 #+begin_src emacs-lisp
 #+end_src
+** [x] inf-elixir
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] jinx
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] keycast
 #+begin_src emacs-lisp
 #+end_src
@@ -2100,103 +2186,6 @@
 
 #+end_src
 
-** [ ] lsp-java        
-#+begin_src emacs-lisp
-#+end_src
-** [ ] lsp-mode        
-#+begin_src emacs-lisp
-(with-package lsp-mode
-              (setq lsp-diagnostic-provider :none
-                    lsp-keymap-prefix "C-f"
-                    lsp-completion-provider t
-                    lsp-enable-xref t
-                    lsp-auto-configure t
-                    lsp-auto-guess-root t
-                    ;;lsp-inhibit-message t
-                    lsp-enable-snippet t
-                    lsp-restart 'interactive
-                    lsp-log-io nil
-                    lsp-idle-delay 0.1
-                    lsp-enable-links nil
-                    lsp-enable-symbol-highlighting t
-                    lsp-keep-workspace-alive t
-                    lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error")
-                    ;; python
-                    ;; lsp-python-executable-cmd "python3"
-                    ;; lsp-python-ms-executable "~/repos/python-language-server/output/bin/Release/osx-x64/publish/Microsoft.Python.LanguageServer"
-                    lsp-enable-completion-enable t
-                    lsp-pyls-plugins-flake8-enabled t)
-              
-              (lsp-register-custom-settings
-               '(("pyls.plugins.pyls_mypy.enabled" t t)
-                 ("pyls.plugins.pyls_mypy.live_mode" nil t)
-                 ("pyls.plugins.pyls_black.enabled" t t)
-                 ("pyls.plugins.pyls_isort.enabled" t t)
-                 ;; Disable these as they're duplicated by flake8
-                 ("pyls.plugins.pycodestyle.enabled" nil t)
-                 ("pyls.plugins.mccabe.enabled" nil t)
-                 ("pyls.plugins.pyflakes.enabled" nil t)))
-               (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
-               (add-hook 'lsp-managed-mode-hook (lambda () (setq-local company-backends
-                                                                       '(company-capf))))
-               (require 'dap-chrome)
-               (require 'dap-cpptools)
-               (diminish 'lsp-mode))
-
-(with-hook python-mode
-           (lsp-deferred))
-#+end_src
-** [ ] lsp-pyright
-#+begin_src emacs-lisp
-     ;; (with-package lsp-pyright
-     ;;               (setq lsp-clients-python-library-directories '("/usr"
-     ;;                                                              "~/miniconda3/pkgs")
-     ;;                     lsp-pyright-disable-language-service nil
-     ;;                     lsp-pyright-dsable-organize-imports nil
-     ;;                     lsp-pyright-auto-import-completions t
-     ;;                     lsp-pyright-use-library-code-for-types t
-     ;;                     lsp-pyright-venv-pat "~/miniconda3/envs"))
-     ;; (with-hook python-mode
-     ;;            (require 'lsp-pyright)
-     ;;            (lsp-deferred)
-     ;;            (setq python-shell-interpreter "ipython"
-     ;;                  python-shell-interpreter-args "-i --simple-prompt"))
-#+end_src
-** [ ] lsp-treemacs        
-#+begin_src emacs-lisp
-#+end_src
-** [ ] lsp-ui
-#+begin_src emacs-lisp
-(with-package lsp-ui
-              (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-              (setq lsp-ui-doc-enable t
-                    lsp-ui-sideline-show-hover t
-                    lsp-ui-doc-header t
-                    lsp-ui-doc-delay 2
-                    lsp-ui-doc-include-signature t
-                    lsp-ui-doc-position 'top
-                    lsp-ui-doc-alignment 'frame
-                    lsp-ui-doc-border (face-foreground 'default)
-                    lsp-ui-sideline-enable nil
-                    lsp-ui-sideline-ignore-duplicate t
-                    lsp-ui-sideline-show-code-actions nil
-                    lsp-ui-sideline-ignore-duplicate t
-                    ;; Use lsp-ui-doc-webkit only in GUI
-                    lsp-ui-doc-use-webkit t
-                    lsp-ui-doc-include-signature t
-                    lsp-ui-doc-use-childframe t
-                    ;; WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
-                    ;; https://github.com/emacs-lsp/lsp-ui/issues/243
-                    ;;mode-line-format nil
-                    )
-              (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate))
-           (defkeys lsp-ui-mode-map
-             [remap xref-find-references]  lsp-ui-peek-find-references
-             [remap xref-find-definitions] lsp-ui-peek-find-definitions
-             "C-c u" lsp-ui-imenu))
-(with-hook lsp-ui-mode
-           (diminish 'lsp-ui-mode))
-#+end_src
 ** [x] lusty-explorer
 #+begin_src emacs-lisp
 #+end_src
@@ -2264,20 +2253,20 @@
 ** [x] ob-async
 #+begin_src emacs-lisp
 #+end_src
-
 ** [x] org
 #+begin_src emacs-lisp
 (with-hook
  org-mode
  (when (equal (buffer-name) "init.org")
-   (org-babel-hide-markers-mode 1)
-   (diminish 'org-babel-hide-markers-mode)
+   ;;(org-babel-hide-markers-mode 1)
+   ;;(diminish 'org-babel-hide-markers-mode)
    (auto-save-mode 1)
    (page-break-lines-mode 1))
- ;; (yas-minor-mode 1)
+ (yas-minor-mode 1)
  ;; (yas-activate-extra-mode 'emacs-lisp-mode)
- (org-pretty-table-mode 1)
- (diminish 'org-pretty-table-mode))
+ ;; (org-pretty-table-mode 1)
+ ;; (diminish 'org-pretty-table-mode)
+ )
 
 (with-package
  org
@@ -2289,7 +2278,7 @@
           [C-enter] other-window
           [C-S-<return>] org-insert-heading-respect-content)
 
- (define-key org-mode-map (kbd "SPC") #'yas-org-expand)
+;; (define-key org-mode-map (kbd "SPC") #'yas-org-expand)
 
  (setq org-capture-templates
        `(("p" "Protocol" entry (file+headline "~/Dokument/notes.org" "Inbox")
@@ -2372,10 +2361,6 @@
 
 #+end_src
 
-** [ ] outshine
-#+begin_src emacs-lisp
-(with-hook outshine-mode (diminish 'outshine-mode))
-#+end_src
 ** [x] overseer
 #+begin_src emacs-lisp
 #+end_src
@@ -2444,9 +2429,18 @@
 ** [x] qrencode
 #+begin_src emacs-lisp
 #+end_src
+** [x] quick-peek
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] recentf 
 #+begin_src emacs-lisp
 #+end_src
+** [x] reddigg
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] refine
 #+begin_src emacs-lisp
 #+end_src
@@ -2473,15 +2467,27 @@
 ** [x] s
 #+begin_src emacs-lisp
 #+end_src
+** [x] sentex
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] simple-httpd
 #+begin_src emacs-lisp
 #+end_src
 ** [x] sly
 #+begin_src emacs-lisp
-(with-package sly
-              (setq inferior-lisp-program "/usr/bin/sbcl")
-              (defkeys sly-prefix-map
-                "M-h" sly-documentation-lookup))
+(with-package
+ sly
+ (add-to-list 'sly-contribs 'sly-asdf 'append)
+ (setq inferior-lisp-program "sbcl")
+ (defkeys
+  sly-prefix-map
+  "C-c b" sly-eval-buffer
+  "C-c d" sly-eval-defun
+  "C-c C-d" sly-compile-defun
+  "C-c l" sly-eval-last-expression
+  "M-h" sly-documentation-lookup))
 #+end_src
 ** [x] sly-asdf
 #+begin_src emacs-lisp
@@ -2557,6 +2563,11 @@
  (which-key-setup-minibuffer)
  (which-key-mode))
 #+end_src
+** [x] window-layout
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] winum
 #+begin_src emacs-lisp
 #+end_src
@@ -2598,6 +2609,61 @@
 #+begin_src emacs-lisp
 #+end_src
    
+** [ none  ] [x] early-init
+#+begin_src emacs-lisp
+    (with-hook early-init
+               (defvar default-gc-cons-threshold gc-cons-threshold)
+               (defvar old-file-name-handler file-name-handler-alist)
+               (setq file-name-handler-alist nil
+                     debug-on-error t
+                     gc-cons-threshold most-positive-fixnum
+                     frame-inhibit-implied-resize t
+                     bidi-inhibit-bpa t
+                     initial-scratch-message ""
+                     inhibit-splash-screen t
+                     inhibit-startup-screen t
+                     inhibit-startup-message t
+                     inhibit-startup-echo-area-message t
+                     show-paren-delay 0
+                     use-dialog-box nil
+                     visible-bell nil
+                     ring-bell-function 'ignore
+                     load-prefer-newer t
+                     shell-command-default-error-buffer "Shell Command Errors"
+                     native-comp-async-report-warnings-errors 'silent
+                     comp-speed 3)
+               (when 'native-comp-compiler-options
+                 (setq native-comp-async-jobs-number 4))
+               
+               (setq-default abbrev-mode t
+                             indent-tabs-mode nil
+                             indicate-empty-lines t
+                             cursor-type 'bar
+                             fill-column 80
+                             auto-fill-function 'do-auto-fill
+                             cursor-in-non-selected-windows 'hollow
+                             bidi-display-reordering 'left-to-right
+                             bidi-paragraph-direction 'left-to-right)
+               (push '(fullscreen . maximized) initial-frame-alist)
+               (push '(fullscreen . maximized) default-frame-alist)
+               (push '(menu-bar-lines . 0) default-frame-alist)
+               (push '(tool-bar-lines . 0) default-frame-alist)
+               (push '(vertical-scroll-bars . nil) default-frame-alist)
+               (push '(font . "Anonymous Pro-16") default-frame-alist)
+               (custom-set-faces '(default ((t (:height 120)))))
+               ;; (let ((default-directory  (expand-file-name "lisp" user-emacs-directory)))
+               ;;   (normal-top-level-add-to-load-path '("."))
+               ;;   (normal-top-level-add-subdirs-to-load-path))
+               ;; (let ((deff (gethash 'default face--new-frame-defaults)))
+               ;;   (aset (cdr deff) 4 440)
+               ;;   (puthash 'default deff face--new-frame-defaults))
+               (define-prefix-command 'C-z-map)
+               (global-set-key (kbd "C-z") 'C-z-map)
+               (global-unset-key (kbd "C-v"))
+               ;; define a setc function for use in init file
+               (defalias 'setc 'customize-set-variables)
+               (put 'setc 'byte-optimizer 'byte-compile-inline-expand))
+#+end_src
 ** [ none  ] [x] abbrev
 #+begin_src emacs-lisp
 (with-package abbrev
@@ -2690,65 +2756,19 @@
            ;;(dired-git-log-mode)
            (dired-auto-readme-mode))
 #+end_src
-** [ none  ] [x] early-init
-#+begin_src emacs-lisp
-    (with-hook early-init
-               (defvar default-gc-cons-threshold gc-cons-threshold)
-               (defvar old-file-name-handler file-name-handler-alist)
-               (setq file-name-handler-alist nil
-                     debug-on-error t
-                     gc-cons-threshold most-positive-fixnum
-                     frame-inhibit-implied-resize t
-                     bidi-inhibit-bpa t
-                     initial-scratch-message ""
-                     inhibit-splash-screen t
-                     inhibit-startup-screen t
-                     inhibit-startup-message t
-                     inhibit-startup-echo-area-message t
-                     show-paren-delay 0
-                     use-dialog-box nil
-                     visible-bell nil
-                     ring-bell-function 'ignore
-                     load-prefer-newer t
-                     shell-command-default-error-buffer "Shell Command Errors"
-                     native-comp-async-report-warnings-errors 'silent
-                     comp-speed 3)
-               (when 'native-comp-compiler-options
-                 (setq native-comp-async-jobs-number 4))
-               
-               (setq-default abbrev-mode t
-                             indent-tabs-mode nil
-                             indicate-empty-lines t
-                             cursor-type 'bar
-                             fill-column 80
-                             auto-fill-function 'do-auto-fill
-                             cursor-in-non-selected-windows 'hollow
-                             bidi-display-reordering 'left-to-right
-                             bidi-paragraph-direction 'left-to-right)
-               (push '(fullscreen . maximized) initial-frame-alist)
-               (push '(fullscreen . maximized) default-frame-alist)
-               (push '(menu-bar-lines . 0) default-frame-alist)
-               (push '(tool-bar-lines . 0) default-frame-alist)
-               (push '(vertical-scroll-bars . nil) default-frame-alist)
-               (push '(font . "Anonymous Pro-16") default-frame-alist)
-               (custom-set-faces '(default ((t (:height 120)))))
-               ;; (let ((default-directory  (expand-file-name "lisp" user-emacs-directory)))
-               ;;   (normal-top-level-add-to-load-path '("."))
-               ;;   (normal-top-level-add-subdirs-to-load-path))
-               ;; (let ((deff (gethash 'default face--new-frame-defaults)))
-               ;;   (aset (cdr deff) 4 440)
-               ;;   (puthash 'default deff face--new-frame-defaults))
-               (define-prefix-command 'C-z-map)
-               (global-set-key (kbd "C-z") 'C-z-map)
-               (global-unset-key (kbd "C-v"))
-               ;; define a setc function for use in init file
-               (defalias 'setc 'customize-set-variables)
-               (put 'setc 'byte-optimizer 'byte-compile-inline-expand))
-#+end_src
 ** [ none  ] [x] edebug
 #+begin_src emacs-lisp
 (with-package edebug (require 'edebug-x))
 #+end_src
+** [ none  ] [x] eglot
+#+begin_src emacs-lisp
+(with-package
+ eglot
+ (push :inlayHintProvider eglot-ignored-server-capabilities)
+ (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+ (advice-add 'eglot-completion-at-point :around #'cape-wrap-noninterruptible))
+#+end_src
+
 ** [ none  ] [x] emacs
 #+begin_src emacs-lisp
   (with-hook text-mode (setq fill-column 240))
@@ -2783,7 +2803,7 @@
 	   message-log-max 10000 ;; oriignal 1000
 	   undo-outer-limit 37000000
 	   shell-file-name "bash"
-	   shell-command-switch "-ic"
+	   shell-command-switch "-c"
 	   delete-exited-processes t
 	   echo-keystrokes 0.1
 	   create-lock-files nil
@@ -2848,6 +2868,7 @@
    (winner-mode t)
    (turn-on-auto-fill)
    (pixel-scroll-precision-mode +1)
+   (bash-alias-mode +1)
  
    (defkeys global-map
 	    "C-<insert>"    term-toggle-term
@@ -3052,6 +3073,12 @@
   (with-hook inferior-python-mode
              (hide-mode-line-mode))
 #+end_src
+** [ none  ] [x] info
+#+begin_src emacs-lisp
+(with-package
+ info
+ (defkeys Info-mode-map "." Info-forward-node))
+#+end_src
 ** [ none  ] [x] lisp & elisp
 #+begin_src emacs-lisp
 (with-package
@@ -3077,6 +3104,7 @@
  (set-default 'auto-mode-alist
               (append '(("\\.lisp" . lisp-mode)
                         ("\\.lsp" . lisp-mode)
+                        ("\\.asd" . lisp-mode)
                         ("\\.cl" . lisp-mode))
                       auto-mode-alist)))
 

@@ -512,6 +512,13 @@ If there is not a window to the right, open new one."
   (helm-next-line))
 
 ;;;###autoload
+(defun erase-read-only-buffer ()
+  "Interactively erase a read-only buffer."
+  (interactive)
+  (let ((inhibit-read-only t))
+    (erase-buffer)))
+
+;;;###autoload
 (defun corfu-enable-always-in-minibuffer ()
   "Enable Corfu in the minibuffer if Vertico/Mct are not active."
   (unless (or (bound-and-true-p helm-alive-p)

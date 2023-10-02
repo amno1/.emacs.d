@@ -29,6 +29,7 @@ lisp/lisp-autoloads.el
 lisp/org-view-mode.el
 package-quickstart.el
 helm-adaptive-history
+etc/bash-alias-table
 etc/.emacs.desktop.lock
 etc/custom.el
 etc/abbrev_defs
