@@ -2764,6 +2764,10 @@
 #+begin_src emacs-lisp
 (with-package
  eglot
+ (fset #'jsonrpc--log-event #'ignore)
+ (setq eglot-events-buffer-size 0)
+ (setq eglot-sync-connect nil)
+ (setq eglot-connect-timeout nil)
  (push :inlayHintProvider eglot-ignored-server-capabilities)
  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
  (advice-add 'eglot-completion-at-point :around #'cape-wrap-noninterruptible))

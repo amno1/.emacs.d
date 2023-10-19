@@ -44,7 +44,8 @@
   (page-break-lines-mode 1))
 
 (setq sly-lisp-implementations
-  '((sbcl-patched ("~/repos/sbcl-statat/run-sbcl.sh" "--noinform"))
+  '((sbcl-patched ("~/repos/sbcl-fasteval/run-sbcl.sh" "--noinform"))
+    (sbcl-patched ("~/repos/sbcl-statat/run-sbcl.sh" "--noinform"))
     (sbcl-clean ("/usr/bin/sbcl" "--noinform"))))
 
 (add-to-list 'auto-insert-alist
