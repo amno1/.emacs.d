@@ -2824,6 +2824,7 @@
 	   help-enable-symbol-autoload t
 	   large-file-warning-threshold nil
 	   save-abbrevs 'silent
+           save-silently t
 	   save-interprogram-paste-before-kill t
 	   save-place-file (expand-file-name "places" etc)
 	   max-lisp-eval-depth '100000
