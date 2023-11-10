@@ -2475,11 +2475,15 @@
 ** [x] simple-httpd
 #+begin_src emacs-lisp
 #+end_src
-** [x] sly
+** [ ] sly
 #+begin_src emacs-lisp
 (with-package
  sly
  (add-to-list 'sly-contribs 'sly-asdf 'append)
+ (require 'sly-stepper-autoloads)
+ (require 'sly-quicklisp-autoloads)
+ (require 'sly-macrostep-autoloads)
+ (require 'sly-named-readtables-autoloads)
  (setq inferior-lisp-program "sbcl")
  (defkeys
   sly-prefix-map
@@ -2612,6 +2616,7 @@
 ** [ none  ] [x] early-init
 #+begin_src emacs-lisp
     (with-hook early-init
+               (defvar yas-alias-to-yas/prefix-p nil)
                (defvar default-gc-cons-threshold gc-cons-threshold)
                (defvar old-file-name-handler file-name-handler-alist)
                (setq file-name-handler-alist nil
