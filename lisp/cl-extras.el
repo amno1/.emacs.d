@@ -25,10 +25,10 @@
 ;;; Code:
 
 (require 'sly)
-(require 'clede)
-(require 'clede-sly)
-(require 'clede-asdf)
-(require 'clede-fiveam)
+;;(require 'clede)
+;;(require 'clede-sly)
+;;(require 'clede-asdf)
+;;(require 'clede-fiveam)
 (require 'sotlisp)
 (require 'autoinsert)
 (require 'helm-pages)

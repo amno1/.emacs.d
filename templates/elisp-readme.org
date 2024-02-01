@@ -1,0 +1,21 @@
+* About
+
+* Install
+
+This package is not yet in any public repository, so currently you will have to make it available to your Emacs eiter manually by cloning this directory and adding it to
+your load file:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "/path/to/{{ (file-name-nondirectory buffer-file-name) }}")
+(require '{{ (file-name-base buffer-file-name) }})
+#+END_SRC
+
+or by installing via package-vc-install if you are running a version of Emacs later than 28.0.
+
+* Usage
+
+* Screenshots
+
+* License
+
+This package and all its contents are licensed to you under the terms of {{default-licence}}. For the details, see the attached [[file:LICENSE][licence file]].

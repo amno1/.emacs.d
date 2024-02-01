@@ -38,12 +38,11 @@
 (require 'dired-subtree)
 (require 'org-pretty-table)
 (require 'dired-copy-paste)
-;;(require 'dired+)
 (require 'dired-git-log)
 (require 'dired-auto-readme)
 (require 'tmtxt-dired-async)
 
-;;;; Help Functions
+;; Help Functions
 ;; quick-hack - need to rewrite this
 (defun my-run ()
   (interactive)
@@ -351,7 +350,7 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
            operation success-count))))
   (dired-move-to-filename))
 
-;;;; Setup
+;; Setup
 
 (setq dired-dwim-target t
       global-auto-revert-non-file-buffers nil

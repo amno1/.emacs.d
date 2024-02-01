@@ -1,5 +1,5 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
-(require 'corfu)
+;;(require 'corfu)
 (require 'recentf)
 (require 'windmove)
 
