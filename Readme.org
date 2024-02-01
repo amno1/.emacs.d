@@ -1,4 +1,4 @@
-My current minimal and very experimental Emacs setup based[[https://github.
+My current minimal and very experimental Emacs setup.
 
 If anyone would like to try it, I would be glad to hear if and how it works,
 especially if you find bugs with the setup (they are :-)).
