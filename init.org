@@ -1879,9 +1879,7 @@
 (on-hook wrap-region-mode (diminish 'wrap-region-mode))
 (on-hook winner-mode (diminish 'winner-mode))
 (on-hook after-init
-  (when-system windows-nt
-    (when (equal system-name "HP-Laptop")
-      (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
+  (when-system windows-nt    
     (setq w32-get-true-file-attributes nil
 	  w32-pipe-read-delay 0
 	  w32-pipe-buffer-size (* 64 1024)
@@ -1890,11 +1888,15 @@
 	  command-line-x-option-alist nil
 	  command-line-ns-option-alist nil
 	  browse-url-galeon-program (getenv "BROWSER")
-	  browse-url-netscape-program browse-url-galeon-program))
+	  browse-url-netscape-program browse-url-galeon-program)
 
-  (when-host Emmi
-    (global-disable-mouse-mode 1))
-  
+    (when-host "HP-Laptop"
+      (global-disable-mouse-mode 1)
+      (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
+    
+    (when-host "EMMI"
+      (global-disable-mouse-mode 1))))
+
   (let ((etc (expand-file-name "etc" user-emacs-directory)))
     (setq show-paren-style 'expression
           message-log-max 10000 ;; oriignal 1000
