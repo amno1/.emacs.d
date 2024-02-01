@@ -1057,6 +1057,10 @@
   (setq dired-subtree-line-prefix "    "
         dired-subtree-use-backgrounds nil))
 #+end_src
+** [x] disable-mouse
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] elnode
 #+begin_src emacs-lisp
 #+end_src
