@@ -1895,7 +1895,7 @@
       (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
     
     (when-host "EMMI"
-      (global-disable-mouse-mode 1))))
+      (global-disable-mouse-mode 1)))
 
   (let ((etc (expand-file-name "etc" user-emacs-directory)))
     (setq show-paren-style 'expression
