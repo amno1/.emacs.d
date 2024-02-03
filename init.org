@@ -48,16 +48,25 @@
 (defvar init-file--loadpaths-map (make-hash-table :test 'equal))
 (defvar init-file--need-package-refresh t)
 
-(require 'package)
+;; (load (expand-file-name "./lisp/package.el")) ;; use hacked-package.el
 
-(when (equal system-name "HP-Laptop")
-    (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
+;; (if (equal system-name "HP-Laptop")
+;;     (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
 
 (setq package-archives nil)
-(push '("local" . "/home/arthur/repos/") package-archives)
-(push '("melpa" . "https://melpa.org/packages/") package-archives)
-(push '("elpa" . "https://elpa.gnu.org/packages/") package-archives)
-(push '("nelpa" . "https://elpa.nongnu.org/nongnu/") package-archives)
+(defvar site-archive '("local" . "/home/arthur/repos/"))
+(defvar org-archive '("org" . "https://orgmode.org/elpa/"))
+(defvar gnu-archive '("elpa" . "https://elpa.gnu.org/packages/"))
+(defvar melpa-archive '("melpa" . "https://melpa.org/packages/"))
+(defvar nelpa-archive '("nelpa" . "https://elpa.nongnu.org/nongnu/"))
+(defvar marmalade-archive '("marmalade" . "https://marmalade-repo.org/packages/"))
+
+(add-to-list 'package-archives site-archive)
+(add-to-list 'package-archives org-archive)
+(add-to-list 'package-archives gnu-archive)
+(add-to-list 'package-archives nelpa-archive)
+(add-to-list 'package-archives melpa-archive)
+(setq package-archives (nreverse package-archives))
 
 (unless (file-directory-p init-file-etc-directory)
   (make-directory init-file-etc-directory))
@@ -1029,13 +1038,13 @@
 ** [x] crux
 #+begin_src emacs-lisp
 #+end_src
-** [x] diminish        
+** [x] diminish 
 #+begin_src emacs-lisp
 #+end_src
-** [x] dired-hacks-utils        
+** [x] dired-hacks-utils
 #+begin_src emacs-lisp
 #+end_src
-** [x] dired-narrow        
+** [x] dired-narrow
 #+begin_src emacs-lisp
 #+end_src
 ** [x] dired-quick-sort
@@ -1058,7 +1067,7 @@
 ** [x] el-search
 #+begin_src emacs-lisp
 #+end_src
-** [x] expand-region        
+** [x] expand-region
 #+begin_src emacs-lisp
 (on-hook after-init
   (defkeys global-map
@@ -1070,30 +1079,24 @@
 ** [x] feebleline
 #+begin_src emacs-lisp
 #+end_src
-** [x] flimenu        
+** [x] flimenu 
 #+begin_src emacs-lisp
 (on-package flimenu
   (flimenu-global-mode))
 #+end_src
-** [x] flycheck        
+** [x] flycheck 
 #+begin_src emacs-lisp
-#+end_src
-** [x] flycheck-languagetool
-#+begin_src emacs-lisp
-(on-package flycheck-languagetool
-  (setq flycheck-languagetool-server-jar
-        "/usr/share/java/languagetool/languagetool-server.jar"))
 #+end_src
 ** [x] flycheck-package
 #+begin_src emacs-lisp
 #+end_src
-** [x] gh        
+** [x] gh 
 #+begin_src emacs-lisp
 #+end_src
 ** [x] gif-screencast
 #+begin_src emacs-lisp
 #+end_src
-** [x] gist        
+** [x] gist 
 #+begin_src emacs-lisp
 #+end_src
 ** [x] git-gutter
@@ -1111,11 +1114,10 @@
 ** [x] github-clone.el
 #+begin_src emacs-lisp
 #+end_src
-
-** [x] github-search        
+** [x] github-search 
 #+begin_src emacs-lisp
 #+end_src
-** [x] git-link        
+** [x] git-link 
 #+begin_src emacs-lisp
 #+end_src
 ** [x] git-messenger
@@ -1124,15 +1126,15 @@
 ** [x] gnu-elpa-keyring-update
 #+begin_src emacs-lisp
 #+end_src
-** [x] google-c-style        
+** [x] google-c-style 
 #+begin_src emacs-lisp
 (on-hook google-c-style-mode
   (diminish 'google-c-style-mode))
 #+end_src
-** [x] goto-last-change        
+** [x] goto-last-change
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm        
+** [x] helm 
 #+begin_src emacs-lisp
 (on-hook after-init (when-idle
                       (require 'helm)
@@ -1274,25 +1276,25 @@
   (diminish 'helm-mode)
   (helm-adaptive-mode 1))
 #+end_src
-** [x] helm-ag        
+** [x] helm-ag 
 #+begin_src emacs-lisp
 (on-package helm-ag
   (setq helm-ag-use-agignore t
         helm-ag-base-command 
         "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*"))
 #+end_src
-** [x] helm-c-yasnippet        
+** [x] helm-c-yasnippet
 #+begin_src emacs-lisp
 (on-package helm-c-yasnippet
   (setq helm-yas-space-match-any-greedy t))
 #+end_src
-** [x] helm-dash        
+** [x] helm-dash
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-descbinds        
+** [x] helm-descbinds
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-dired-history       
+** [x] helm-dired-history
 #+begin_src emacs-lisp
 (on-package helm-dired-history
   (require 'savehist)
@@ -1303,40 +1305,40 @@
     (require 'helm-dired-history)
     (define-key dired-mode-map "," 'dired)))
 #+end_src
-** [x] helm-flyspell        
+** [x] helm-flyspell
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-fuzzier        
+** [x] helm-fuzzier
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-git-grep
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-make        
+** [x] helm-make
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-navi        
+** [x] helm-navi
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-org        
+** [x] helm-org
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-pages
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-projectile        
+** [x] helm-projectile
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-sly 
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-smex        
+** [x] helm-smex 
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-swoop        
+** [x] helm-swoop 
 #+begin_src emacs-lisp
 #+end_src
-** [x] helm-xref        
+** [x] helm-xref
 #+begin_src emacs-lisp
 #+end_src
 ** [x] hnreader
@@ -1395,11 +1397,10 @@
 #+begin_src emacs-lisp
 
 #+end_src
-
-** [x] imenu-anywhere        
+** [x] imenu-anywhere 
 #+begin_src emacs-lisp
 #+end_src
-** [x] import-js        
+** [x] import-js
 #+begin_src emacs-lisp
 #+end_src
 ** [x] inf-elixir
@@ -1424,7 +1425,7 @@
 ;;(on-hook edebug-mode (macrostep-mode +1))
 #+end_src
 
-** [x] magit        
+** [x] magit
 #+begin_src emacs-lisp
 #+end_src
 ** [x] magit-filenotify
@@ -1434,18 +1435,18 @@
 #+begin_src emacs-lisp
 #+end_src
 
-** [x] markdown-mode        
+** [x] markdown-mode
 #+begin_src emacs-lisp
 #+end_src
-** [x] marshal        
+** [x] marshal
 #+begin_src emacs-lisp
 #+end_src
-** [x] modern-cpp-font-lock        
+** [x] modern-cpp-font-lock
 #+begin_src emacs-lisp
 (on-hook modern-cpp-font-lock-mode
   (diminish 'modern-cpp-font-lock-mode))
 #+end_src
-** [x] nov        
+** [x] nov
 #+begin_src emacs-lisp
 (on-hook after-init
   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
@@ -1566,7 +1567,7 @@
 ** [x] polymode
 #+begin_src emacs-lisp
 #+end_src
-** [x] prettier-js        
+** [x] prettier-js
 #+begin_src emacs-lisp
 (on-package prettier-js
   (diminish 'prettier-js-mode))
@@ -1578,7 +1579,7 @@
 ** [x] pretty-symbols
 #+begin_src emacs-lisp
 #+end_src
-** [x] projectile        
+** [x] projectile
 #+begin_src emacs-lisp
 (on-package projectile
   (setq projectile-indexing-method 'alien))
@@ -1596,7 +1597,7 @@
 ** [x] refine
 #+begin_src emacs-lisp
 #+end_src
-** [x] request        
+** [x] request
 #+begin_src emacs-lisp
 #+end_src
 ** [x] rjsx-mode
@@ -1648,13 +1649,13 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] solarized-theme        
+** [x] solarized-theme
 #+begin_src emacs-lisp
      ;; (on-package
      ;;  solarized
      ;;  (load-theme 'solarized-dark t))
 #+end_src
-** [x] which-key        
+** [x] which-key
 #+begin_src emacs-lisp
 (on-package which-key
   (setq which-key-idle-delay 0.1)
@@ -1886,8 +1887,8 @@
 	  browse-url-netscape-program browse-url-galeon-program)
 
     (when-host "HP-Laptop"
-      (global-disable-mouse-mode 1)
-      (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
+      (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg")
+      (global-disable-mouse-mode 1))
     
     (when-host "EMMI"
       (global-disable-mouse-mode 1)))
@@ -2088,13 +2089,13 @@
                                     (nnimap-address "imap-mail.outlook.com")
                                     (nnimap-server-port 993)
                                     (nnimap-stream ssl)
-                                    (nnir-search-engine imap)
-                                    ))
+                                    (nnir-search-engine imap)))
   
   ;; Send email through SMTP
   (setq message-send-mail-function 'smtpmail-send-it
         smtpmail-default-smtp-server "smtp-mail.outlook.com"
         smtpmail-smtp-service 587
+        smtpmail-stream-type 'starttls
         smtpmail-local-domain "homepc")
   (setq gnus-thread-sort-functions
         '(gnus-thread-sort-by-most-recent-date
