@@ -10,6 +10,7 @@ elpa/
 elpy/
 emms/
 eshell/
+org-persist/
 *.elc
 *~
 tramp

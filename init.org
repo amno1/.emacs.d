@@ -1884,54 +1884,58 @@
 	  command-line-x-option-alist nil
 	  command-line-ns-option-alist nil
 	  browse-url-galeon-program (getenv "BROWSER")
-	  browse-url-netscape-program browse-url-galeon-program)
+	  browse-url-netscape-program browse-url-galeon-program))
+  
+  (when-host "EMMI"
+    (autoload 'global-disable-mouse-mode "disable-mouse.el" nil nil nil)
+    (global-disable-mouse-mode 1)
+    (diminish 'disable-mouse-global-mode))
 
-    (when-host "HP-Laptop"
-      (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg")
-      (global-disable-mouse-mode 1))
-    
-    (when-host "EMMI"
-      (global-disable-mouse-mode 1)))
+  (when-host "HP-Laptop"
+    (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg")
+    (autoload 'global-disable-mouse-mode "disable-mouse.el" nil nil nil)
+    (global-disable-mouse-mode 1)
+    (diminish 'disable-mouse-global-mode))
 
-  (let ((etc (expand-file-name "etc" user-emacs-directory)))
-    (setq show-paren-style 'expression
-          message-log-max 10000 ;; oriignal 1000
-          undo-outer-limit 37000000
-          shell-file-name "bash"
-          shell-command-switch "-c"
-          delete-exited-processes t
-          echo-keystrokes 0.1
-          create-lock-files nil
-          winner-dont-bind-my-keys t
-          auto-windo-vscroll nil
-          split-width-threshold 0
-          split-height-threshold nil
-          require-final-newline t
-          next-line-add-newlines t
-          bookmark-save-flag 1
-          delete-selection-mode t
-          initial-major-mode 'emacs-lisp-mode
-          confirm-kill-processes nil
-          help-enable-symbol-autoload t
-          large-file-warning-threshold nil
-          save-abbrevs 'silent
-          save-silently t
-          save-interprogram-paste-before-kill t
-          save-place-file (expand-file-name "places" etc)
-          max-lisp-eval-depth '100000
-          max-specpdl-size '1000000
-          scroll-preserve-screen-position 'always
-          scroll-conservatively 1
-          maximum-scroll-margin 1
-          mouse-autoselect-window t
-          scroll-margin 0
-          make-backup-files nil
-          kill-buffer-delete-auto-save-files t
-          backup-directory-alist `(("." . ,etc))
-          custom-file (expand-file-name "custom.el" etc)
-          abbrev-file-name (expand-file-name "abbrevs.el" etc)
-          bookmark-default-file (expand-file-name "bookmarks" etc)
-          default-licence "GPL 3.0"))
+(let ((etc (expand-file-name "etc" user-emacs-directory)))
+  (setq show-paren-style 'expression
+        message-log-max 10000 ;; oriignal 1000
+        undo-outer-limit 37000000
+        shell-file-name "bash"
+        shell-command-switch "-c"
+        delete-exited-processes t
+        echo-keystrokes 0.1
+        create-lock-files nil
+        winner-dont-bind-my-keys t
+        auto-windo-vscroll nil
+        split-width-threshold 0
+        split-height-threshold nil
+        require-final-newline t
+        next-line-add-newlines t
+        bookmark-save-flag 1
+        delete-selection-mode t
+        initial-major-mode 'emacs-lisp-mode
+        confirm-kill-processes nil
+        help-enable-symbol-autoload t
+        large-file-warning-threshold nil
+        save-abbrevs 'silent
+        save-silently t
+        save-interprogram-paste-before-kill t
+        save-place-file (expand-file-name "places" etc)
+        max-lisp-eval-depth '100000
+        max-specpdl-size '1000000
+        scroll-preserve-screen-position 'always
+        scroll-conservatively 1
+        maximum-scroll-margin 1
+        mouse-autoselect-window t
+        scroll-margin 0
+        make-backup-files nil
+        kill-buffer-delete-auto-save-files t
+        backup-directory-alist `(("." . ,etc))
+        custom-file (expand-file-name "custom.el" etc)
+        abbrev-file-name (expand-file-name "abbrevs.el" etc)
+        bookmark-default-file (expand-file-name "bookmarks" etc)
+        default-licence "GPL 3.0"))
   
   (push '("\\*Compile-Log\\*" (display-buffer-no-window)) display-buffer-alist)
   (push `((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*")
@@ -2095,8 +2099,9 @@
   (setq message-send-mail-function 'smtpmail-send-it
         smtpmail-default-smtp-server "smtp-mail.outlook.com"
         smtpmail-smtp-service 587
-        smtpmail-stream-type 'starttls
+;;        smtpmail-stream-type 'ssl
         smtpmail-local-domain "homepc")
+
   (setq gnus-thread-sort-functions
         '(gnus-thread-sort-by-most-recent-date
           (not gnus-thread-sort-by-number)))
