@@ -1463,48 +1463,7 @@
   (yas-minor-mode 1))
 
 (on-package org
-  (require 'org-protocol)
-  (require 'org-pretty-table)
-  (require 'org-extras)
-  
-  (defkeys org-mode-map
-    [C-<enter>] other-window
-    [C-S-<return>] org-insert-heading-respect-content)
-
-  (setq org-capture-templates
-        `(("p" "Protocol" entry (file+headline "~/Dokument/notes.org" "Inbox")
-           "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
-          ("L" "Protocol Link" entry (file+headline "~/Dokument/notes.org" "Inbox")
-           "* %? [[%:link][%(transform-square-brackets-to-round-ones\"%:description\")]]\n")
-          ("d" "Denote" plain (file "~/Dokument/denotes.org")
-           "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
-           :empty-lines 1)
-          ("r" "To Read" plain (file "~/Dokument/reading.org")
-           "* %A %^g\n  Created: %U\n  ID: %<%y%m%d%H%M%S>\n\n%?"
-           :empty-lines 1)
-          ("n" "Note" entry (file+olp+datetree "~/Dokument/notes.org")
-           "* [[%:link][%:description]] %^g\n%? %U" :empty-lines 1)
-          ("e" "Email" entry (file "~/Dokument/inbox.org")
-           "* TODO %? email |- %:from: %:subject
-                    :EMAIL:\n:PROPERTIES:\n:CREATED: %U\n:EMAIL-SOURCE:
-                    %l\n:END:\n%U\n"
-           :clock-in t :clock-resume t)))
-  
-  (setq  org-log-done 'time
-         org-ditaa-jar-path "/usr/bin/ditaa"
-         org-todo-keywords '((sequence "TODO" "INPROGRESS" "DONE"))
-         org-todo-keyword-faces '(("INPROGRESS" . (:foreground "blue" :weight bold)))
-         org-directory (expand-file-name "~/Dokument/")
-         org-default-notes-file (expand-file-name "notes.org" org-directory)
-         org-use-speed-commands       t
-         org-src-preserve-indentation t
-         org-export-html-postamble    nil
-         org-hide-leading-stars       t
-         org-make-link-description    t
-         org-hide-emphasis-markers    t
-         org-link-descriptive         t
-         org-startup-folded           'overview
-         org-startup-indented         nil))
+  (require 'org-extras))
  #+end_src
 ** [x] org-appear
 #+begin_src emacs-lisp
@@ -1938,7 +1897,8 @@
         default-licence "GPL 3.0"))
   
   (push '("\\*Compile-Log\\*" (display-buffer-no-window)) display-buffer-alist)
-  (push `((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*")
+  (push `((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*"
+                        " *pabbrev suggestions*")
         	(0+ not-newline))
            (display-buffer-same-window
             display-buffer-reuse-mode-window

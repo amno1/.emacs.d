@@ -23,8 +23,10 @@
 ;; This file is always loaded in my Emacs, so no autload cookies needed
 
 ;;; Code:
-(require 'org)
+(require 'org)  
 (require 'ob-core)
+(require 'org-protocol)
+(require 'org-pretty-table)
 
 ;; https://lists.gnu.org/archive/html/emacs-orgmode/2012-09/msg01435.html
 (defun get-html-title-from-url (url)
@@ -58,7 +60,6 @@
 (org-link-set-parameters "https" :insert-description #'org-desc-from-clipboard)
 
 ;; http://www.gnu.org
-
 
 (defun org-desc-from-clipbard (url)
   (url-retrieve
@@ -134,6 +135,46 @@
   (let* ((info (car (org-babel-get-src-block-info 'no-eval)))
          (major-mode (if info (intern-soft (concat info "-mode")) major-mode)))
     (yas-expand-from-trigger-key)))
+
+(progn
+  (setq org-capture-templates
+        `(("p" "Protocol" entry (file+headline "~/Dokument/notes.org" "Inbox")
+           "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+          ("L" "Protocol Link" entry (file+headline "~/Dokument/notes.org" "Inbox")
+           "* %? [[%:link][%(transform-square-brackets-to-round-ones\"%:description\")]]\n")
+          ("d" "Denote" plain (file "~/Dokument/denotes.org")
+           "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
+           :empty-lines 1)
+          ("r" "To Read" plain (file "~/Dokument/reading.org")
+           "* %A %^g\n  Created: %U\n  ID: %<%y%m%d%H%M%S>\n\n%?"
+           :empty-lines 1)
+          ("n" "Note" entry (file+olp+datetree "~/Dokument/notes.org")
+           "* [[%:link][%:description]] %^g\n%? %U" :empty-lines 1)
+          ("e" "Email" entry (file "~/Dokument/inbox.org")
+           "* TODO %? email |- %:from: %:subject
+                    :EMAIL:\n:PROPERTIES:\n:CREATED: %U\n:EMAIL-SOURCE:
+                    %l\n:END:\n%U\n"
+           :clock-in t :clock-resume t)))
+
+  (setq  org-log-done 'time
+         org-ditaa-jar-path "/usr/bin/ditaa"
+         org-todo-keywords '((sequence "TODO" "INPROGRESS" "DONE"))
+         org-todo-keyword-faces '(("INPROGRESS" . (:foreground "blue" :weight bold)))
+         org-directory (expand-file-name "~/Dokument/")
+         org-default-notes-file (expand-file-name "notes.org" org-directory)
+         org-use-speed-commands       t
+         org-src-preserve-indentation t
+         org-export-html-postamble    nil
+         org-hide-leading-stars       t
+         org-make-link-description    t
+         org-hide-emphasis-markers    t
+         org-link-descriptive         t
+         org-startup-folded           'overview
+         org-startup-indented         nil)
+
+(defkeys org-mode-map
+  [C-<enter>] other-window
+  [C-S-<return>] org-insert-heading-respect-content))
 
 (provide 'org-extras)
 ;;; org-extras.el ends here
