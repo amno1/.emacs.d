@@ -11,6 +11,7 @@ elpy/
 emms/
 eshell/
 *.elc
+*.eld
 *~
 tramp
 init.el
@@ -29,6 +30,11 @@ lisp/lisp-autoloads.el
 lisp/org-view-mode.el
 package-quickstart.el
 helm-adaptive-history
+gnupg/
+server/
+persist/
+org-persist/
+comint-histories/
 etc/bash-alias-table
 etc/.emacs.desktop.lock
 etc/custom.el

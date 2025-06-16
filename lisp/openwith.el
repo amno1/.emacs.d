@@ -1,4 +1,4 @@
-;;; openwith.el --- Open files with external programs
+;;; openwith.el --- Open files with external programs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007  Markus Triska
 
@@ -56,7 +56,7 @@
 File pattern is a regular expression describing the files to
 associate with a program. The program arguments are a list of
 strings and symbols and are passed to the program on invocation,
-where the symbol 'file' is replaced by the file to be opened."
+where the symbol `file' is replaced by the file to be opened."
   :group 'openwith
   :type '(repeat (list (regexp :tag "Files")
                        (string :tag "Program")
@@ -105,22 +105,21 @@ string."
             ;; temporarily unbind it
             (catch 'done
               (while assocs
-                (setq oa (car assocs)
-                      assocs (cdr assocs))
-                (when (save-match-data (string-match (car oa) file))
-                  (let ((params (mapcar (lambda (x) (if (eq x 'file) file x))
-                                        (nth 2 oa))))
-                    (when (or (not openwith-confirm-invocation)
-                              (y-or-n-p (format "%s %s? " (cadr oa)
-                                                (mapconcat #'identity params " "))))
-	              (if (eq system-type 'windows-nt)
-		          (openwith-open-windows file)
-	                (openwith-open-unix (cadr oa) params))
+                (let ((oa (car assocs)))
+                  (when (save-match-data (string-match (car oa) file))
+                    (let ((params (mapcar (lambda (x) (if (eq x 'file) file x))
+                                          (nth 2 oa))))
+                      (when (or (not openwith-confirm-invocation)
+                                (y-or-n-p (format "%s %s? " (cadr oa)
+                                                  (mapconcat #'identity params " "))))
+                        (if (eq system-type 'windows-nt)
+                            (openwith-open-windows file)
+                          (openwith-open-unix (cadr oa) params))
 
-                      (when (featurep 'recentf)
-                        (recentf-add-file file))
-                      ;; inhibit further actions
-                      (throw 'done (cadr oa)))))))))
+                        (when (featurep 'recentf)
+                          (recentf-add-file file))
+                        ;; inhibit further actions
+                        (throw 'done (cadr oa))))))))))
       (if status
           (message "Opened %s with %s program"
                    (file-name-nondirectory file) status)

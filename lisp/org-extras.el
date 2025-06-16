@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023  Arthur Miller
 
 ;; Author: Arthur Miller <arthur.miller@live.com>
-;; Keywords: 
+;; Keywords:
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 ;;; Code:
 (require 'org)
 (require 'ob-core)
+(require 'org-protocol)
+(require 'org-pretty-table)
 
 ;; https://lists.gnu.org/archive/html/emacs-orgmode/2012-09/msg01435.html
 (defun get-html-title-from-url (url)
@@ -58,7 +60,6 @@
 (org-link-set-parameters "https" :insert-description #'org-desc-from-clipboard)
 
 ;; http://www.gnu.org
-
 
 (defun org-desc-from-clipbard (url)
   (url-retrieve
@@ -105,7 +106,7 @@
   (org-agenda-fortnight-view))
 ;; ("P" "Research project" entry (file "~/Org/inbox.org")
 ;;  "* TODO %^{Project title} :%^G:\n:PROPERTIES:\n:CREATED:
-;;     %U\n:END:\n%^{Project description}\n** [x] 
+;;     %U\n:END:\n%^{Project description}\n** [x]
 ;;    TODO Literature review\n** [x] TODO %?\n** [x]
 ;;  TODO Summary\n** [x] TODO Reports\n** [x] Ideas\n"
 ;;  :clock-in t :clock-resume t)
@@ -120,7 +121,7 @@
 ;; ;;;###autoload
 ;; (defun yas-org-expand ()
 ;;   (interactive)
-  
+
 ;;   (let* ((info (org-babel-get-src-block-info 'no-eval))
 ;;          (major-mode (if info
 ;;                          (intern-soft (concat (car info) "-mode"))
@@ -134,6 +135,45 @@
   (let* ((info (car (org-babel-get-src-block-info 'no-eval)))
          (major-mode (if info (intern-soft (concat info "-mode")) major-mode)))
     (yas-expand-from-trigger-key)))
+
+(setq org-capture-templates
+      `(("p" "Protocol" entry (file+headline "~/webnotes.org" "Inbox")
+         "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+        ("L" "Protocol Link" entry (file+headline "~/webnotes.org" "Inbox")
+         "* %? [[%:link][%(transform-square-brackets-to-round-ones\"%:description\")]]\n")
+        ("d" "Denote" plain (file "~/denotes.org")
+         "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
+         :empty-lines 1)
+        ("E" "Emmi" plain (file "~/Documents/emmi.org")
+         "* %^{Description} \n  Created: %U\n  Author:%n\n\n%?"
+         :empty-lines 1)
+        ("g" "Gem note" plain (file "~/repos/gem/doc/notes.org")
+         "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
+         :empty-lines 1)
+        ("r" "To Read" plain (file "~/reading.org")
+         "* %A %^g\n  Created: %U\n  ID: %<%y%m%d%H%M%S>\n\n%?"
+         :empty-lines 1)
+        ("e" "Email" entry (file "~/inbox.org")
+         "* TODO %? email |- %:from: %:subject
+                    :EMAIL:\n:PROPERTIES:\n:CREATED: %U\n:EMAIL-SOURCE:
+                    %l\n:END:\n%U\n"
+         :clock-in t :clock-resume t)))
+
+(setq  org-log-done 'time
+       org-ditaa-jar-path "/usr/bin/ditaa"
+       org-todo-keywords '((sequence "TODO" "INPROGRESS" "DONE"))
+       org-todo-keyword-faces '(("INPROGRESS" . (:foreground "blue" :weight bold)))
+       org-directory (expand-file-name "~/")
+       org-default-notes-file (expand-file-name "notes.org" org-directory)
+       org-use-speed-commands       t
+       org-src-preserve-indentation t
+       org-export-html-postamble    nil
+       org-hide-leading-stars       t
+       org-make-link-description    t
+       org-hide-emphasis-markers    t
+       org-link-descriptive         t
+       org-startup-folded           'overview
+       org-startup-indented         nil)
 
 (provide 'org-extras)
 ;;; org-extras.el ends here

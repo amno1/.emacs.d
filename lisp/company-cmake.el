@@ -1,4 +1,4 @@
-;;; company-cmake.el --- company-mode completion back-end for CMake
+;;; company-cmake.el --- company-mode completion back-end for CMake -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013  Chen Bin
 
@@ -105,7 +105,7 @@ They affect which types of symbols we get completion candidates for.")
       result)))
 
 ;;;###autoload
-(defun company-cmake (command &optional arg &rest ignored)
+(defun company-cmake (command &optional arg &rest _ignored)
   "`company-mode' completion back-end for CMake.
 CMake is a cross-platform, open-source make system."
   (interactive (list 'interactive))

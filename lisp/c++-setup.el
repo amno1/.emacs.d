@@ -113,7 +113,6 @@
                   (menu-bar-lines . 0))
                  special-display-buffer-names))
   
-  (add-hook 'c-mode-common-hook 'company-mode)
   (add-hook 'c-mode-common-hook 'eglot-ensure)
   (add-hook 'c-mode-hook 'c-modes-keys)
   (add-hook 'c-mode-hook 'hs-minor-mode)
@@ -164,3 +163,4 @@
 
   (provide 'c++-setup)
 ;;; c++-setup.el ends here
+

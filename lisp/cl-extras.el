@@ -25,10 +25,17 @@
 ;;; Code:
 
 (require 'sly)
-(require 'clede)
-(require 'clede-sly)
-(require 'clede-asdf)
-(require 'clede-fiveam)
+(with-eval-after-load "sly"
+  (add-to-list
+   'load-path (expand-file-name
+               "contrib/" (file-name-directory (locate-library "sly"))))
+  (require 'sly-mrepl))
+;;(require 'clede)
+;;(require 'clede-sly)
+;;(require 'clede-asdf)
+;;(require 'clede-fiveam)
+(require 'company)
+(require 'paredit)
 (require 'sotlisp)
 (require 'autoinsert)
 (require 'helm-pages)
@@ -36,17 +43,24 @@
 (defun cl-hooks ()  
   (setq fill-column 80)
   (paredit-mode 1)
-  ;;(company-mode 1)
+  (company-mode 1)
   ;;  (outshine-mode 1)
   (yas-minor-mode 1)
   ;;(lisp-extra-font-lock-mode 1)
   (speed-of-thought-mode 1)
   (page-break-lines-mode 1))
 
+(defun generate-new-version () "0.0.1")
+
+(defun org-current-time-stamp () (org-time-stamp '(16)))
+
 (setq sly-lisp-implementations
-  '((sbcl-patched ("~/repos/sbcl-fasteval/run-sbcl.sh" "--noinform"))
-    (sbcl-patched ("~/repos/sbcl-statat/run-sbcl.sh" "--noinform"))
-    (sbcl-clean ("/usr/bin/sbcl" "--noinform"))))
+      `((sbcl-fasteval
+         (,(expand-file-name "~/repos/sbcl-fasteval/src/runtime/sbcl.exe")
+          "--core" ,(expand-file-name "~/repos/sbcl-fasteval/output/sbcl.core")
+          "--noinform")
+         :coding-system utf-8-unix)
+        (sbcl-clean ("sbcl" "--noinform"))))
 
 (add-to-list 'auto-insert-alist
              '(("\\.cl\\|\\.lisp\\'" . "CommonLisp header")
@@ -62,6 +76,8 @@
                '(if (search-backward "&" (line-beginning-position) t)
                     (replace-match (capitalize (user-login-name)) t t))
                '(end-of-line 1) " <" (progn user-mail-address) ">
+;; Version: 0.0.1
+;; Date: " (format-time-string "%Y-%m-%d") "
 ;; Keywords: ""
 
 \;; This program is free software; you can redistribute it and/or modify
@@ -91,7 +107,8 @@
 
 ;;; A template for ASDF system files:
 ;; https://www.emacswiki.org/emacs/auto-insert-for-asdf
-(push `(("\\.asd\\'" . "ASDF Skeleton") 
+(add-to-list 'auto-insert-alist
+             `(("\\.asd\\'" . "ASDF Skeleton") 
 	"System Name: "
 	"
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -108,8 +125,7 @@
   :licence \"" (read-string "License: ") "\" 
   :version \"" (read-string "Version: ") "\" 
   :components (()) 
-  :depends-on ())") 
-  auto-insert-alist) 
+  :depends-on ())")) 
 
 ;;;###autoload
 (defun new-cl-scratch ()
@@ -141,6 +157,11 @@ If not specified, ASDF-BUFFER defaults to current buffer."
   (with-temp-buffer
     (insert-file-contents-literally asdf-file)
     (find-systems-in-buffer)))
+
+(defun sly-compileload-file (&optional policy)
+  (interactive)
+  (let ((compilation-ask-about-save nil))
+    (call-interactively #'sly-compile-and-load-file policy)))
 
 (defun sly-start-connects ()
   "New connection with one of compilers specified in `sly-lisp-implementations'"

@@ -1,7 +1,8 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
-(require 'corfu)
+;;(require 'corfu)
 (require 'recentf)
 (require 'windmove)
+(require 'ielm)
 
 (defun ielm-use-current-buffer (fn &rest args)
   (let ((working-buffer (current-buffer)))
@@ -217,7 +218,8 @@ column narrower."
     (error "No Git URL in clipboard"))
   (let* ((url (current-kill 0))
          (download-dir git-repository-dirs)
-         (project-dir (expand-file-name (file-name-nondirectory url) download-dir))
+         (project-dir (expand-file-name
+                       (car (last (split-string url "/" t "/"))) download-dir))
          (default-directory download-dir)
          (command (format "git clone %s" url))
          (buffer (generate-new-buffer (format "*%s*" command)))
@@ -274,7 +276,6 @@ column narrower."
 (defun plist-elt (plist property)
   "Return value of PROPERTY from irregular plist PLIST."
   (cadr (member property plist)))
-
 
 ;;;###autoload
 (defun shell-command-on-buffer ()
@@ -540,8 +541,9 @@ If there is not a window to the right, open new one."
          (end (or end (save-excursion (1- (re-search-forward "[[:blank:]]")))))
          (key (buffer-substring-no-properties beg end))
          (shell-command-switch "-c"))
-    (shell-command-on-region
-     beg end (format "gpg --homedir %s --receive-keys " dir key))))
+    (let ((default-directory dir))
+      (shell-command-on-region
+       beg end (format "gpg --homedir %s --receive-keys %s" "" key)))))
 
 
 (provide 'extras)

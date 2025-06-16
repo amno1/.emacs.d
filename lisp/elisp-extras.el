@@ -25,13 +25,26 @@
 ;; This file is always loaded in my Emacs, so I don't use autoload cookies here
 ;;; Code:
 
-;;(require 'paredit)
+(require 'autoinsert)
+(require 'paredit)
 (require 'sotlisp)
-;;(require 'company)
+(require 'company)
 ;;(require 'outshine)
 (require 'yasnippet)
 (require 'page-break-lines)
 (require 'helm-pages)
+
+(defun elisp-byte-compile ()
+  (interactive)
+  (when (buffer-modified-p)
+    (save-buffer))
+  (emacs-lisp-byte-compile))
+
+(defun elisp-byte-compile-and-load ()
+  (interactive)
+  (when (buffer-modified-p)
+    (save-buffer))
+  (emacs-lisp-byte-compile-and-load))
 
 ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
 (defun fc-eval-and-replace ()
@@ -118,17 +131,6 @@
                :scroll-bar t
                :margin t)))
 
-(defun elisp-hooks ()
-  (setq fill-column 80)
-  (paredit-mode 1)
-;;  (company-mode 1)
-  ;; (outshine-mode 1)
-  (yas-minor-mode 1)
-  (speed-of-thought-mode 1)
-  (page-break-lines-mode 1)
-  ;;(lisp-extra-font-lock-mode 1)
-  )
-
 (defun elisp-gen-autoload-cookie ()
   "Generate an autoload cookie for the defun at point."
   (interactive)
@@ -141,29 +143,40 @@
         (beginning-of-defun)
         (insert ";;;###autoload\n")))))
 
+(defun elisp-hooks ()
+  (setq fill-column 80)
+  (paredit-mode 1)
+  (company-mode 1)
+  ;; (outshine-mode 1)
+  (yas-minor-mode 1)
+  (speed-of-thought-mode 1)
+  (page-break-lines-mode 1)
+  ;;(lisp-extra-font-lock-mode 1)
+  )
+
 (defun yas-undo-expand ()
   (interactive)
   (undo)
   (insert " "))
 
 ;; from https://www.emacswiki.org/emacs/auto-insert-for-asdf
-;; (push `(("\\.asd\\'" . "ASDF Skeleton") 
-;; 	              "System Name: "
-;; 	              "
-;; (eval-when (:compile-toplevel :load-toplevel :execute)
-;;   (unless (find-package :" str ".system)
-;;     (defpackage :" str ".system
-;;       (:use :common-lisp :asdf))))
+(push `(("\\.asd\\'" . "ASDF Skeleton") 
+	              "System Name: "
+	              "
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (unless (find-package :" str ".system)
+    (defpackage :" str ".system
+      (:use :common-lisp :asdf))))
 
-;; (in-package :" str ".system)
-;; (defsystem :" str " 
-;;   :description " ?\" (read-string "Description: ") ?\"" 
-;;   :author \"" (user-full-name) " <" user-mail-address ">\" 
-;;   :licence \"" (read-string "License: ") "\" 
-;;   :version \"" (read-string "Version: ") "\" 
-;;   :components (()) 
-;;   :depends-on ())") 
-;;                     auto-insert-alist)
+(in-package :" str ".system)
+(defsystem :" str " 
+  :description " ?\" (read-string "Description: ") ?\"" 
+  :author \"" (user-full-name) " <" user-mail-address ">\" 
+  :licence \"" (read-string "License: ") "\" 
+  :version \"" (read-string "Version: ") "\" 
+  :components (()) 
+  :depends-on ())") 
+      auto-insert-alist)
 
 (provide 'elisp-extras)
 ;;; elisp-extras.el ends here
