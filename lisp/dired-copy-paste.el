@@ -1,4 +1,4 @@
-;;; dired-copy-paste.el --- cut/copy/paste files and directories in dired mode -*- lexical-binding: t; -*-
+;;; dired-copy-paste.el --- cut/copy/paste files and directories in dired mode  -*- lexical-binding: t; -*-
 
 ;; Copyrigth (C) 2011 Hidaka Uchida
 

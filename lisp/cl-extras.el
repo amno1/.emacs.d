@@ -25,42 +25,32 @@
 ;;; Code:
 
 (require 'sly)
-(with-eval-after-load "sly"
-  (add-to-list
-   'load-path (expand-file-name
-               "contrib/" (file-name-directory (locate-library "sly"))))
-  (require 'sly-mrepl))
 ;;(require 'clede)
 ;;(require 'clede-sly)
 ;;(require 'clede-asdf)
 ;;(require 'clede-fiveam)
-(require 'company)
 (require 'paredit)
 (require 'sotlisp)
 (require 'autoinsert)
 (require 'helm-pages)
+(require 'page-break-lines)
 
 (defun cl-hooks ()  
   (setq fill-column 80)
   (paredit-mode 1)
   (company-mode 1)
-  ;;  (outshine-mode 1)
   (yas-minor-mode 1)
   ;;(lisp-extra-font-lock-mode 1)
   (speed-of-thought-mode 1)
   (page-break-lines-mode 1))
 
-(defun generate-new-version () "0.0.1")
-
-(defun org-current-time-stamp () (org-time-stamp '(16)))
-
-(setq sly-lisp-implementations
-      `((sbcl-fasteval
-         (,(expand-file-name "~/repos/sbcl-fasteval/src/runtime/sbcl.exe")
-          "--core" ,(expand-file-name "~/repos/sbcl-fasteval/output/sbcl.core")
-          "--noinform")
-         :coding-system utf-8-unix)
-        (sbcl-clean ("sbcl" "--noinform"))))
+;; (setq sly-lisp-implementations
+;;       `((sbcl-fasteval
+;;          (,(expand-file-name "~/repos/sbcl-fasteval/src/runtime/sbcl.exe")
+;;           "--core" ,(expand-file-name "~/repos/sbcl-fasteval/output/sbcl.core")
+;;           "--noinform")
+;;          :coding-system utf-8-unix)
+;;         (sbcl-clean ("sbcl" "--noinform"))))
 
 (add-to-list 'auto-insert-alist
              '(("\\.cl\\|\\.lisp\\'" . "CommonLisp header")
@@ -76,8 +66,6 @@
                '(if (search-backward "&" (line-beginning-position) t)
                     (replace-match (capitalize (user-login-name)) t t))
                '(end-of-line 1) " <" (progn user-mail-address) ">
-;; Version: 0.0.1
-;; Date: " (format-time-string "%Y-%m-%d") "
 ;; Keywords: ""
 
 \;; This program is free software; you can redistribute it and/or modify
@@ -107,8 +95,7 @@
 
 ;;; A template for ASDF system files:
 ;; https://www.emacswiki.org/emacs/auto-insert-for-asdf
-(add-to-list 'auto-insert-alist
-             `(("\\.asd\\'" . "ASDF Skeleton") 
+(push `(("\\.asd\\'" . "ASDF Skeleton") 
 	"System Name: "
 	"
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -125,7 +112,8 @@
   :licence \"" (read-string "License: ") "\" 
   :version \"" (read-string "Version: ") "\" 
   :components (()) 
-  :depends-on ())")) 
+  :depends-on ())") 
+  auto-insert-alist) 
 
 ;;;###autoload
 (defun new-cl-scratch ()
@@ -158,35 +146,37 @@ If not specified, ASDF-BUFFER defaults to current buffer."
     (insert-file-contents-literally asdf-file)
     (find-systems-in-buffer)))
 
-(defun sly-compileload-file (&optional policy)
-  (interactive)
-  (let ((compilation-ask-about-save nil))
-    (call-interactively #'sly-compile-and-load-file policy)))
+;; (defun sly-start-connects ()
+;;   "New connection with one of compilers specified in `sly-lisp-implementations'"
+;;   (interactive)
+;;   (let* ((ask (completing-read "Choose compiler: " sly-lisp-implementations))
+;;          (opt (cadr (assoc (intern-soft ask) sly-lisp-implementations)))
+;;          (cmd (expand-file-name (car opt)))
+;;          (args (cdr opt)))
+;;     (apply #'sly-start `(:program ,cmd :program-args ,args))))
 
-(defun sly-start-connects ()
-  "New connection with one of compilers specified in `sly-lisp-implementations'"
-  (interactive)
-  (let* ((ask (completing-read "Choose compiler: " sly-lisp-implementations))
-         (opt (cadr (assoc (intern-soft ask) sly-lisp-implementations)))
-         (cmd (expand-file-name (car opt)))
-         (args (cdr opt)))
-    (apply #'sly-start `(:program ,cmd :program-args ,args))))
+;; ;;;###autoload
+;; (defun sly-new-from-system (&optional dir)
+;;   "Load .asd file in current folder."
+;;   (interactive)
+;;   (let* ((dir (or dir default-directory))
+;;          (asd-path
+;;           (or (and buffer-file-name
+;;                    (equal "asd" (file-name-extension buffer-file-name))
+;;                    buffer-file-name)
+;;               (read-file-name "Choose asdf-file: " (expand-file-name dir))))
+;;          (default-directory (file-name-directory asd-path)))
+;;     (find-file asd-path)
+;;     (sly)
+;;     (while (not (sly-connected-p)) (sleep-for 0.1)) ; is there a better way?
+;;     (call-interactively #'sly-compile-and-load-file)))
 
-;;;###autoload
-(defun sly-new-from-system (&optional dir)
-  "Load .asd file in current folder."
-  (interactive)
-  (let* ((dir (or dir default-directory))
-         (asd-path
-          (or (and buffer-file-name
-                   (equal "asd" (file-name-extension buffer-file-name))
-                   buffer-file-name)
-              (read-file-name "Choose asdf-file: " (expand-file-name dir))))
-         (default-directory (file-name-directory asd-path)))
-    (find-file asd-path)
-    (sly)
-    (while (not (sly-connected-p)) (sleep-for 0.1)) ; is there a better way?
-    (call-interactively #'sly-compile-and-load-file)))
+
+(defun sly-my-compile-and-load-file (&optional policy)
+  (interactive "P")
+  (when (buffer-modified-p)
+    (save-buffer))
+  (call-interactively #'sly-compile-and-load-file policy))
 
 (provide 'cl-extras)
 ;;; cl-extrasl.el ends here

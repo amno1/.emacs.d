@@ -155,12 +155,6 @@
              ")"))
     (setq keys (cddr keys))))
 
-;; (defun emit-defkeys (map keys)
-;;   (append-to-init-file
-;;    (dolist (key keys)
-;;      (with-output-to-string
-;;        (princ (defkeys map key))))))
-
 (defun emit-on-idle (sexp)
   (append-to-init-file
    (format "(run-with-idle-timer 0.5 nil (lambda () %s))" sexp)))
@@ -984,17 +978,13 @@
 (org-init-mode +1)
 #+end_src
 * Packages
-
-** [x] lispy
+** [ ] codemetrics
 #+begin_src emacs-lisp
 
 #+end_src
-
-** [x] dired-collapse
+** [ ] org-roam
 #+begin_src emacs-lisp
-
 #+end_src
-
 ** [x] academic-phrases
 #+begin_src emacs-lisp
 #+end_src
@@ -1045,6 +1035,11 @@
 (on-hook after-init (on-idle (beacon-mode t)))
 (on-hook beacon-mode (diminish 'beacon-mode))
 #+end_src
+** [x] buttercup
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] checkdoc
 #+begin_src emacs-lisp
 #+end_src
@@ -1084,12 +1079,21 @@
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] eask
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] elnode
 #+begin_src emacs-lisp
 #+end_src
 ** [x] el-search
 #+begin_src emacs-lisp
 #+end_src
+** [x] eros
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] expand-region
 #+begin_src emacs-lisp
 (on-hook after-init
@@ -1159,24 +1163,20 @@
 #+end_src
 ** [x] helm 
 #+begin_src emacs-lisp
-(on-hook after-init
-  (on-idle
-    (require 'helm)
-    (require 'helm-files)
-    (require 'helm-eshell)
-    (require 'helm-buffers)
-    (require 'helm-adaptive)
-    (message "Helm loaded on idle.")))
-
+(on-hook after-init (on-idle
+                      (require 'helm)
+                      (require 'helm-files)
+                      (require 'helm-eshell)
+                      (require 'helm-buffers)
+                      (require 'helm-adaptive)
+                      (message "Helm loaded on idle.")))
 (on-hook eshell-mode
   (defkeys eshell-mode-map
     "C-c C-h" helm-eshell-history
     "C-c C-r" helm-comint-input-ring
     "C-c C-l" helm-minibuffer-history))
-
 (on-hook helm-ff-cache-mode
   (diminish 'helm-ff-cache-mode))
-
 (on-package helm
   (require 'helm-eshell)
   (require 'helm-buffers)
@@ -1298,7 +1298,6 @@
     "C-z C-g" helm-ls-git-ls
     "C-z C-b" helm-git-local-branches
     "C-z SPC" helm-all-mark-rings))
-
 (on-hook helm-mode
   ;; (helm-flx-mode +1)
   (diminish 'helm-mode)
@@ -1322,18 +1321,16 @@
 ** [x] helm-descbinds
 #+begin_src emacs-lisp
 #+end_src
-** [ none  ] [ ] helm-dired-history
+** [ ] helm-dired-history
 #+begin_src emacs-lisp
 (on-package helm-dired-history
   (require 'savehist)
   (add-to-list 'savehist-additional-variables
                'helm-dired-history-variable)
   (savehist-mode 1)
-  ;; (with-eval-after-load "dired"
-  ;;   (require 'helm)
-  ;;   (require 'helm-dired-history)
-  ;;   (define-key dired-mode-map "," 'dired))
-  )
+  (with-eval-after-load "dired"
+    (require 'helm-dired-history)
+    (define-key dired-mode-map "," 'dired)))
 #+end_src
 ** [x] helm-flyspell
 #+begin_src emacs-lisp
@@ -1359,6 +1356,11 @@
 ** [x] helm-projectile
 #+begin_src emacs-lisp
 #+end_src
+** [x] helm-rg
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] helm-sly 
 #+begin_src emacs-lisp
 #+end_src
@@ -1371,6 +1373,10 @@
 ** [x] helm-xref
 #+begin_src emacs-lisp
 #+end_src
+** [x] helpful
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] hnreader
 #+begin_src emacs-lisp
 
@@ -1382,10 +1388,10 @@
 #+begin_src emacs-lisp
 #+end_src
 
-** [ ] hydra
+** [x] hydra
 #+begin_src emacs-lisp
 (on-package hydra
-  (defhydra global-map
+  (defkeys global-map
     "C-x t"
     (defhydra toggle (:color blue)
       "toggle"
@@ -1438,6 +1444,10 @@
 
 #+end_src
 
+** [x] jq-mode
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] keycast
 #+begin_src emacs-lisp
 #+end_src
@@ -1467,6 +1477,17 @@
 
 ** [x] markdown-mode
 #+begin_src emacs-lisp
+  (on-package markdown-mode
+    (defkeys markdown-mode-map
+      "M-n" scroll-up-line
+      "M-p" scroll-down-line
+      "M-N" scroll-up-command
+      "M-P" scroll-down-command)
+    (defkeys markdown-view-mode-map
+      "M-n" scroll-up-line
+      "M-p" scroll-down-line
+      "M-N" scroll-up-command
+      "M-P" scroll-down-command))
 #+end_src
 ** [x] marshal
 #+begin_src emacs-lisp
@@ -1484,21 +1505,6 @@
 ** [x] ob-async
 #+begin_src emacs-lisp
 #+end_src
-** [x] org
-#+begin_src emacs-lisp
-(on-hook org-mode
-  (when (equal (buffer-name) "init.org")
-    (auto-save-mode 1)
-    (page-break-lines-mode 1))
-  (yas-minor-mode 1))
-
-(on-package org
-  (require 'org-extras)
-  
-  (defkeys org-mode-map
-    "C-<return>" other-window
-    "C-S-<return>" org-insert-heading-respect-content))
- #+end_src
 ** [x] org-appear
 #+begin_src emacs-lisp
 #+end_src
@@ -1532,9 +1538,6 @@
 #+begin_src emacs-lisp
 #+end_src
 
-** [x] org-roam
-#+begin_src emacs-lisp
-#+end_src
 ** [x] org-sidebar
 #+begin_src emacs-lisp
 #+end_src
@@ -1560,6 +1563,11 @@
 ** [x] polymode
 #+begin_src emacs-lisp
 #+end_src
+** [x] posframe
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] prettier-js
 #+begin_src emacs-lisp
 (on-package prettier-js
@@ -1611,33 +1619,57 @@
 #+begin_src emacs-lisp
 
 #+end_src
-
 ** [x] sly
 #+begin_src emacs-lisp
-(on-package sly
- (add-to-list 'sly-contribs 'sly-asdf 'append)
- ;;(require 'sly-stepper-autoloads)
- ;;(require 'sly-quicklisp-autoloads)
- ;;(require 'sly-macrostep-autoloads)
- ;;(require 'sly-named-readtables-autoloads)
- (setq inferior-lisp-program "sbcl"
-       sly-init-function 'sly-init-using-slynk-loader
-       compilation-ask-about-save nil)
- (defkeys sly-editing-mode-map
-  "C-c b" sly-eval-buffer
-  "C-c d" sly-eval-defun
-  ;;"C-c C-d" sly-compile-defun
-  "C-c l" sly-eval-last-expression
-  "C-c C-k" sly-compileload-file
-  "M-h" sly-documentation-lookup))
+  (on-package sly
+    (add-to-list 'sly-contribs 'sly-asdf)
+    (add-to-list 'sly-contribs 'sly-mrepl)
+    (add-to-list 'sly-contribs 'sly-indentation)
+    ;;(require 'sly-stepper-autoloads)
+    ;;(require 'sly-quicklisp-autoloads)
+    ;;(require 'sly-macrostep-autoloads)
+    ;;(require 'sly-named-readtables-autoloads)
+    (setq inferior-lisp-program "sbcl")
+    (setq sly-init-function 'sly-init-using-slynk-loader)
+    (defkeys sly-editing-mode-map
+      "C-c b" sly-eval-buffer
+      "C-c d" sly-eval-defun
+      "C-c C-d" sly-compile-defun
+      "C-c C-k" sly-my-compile-and-load-file
+      "C-c l" sly-eval-last-expression
+      "M-h" sly-documentation-lookup
+      "M-n" scroll-up-line
+      "M-p" scroll-down-line)
+    (defkeys sly-prefix-map
+      "C-c b" sly-eval-buffer
+      "C-c d" sly-eval-defun
+      "C-c C-d" sly-compile-defun
+      "C-c C-k" sly-my-compile-and-load-file
+      "C-c l" sly-eval-last-expression
+      "M-h" sly-documentation-lookup))
 
-(on-hook sly-mode-hook
-  (unless (functionp (symbol-function 'sly-common-lisp-indent-function))
-    (let ((sly-dir (file-name-directory (find-library-name "sly"))))
-      (add-to-list 'load-path (expand-file-name "lib" sly-dir))
-      (add-to-list 'load-path (expand-file-name "contrib" sly-dir))
-      (require 'sly-autodoc)
-      (require 'sly-indentation))))
+  (on-package sly-mrepl
+    (defkeys sly-mrepl-mode-map
+      "M-n" scroll-up-line
+      "M-p" scroll-down-line
+      "<up>" sly-mrepl-previous-input-or-button
+      "<down>" sly-mrepl-next-input-or-button))
+
+  (on-hook sly-mrepl-mode
+    (cl-hooks))
+
+  (on-hook sly-mode
+    ;; Sly auto-installs its own indetantion function, which seems to be loaded
+    ;; first when mrepl is loaded.
+    ;; That results with Emacs ending up in the debugger when I try to indent a
+    ;; Lisp file without a connection or mrepl loaded.
+    ;; This is my temporary fix for the situation:
+    (unless (functionp (symbol-function 'sly-common-lisp-indent-function))
+      (let ((sly-dir (file-name-directory (find-library-name "sly"))))
+        (add-to-list 'load-path (expand-file-name "lib" sly-dir))
+        (add-to-list 'load-path (expand-file-name "contrib" sly-dir))
+        (require 'sly-autodoc)
+        (require 'sly-indentation))))
 #+end_src
 ** [x] sly-asdf
 #+begin_src emacs-lisp
@@ -1659,15 +1691,30 @@
      ;;  solarized
      ;;  (load-theme 'solarized-dark t))
 #+end_src
-** [ none  ] [x] which-key
+** [x] super-save
 #+begin_src emacs-lisp
-(on-package which-key
-  (setq which-key-idle-delay 0.1)
-  (which-key-mode))
-(on-hook which-key
-  (diminish 'which-key-mode)
-  (which-key-setup-minibuffer))
+(on-package super-save
+  ;; add integration with ace-window
+  (add-to-list 'super-save-triggers 'ace-window)
+  ;; save on find-file
+  (add-to-list 'super-save-hook-triggers 'find-file-hook)
+  (setf super-save-remote-files nil
+        super-save-idle-duration 0.5
+        super-save-auto-save-when-idle t
+        super-save-exclude '(".gpg")
+        super-save-silent t
+        super-save-triggers
+        (append super-save-triggers
+                '(emacs-lisp-byte-compile
+                  emacs-lisp-byte-compile-and-load
+                  emacs-lisp-native-compile-and-load))))
+(on-hook super-save (diminish 'super-save))
 #+end_src
+** [x] web-mode
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] winum
 #+begin_src emacs-lisp
 #+end_src
@@ -1715,7 +1762,6 @@
 ** [ none  ] [x] dap-java
 #+begin_src emacs-lisp
 #+end_src
-
 ** [ none  ] [x] dired
 #+begin_src emacs-lisp
 ;; (on-hook after-init
@@ -1753,7 +1799,6 @@
                              "okular"
                              '(file))))
       (add-to-list 'openwith-associations ext)))
-
   (defkeys dired-mode-map
     "C-x <M-S-return>" dired-open-current-as-sudo
     "r"                dired-do-rename
@@ -1801,7 +1846,6 @@
   (defvar yas-alias-to-yas/prefix-p nil)
   (defvar default-gc-cons-threshold gc-cons-threshold)
   (defvar old-file-name-handler file-name-handler-alist)
-
   (setq file-name-handler-alist nil
         debug-on-error t
         gc-cons-threshold most-positive-fixnum
@@ -1820,7 +1864,6 @@
         shell-command-default-error-buffer "Shell Command Errors"
         native-comp-async-report-warnings-errors 'silent
         comp-speed 3)
-  
   (when 'native-comp-compiler-options
     (setq native-comp-async-jobs-number 4))
   
@@ -1833,7 +1876,6 @@
                 cursor-in-non-selected-windows 'hollow
                 bidi-display-reordering 'left-to-right
                 bidi-paragraph-direction 'left-to-right)
-
   (push '(fullscreen . maximized) initial-frame-alist)
   (push '(fullscreen . maximized) default-frame-alist)
   (push '(menu-bar-lines . 0) default-frame-alist)
@@ -1849,8 +1891,9 @@
     (puthash 'default deff face--new-frame-defaults))
   (define-prefix-command 'C-z-map)
   (global-set-key (kbd "C-z") 'C-z-map)
-  (global-unset-key (kbd "C-v")))
-
+  (global-unset-key (kbd "C-v"))
+  ;;define a setc function for use in init file
+  (put 'setc 'byte-optimizer 'byte-compile-inline-expand))
 #+end_src
 ** [ none  ] [x] edebug
 #+begin_src emacs-lisp
@@ -1876,53 +1919,51 @@
 (on-hook abbrev-mode (diminish 'abbrev-mode))
 (on-hook auto-complete-mode (diminish 'auto-complete-mode))
 (on-hook auto-fill-mode (diminish 'auto-fill-function))
-(on-hook auto-insert-mode (diminish 'auto-insert-mode))
+(on-hook auto-insert-mode
+  (setq auto-insert-query nil)
+  (diminish 'auto-insert-mode))
 (on-hook edit-abbrevs-mode (diminish 'abbrev-mode))
 (on-hook eldoc-mode (diminish 'eldoc-mode))
 (on-hook electric-pair-mode (diminish 'electric-pair-mode))
 (on-hook subword-mode (diminish 'subword-mode))
 (on-hook wrap-region-mode (diminish 'wrap-region-mode))
 (on-hook winner-mode (diminish 'winner-mode))
+
 (on-hook after-init
 
-  (on-system windows-nt    
+  (when (eq system-type 'windows-nt)
     (setq w32-get-true-file-attributes nil
 	  w32-pipe-read-delay 0
 	  w32-pipe-buffer-size (* 64 1024)
-	  source-directory "~/repos/emsrc/emacs"
+	  source-directory "~/repos/em2/emacs"
 	  command-line-x-option-alist nil
 	  command-line-ns-option-alist nil
 	  browse-url-galeon-program (getenv "BROWSER")
-	  browse-url-netscape-program browse-url-galeon-program))
+	  browse-url-netscape-program browse-url-galeon-program)
 
-  (when (getenv "MSYSTEM")
-    (setopt package-gnupghome-dir ""))
-  
-  (when (equal (system-name) "EMMI")
-    (autoload 'global-disable-mouse-mode "disable-mouse.el" nil nil nil)
-    (global-disable-mouse-mode 1)
-    (diminish 'disable-mouse-global-mode))
+    (when (getenv "MSYSTEM") (setq package-gnupghome-dir ""))
+    
+    (when (or (equal (system-name) "EMMI")
+              (equal (system-name) "HP-Laptop"))
+      (autoload 'global-disable-mouse-mode "disable-mouse.el" nil nil nil)
+      (global-disable-mouse-mode 1)
+      (diminish 'disable-mouse-global-mode)))
 
-  (when (equal (system-name) "HP-Laptop")
-    (autoload 'global-disable-mouse-mode "disable-mouse.el" nil nil nil)
-    (global-disable-mouse-mode 1)
-    (diminish 'disable-mouse-global-mode))
-
-(let ((etc (expand-file-name "etc" user-emacs-directory)))
   (setq show-paren-style 'expression
+        use-short-answers t
+        auto-insert-query nil
         message-log-max 10000 ;; oriignal 1000
         undo-outer-limit 37000000
-        shell-file-name "bash"
-        shell-command-switch "-c"
+        shell-file-name "sh"
+        shell-command-switch ""
         delete-exited-processes t
         echo-keystrokes 0.1
-        create-lock-files nil
+        create-lockfiles nil
         winner-dont-bind-my-keys t
         auto-windo-vscroll nil
         split-width-threshold 0
         split-height-threshold nil
-        require-final-newline t
-        next-line-add-newlines t
+        ;;require-final-newline t
         bookmark-save-flag 1
         delete-selection-mode t
         initial-major-mode 'emacs-lisp-mode
@@ -1932,7 +1973,7 @@
         save-abbrevs 'silent
         save-silently t
         save-interprogram-paste-before-kill t
-        save-place-file (expand-file-name "places" etc)
+        save-place-file (expand-file-name "places" user-emacs-directory)
         max-lisp-eval-depth '100000
         max-specpdl-size '1000000
         scroll-preserve-screen-position 'always
@@ -1943,31 +1984,27 @@
         make-backup-files nil
         vc-make-backup-files nil
         vc-display-status nil
-        vc-handled-backends nil
+        ;;vc-handled-backends nil
         kill-buffer-delete-auto-save-files t
-        backup-directory-alist `(("." . ,etc))
-        custom-file (expand-file-name "custom.el" etc)
-        abbrev-file-name (expand-file-name "abbrevs.el" etc)
-        bookmark-default-file (expand-file-name "bookmarks" etc)
-        default-licence "GPL 3.0"))
+        backup-directory-alist `(("." . ,user-emacs-directory))
+        custom-file (expand-file-name "custom.el" user-emacs-directory)
+        bookmark-default-file (expand-file-name "bookmarks" user-emacs-directory)
+        default-licence "GPL 3.0")
 
   (push '("\\*Compile-Log\\*" (display-buffer-no-window)) display-buffer-alist)
-  (push `((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*")
+  (push `       ((,(rx bos (or "*Apropos*" "*Help*" "*helpful*" "*info*" "*Summary*")
         	(0+ not-newline))
            (display-buffer-same-window
             display-buffer-reuse-mode-window
             display-buffer-pop-up-window)
            (mode apropos-mode help-mode helpful-mode Info-mode Man-mode)))
         display-buffer-alist)
-
+  
   (push '(("*Help*" (window-parameters . ((dedicated . t))))) display-buffer-alist)
-  ;;(push `(progn ,(expand-file-name "~/repos/ready-lisp/doc/info")) Info-directory-list)
-  ;;(push `(progn ,(expand-file-name "~/repos/common-lisp-info")) Info-directory-list)
-
+  (push (expand-file-name "~/repos/ready-lisp/doc/info") Info-directory-list)
   (setq find-file-hook (delq 'vc-refresh-state find-file-hook))
 
   (fset 'vc-backend 'ignore)
-  (fset 'yes-or-no-p 'y-or-n-p)
   (electric-indent-mode 1)
   (electric-pair-mode 1)
   (global-auto-revert-mode)
@@ -1976,7 +2013,7 @@
   (auto-compression-mode 1)
   (auto-image-file-mode)
   (auto-insert-mode 1)
-  (auto-save-visited-mode 1)
+  ;;(auto-save-visited-mode 1)
   (blink-cursor-mode 1)
   (column-number-mode 1)
   (delete-selection-mode 1)
@@ -1988,6 +2025,8 @@
   (turn-on-auto-fill)
   (pixel-scroll-precision-mode +1)
   (bash-alias-mode +1)
+  (which-key-mode +1)
+  (super-save-mode +1)
   
   (defkeys global-map
     "C-<insert>"    term-toggle-term
@@ -2063,7 +2102,6 @@
         		    user-emacs-directory))))
 
   (on-idle (require 'which-key))
-  ;;   (on-idle (require 'cape))
   (on-idle (require 'extras))
   (on-idle (require 'sv-kalender)
     ;;(add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
@@ -2072,74 +2110,51 @@
     (add-hook 'comint-output-filter-functions
 	      #'comint-watch-for-password-prompt))
 
-  ;; from https://emacsredux.com/blog/2025/06/01/let-s-make-keyboard-quit-smarter/
-  (define-advice keyboard-quit
-    (:around (quit) quit-current-context)
-  "Quit the current context.
-
-When there is an active minibuffer and we are not inside it close
-it.  When we are inside the minibuffer use the regular
-`minibuffer-keyboard-quit' which quits any active region before
-exiting.  When there is no minibuffer `keyboard-quit' unless we
-are defining or executing a macro."
-  (if (active-minibuffer-window)
-      (if (minibufferp)
-          (minibuffer-keyboard-quit)
-        (abort-recursive-edit))
-    (unless (or defining-kbd-macro
-                executing-kbd-macro)
-      (funcall-interactively quit))))
-
-  ;;   (require 'solarized-theme)
   (load-theme 'solarized-dark t)
   (setq gc-cons-threshold       default-gc-cons-threshold
 	;;gc-cons-percentage      0.1
 	file-name-handler-alist old-file-name-handler))
 #+end_src
 ** [ none  ] [x] emacs-director
-  #+GIT: https://github.com/bard/emacs-director
 #+begin_src emacs-lisp
 #+end_src
 ** [ none  ] [x] emacs-gif-screencast
-  #+GIT: https://gitlab.com/ambrevar/emacs-gif-screencast
 #+begin_src emacs-lisp
 #+end_src
 ** [ none  ] [x] emacs-run-command
-  #+GIT: https://github.com/bard/emacs-run-command
 #+begin_src emacs-lisp
 #+end_src
 ** [ none  ] [x] emacs-velocity
-  #+GIT: https://github.com/bard/emacs-velocity
 #+begin_src emacs-lisp
 #+end_src
 ** [ none  ] [x] gnus
 #+begin_src emacs-lisp
 (on-hook after-init
   (require 'gnus))
+
 (on-hook message-mode
-  (setq fill-column 80))
+  (setq fill-column 72))
+
 (on-package gnus
   
   ;; (require 'nnir)
   (setq user-full-name    "Arthur Miller"
         user-mail-address "arthur.miller@live.com")
-  
+  (setq gnus-select-method '(nnnil ""))
   ;; for the outlook
-  (setq gnus-select-method
-        '(nnimap "live.com"
+  (setq gnus-secondary-select-methods
+        '((nnimap "live.com"
                  (nnimap-address "imap-mail.outlook.com")
                  (nnimap-server-port 993)
-                 (nnimap-stream ssl)
-                 ;(nnir-search-engine imap)
-                 ))
+                 (nnimap-stream starttls)
+                 (nnimap-search-engine imap)
+                 (nnimap-authinfo-file "~/.authinfo"))))
   
   ;; Send email through SMTP
   (setq message-send-mail-function 'smtpmail-send-it
         smtpmail-default-smtp-server "smtp-mail.outlook.com"
         smtpmail-smtp-service 587
-        smtpmail-stream-type 'ssl
-        smtpmail-debug-info t
-        smtpmail-debug-verb t
+        smtpmail-stream-type 'starttls
         smtpmail-local-domain "homepc")
 
   (setq gnus-thread-sort-functions
@@ -2165,7 +2180,7 @@ are defining or executing a macro."
   ;;(setq gnus-large-newsgroup 'nil)
   ;; Smileys:
   (setq smiley-style 'medium)
-  
+  (setq gnus-fetch-old-headers 'some)
   ;; Use topics per default:
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
   (setq gnus-message-archive-group '((format-time-string "sent.%Y")))
@@ -2180,7 +2195,9 @@ are defining or executing a macro."
   (setq gnus-topic-alist '(("live.com")
                            ("Gnus"))))
 #+end_src
-
+** [ none  ] [x] helm-convert
+#+begin_src emacs-lisp
+#+end_src
 ** [ none  ] [x] ielm
 #+begin_src emacs-lisp
 (on-package
@@ -2209,14 +2226,25 @@ are defining or executing a macro."
   (paredit-mode +1)
   (turn-on-eldoc-mode))
 #+end_src
+** [ none  ] [x] inferior-python-mode
+#+begin_src emacs-lisp
+(on-hook inferior-python-mode
+  (hide-mode-line-mode))
+#+end_src
+** [ none  ] [x] info
+#+begin_src emacs-lisp
+(on-package info
+  (defkeys Info-mode-map
+    "M-n" nil))
+#+end_src
+
 ** [ none  ] [x] lisp & elisp
 #+begin_src emacs-lisp
-;;(require 'helm-extras)
 (on-package elisp-mode
   (require 'elisp-extras)
   (defkeys emacs-lisp-mode-map
-    "\C-c a" elisp-byte-compile-and-load
-    "\C-c b" elisp-byte-compile
+    "\C-c a" emacs-lisp-byte-compile-and-load
+    "\C-c b" emacs-lisp-byte-compile
     "\C-c c" emacs-lisp-native-compile-and-load
     "\C-c d" eval-defun
     "\C-c e" eval-buffer
@@ -2228,19 +2256,38 @@ are defining or executing a macro."
     "\C-c s" eval-surrounding-sexp))
 
 (on-hook after-init
-  (set-default 'auto-mode-alist
-               (append '(("\\.lisp" . lisp-mode)
-                         ("\\.lsp" . lisp-mode)
-                         ("\\.asd" . lisp-mode)
-                         ("\\.cl" . lisp-mode))
-                       auto-mode-alist)))
+  (set-default
+ 'auto-mode-alist
+ (append '(("\\.lisp" . lisp-mode)
+           ("\\.lsp" . lisp-mode)
+           ("\\.asd" . lisp-mode)
+           ("\\.cl" . lisp-mode))
+         auto-mode-alist)))
 
 (on-package inf-lisp (require 'cl-extras))
-(on-package lisp-mode (require 'cl-extras))
+(on-package lisp-mode
+  (require 'cl-extras))
 (on-hook emacs-lisp-mode (elisp-hooks))
 (on-hook inf-lisp (cl-hooks))
 (on-hook lisp-mode (cl-hooks))
 #+end_src
+** [ none  ] [x] org
+#+begin_src emacs-lisp
+  (on-hook org-mode
+    (auto-fill-mode -1)
+    (visual-line-mode +1)
+    (when (equal (buffer-name) "init.org")
+      (auto-save-mode 1)
+      (page-break-lines-mode 1))
+    (yas-minor-mode 1))
+
+  (on-package org
+    (require 'org-extras))
+    
+  ;;  (defkeys org-mode-map
+  ;;     [C-<enter>] other-window
+  ;;     [C-S-<return>] org-insert-heading-respect-content))
+ #+end_src
 ** [ none  ] [x] paredit
 #+begin_src emacs-lisp
 (on-package paredit
@@ -2270,4 +2317,48 @@ are defining or executing a macro."
     "M-<"         dired-go-to-first
     "M->"         dired-go-to-last
     "M-p"         scroll-down-line))
+#+end_src
+** [ none  ] [x] which-key
+#+begin_src emacs-lisp
+(on-package which-key
+  (setq which-key-idle-delay 0.01)
+  (which-key-mode))
+(on-hook which-key
+  (diminish 'which-key-mode)
+  (which-key-setup-minibuffer))
+#+end_src
+* Unused
+** [ ] slime
+#+begin_src emacs-lisp
+;; (on-package slime
+;;   (when (equal (system-name) "EMMI")
+;;     (add-to-list 'exec-path "c:/Program Files/Steel Bank Common Lisp/"))
+;;   (setq inferior-lisp-program "sbcl")
+
+;;   (defkeys slime-mode-indirect-map
+;;     "\C-c d" slime-eval-defun
+;;     "\C-c e" slime-eval-buffer
+;;     "\C-c r" slime-eval-region
+;;     "\C-c l" slime-eval-last-expression
+;;     "\C-c n" (lambda ()
+;;                (interactive)
+;;                (save-excursion
+;;                  (forward-sexp)
+;;                  (slime-eval-last-expression)))
+;;     "\C-c i" reindent-buffer
+;;     "\C-c p" (lambda ()
+;;                (interactive)
+;;                (backward-kill-sexp)
+;;                (condition-case nil
+;;                    (prin1 (slime-eval (read (current-kill 0)))
+;;                           (current-buffer))
+;;                  (error (message "Invalid expression")
+;;                         (insert (current-kill 0)))))
+;;     "\C-c s" (lambda (levels)
+;;                (interactive "p")
+;;                (save-excursion
+;;                  (up-list (abs levels))
+;;                  (forward-sexp)
+;;                  (slime-eval-last-expression))))
+;;   )
 #+end_src

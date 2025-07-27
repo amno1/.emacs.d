@@ -33,18 +33,8 @@
 (require 'yasnippet)
 (require 'page-break-lines)
 (require 'helm-pages)
-
-(defun elisp-byte-compile ()
-  (interactive)
-  (when (buffer-modified-p)
-    (save-buffer))
-  (emacs-lisp-byte-compile))
-
-(defun elisp-byte-compile-and-load ()
-  (interactive)
-  (when (buffer-modified-p)
-    (save-buffer))
-  (emacs-lisp-byte-compile-and-load))
+(require 'popup)
+(require 'eros)
 
 ;; From: https://emacs.wordpress.com/2007/01/17/eval-and-replace-anywhere/
 (defun fc-eval-and-replace ()
@@ -70,8 +60,6 @@
   (save-excursion
     (up-list (abs levels))
     (eval-last-sexp nil)))
-
-(require 'popup)
 
 (defun describe-thing-in-popup ()
   (interactive)
@@ -131,6 +119,28 @@
                :scroll-bar t
                :margin t)))
 
+(defun eval-surrounding-sexp (levels)
+  (interactive "p")
+  (save-excursion
+    (up-list (abs levels))
+    (eval-last-sexp nil)))
+
+(defun imacro-expand (expand-all)
+  (interactive "P")
+  (save-excursion
+    (let* ((end (progn (end-of-defun) (point)))
+           (beg (progn (beginning-of-defun) (point)))
+           (sxp (progn (read (current-buffer)))))
+      (eros--eval-overlay
+       (with-temp-buffer
+         (pp
+          (if expand-all (macroexpand-all sxp) (macroexpand sxp))
+          (current-buffer))
+         (buffer-string))
+       (save-excursion
+         (end-of-defun)
+         (point))))))
+
 (defun elisp-gen-autoload-cookie ()
   "Generate an autoload cookie for the defun at point."
   (interactive)
@@ -143,6 +153,12 @@
         (beginning-of-defun)
         (insert ";;;###autoload\n")))))
 
+(defun add-elisp-advices ()
+  (advice-add #'emacs-lisp-byte-compile :before #'basic-save-buffer))
+
+(defun remove-elisp-advices ()
+  (advice-remove #'emacs-lisp-byte-compile #'basic-save-buffer))
+
 (defun elisp-hooks ()
   (setq fill-column 80)
   (paredit-mode 1)
@@ -152,7 +168,7 @@
   (speed-of-thought-mode 1)
   (page-break-lines-mode 1)
   ;;(lisp-extra-font-lock-mode 1)
-  )
+  (eros-mode 1))
 
 (defun yas-undo-expand ()
   (interactive)
@@ -177,6 +193,70 @@
   :components (()) 
   :depends-on ())") 
       auto-insert-alist)
+
+;; movement
+
+(defun beginning-of-list ()
+  "Move cursor to the beginning of current list."
+  (interactive)
+  (call-interactively #'backward-up-list)
+  (forward-char))
+
+(defun end-of-list ()
+  "Move cursor to the end of current list"
+  (interactive)
+  (call-interactively #'up-list)
+  (backward-char))
+
+(defvar defun-start-re "([[:space:]]*\\(cl-\\)??def.*?[[:space:]]+")
+
+(defun read-form ()
+  (condition-case nil
+      (read (current-buffer))
+    (error nil)))
+
+(defun has-operator-p (tree operator)
+    (cond ((eq tree nil) nil)
+          ((listp (car tree))
+           (or (has-operator-p (car tree) operator) 
+               (has-operator-p (cdr tree) operator)))
+          (t
+           (cond ((eq (car tree) operator) tree)
+                 (t
+                  (has-operator-p (cdr tree) operator))))))
+
+(defun defun-start ()
+  (interactive)
+  (let* ((cursor (point))
+         (beg (save-excursion
+                (end-of-defun)
+                (beginning-of-defun)
+                (point)))
+         (form (save-excursion (read-form)))
+         (found
+          (catch 'found
+            (while (re-search-backward defun-start-re beg t)
+              (unless (nth 3 (parse-partial-sexp beg (point)))
+                (throw 'found (point)))))))
+    (cond (found found)
+          (t (goto-char cursor)
+             nil))))
+
+(defun defun-end ()
+  (interactive)
+  (when (defun-start)
+    (forward-list)
+    (point)))
+
+(defun beginning-of-defun-dwim ()
+  (interactive)
+  (unless (defun-start)
+    (beginning-of-defun)))
+
+(defun end-of-defun-dwim ()
+  (interactive)
+  (unless (defun-end)
+    (end-of-defun)))
 
 (provide 'elisp-extras)
 ;;; elisp-extras.el ends here

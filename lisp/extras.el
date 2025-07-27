@@ -4,6 +4,16 @@
 (require 'windmove)
 (require 'ielm)
 
+(defmacro lex (pairs &rest body)
+  "As let* but initializer list is like in setq/setf."
+  (declare (indent defun))
+  (if (/= (logand (length pairs) 1) 0)
+      (signal 'wrong-number-of-arguments (list 'lex (length pairs))))
+  (let ((args))
+    (while pairs
+      (push (list (pop pairs) (pop pairs)) args))
+    `(let* ,(nreverse args) ,@body)))
+
 (defun ielm-use-current-buffer (fn &rest args)
   (let ((working-buffer (current-buffer)))
     (funcall fn args)
@@ -185,10 +195,9 @@ column narrower."
 
 ;;;###autoload
 (defun sudo-find-file (file-name)
-  "Like find file, but opens the file as root."
+  "Like find file, but with the root priviledges."
   (interactive "FSudo Find File: ")
-  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
-    (find-file tramp-file-name)))
+  (find-file (concat "/sudo::" (expand-file-name file-name))))
 
 ;;;###autoload
 (defun reindent-buffer ()
@@ -218,8 +227,7 @@ column narrower."
     (error "No Git URL in clipboard"))
   (let* ((url (current-kill 0))
          (download-dir git-repository-dirs)
-         (project-dir (expand-file-name
-                       (car (last (split-string url "/" t "/"))) download-dir))
+         (project-dir (expand-file-name (file-name-nondirectory url) download-dir))
          (default-directory download-dir)
          (command (format "git clone %s" url))
          (buffer (generate-new-buffer (format "*%s*" command)))
@@ -291,6 +299,14 @@ column narrower."
          (ctemp (* (- ftemp 32) 0.56)))
     (message "%s degrees Fahrenheit is %s degrees Celsius." ftemp (float ctemp))
     ctemp))
+
+;;;###autoload
+(defun c-to-f ()
+  (interactive)
+  (let* ((ctemp (read-number "Enter temperature in Celsius: "))
+         (ftemp (+ (* ctemp 1.8) 32)))
+    (message "%s degrees Celsius is %s degrees Fahrenheit." ctemp (float ftemp))
+    ftemp))
 
 ;;;###autoload
 (defun println (listobj &optional buffer)
@@ -541,9 +557,7 @@ If there is not a window to the right, open new one."
          (end (or end (save-excursion (1- (re-search-forward "[[:blank:]]")))))
          (key (buffer-substring-no-properties beg end))
          (shell-command-switch "-c"))
-    (let ((default-directory dir))
-      (shell-command-on-region
-       beg end (format "gpg --homedir %s --receive-keys %s" "" key)))))
-
+    (shell-command-on-region
+     beg end (format "gpg --homedir %s --receive-keys %s" dir key))))
 
 (provide 'extras)
