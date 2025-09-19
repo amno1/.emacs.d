@@ -143,9 +143,6 @@
          "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
         ("L" "Protocol Link" entry (file+headline "~/Documents/notes.org" "Inbox")
          "* %? [[%:link][%(transform-square-brackets-to-round-ones\"%:description\")]]\n")
-        ("d" "Denote" plain (file "~/Documents/denotes.org")
-         "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
-         :empty-lines 1)
         ("g" "Gem-note" plain (file "~/repos/gem/doc/notes.org")
          "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
          :empty-lines 1)
@@ -155,8 +152,9 @@
         ("r" "To Read" plain (file "~/Documents/reading.org")
          "* %A %^g\n  Created: %U\n  ID: %<%y%m%d%H%M%S>\n\n%?"
          :empty-lines 1)
-        ("n" "Note" entry (file+olp+datetree "~/Documents/notes.org")
-         "* [[%:link][%:description]] %^g\n%? %U" :empty-lines 1)
+        ("n" "Note" plain (file "~/repos/notes/notes.org")
+         "* %^{Description} %^g\n  Created: %U\n  Author:%n\n  ID:%<%y%m%d%H%M%S>\n\n%?"
+         :empty-lines 1)
         ("s" "SH++ Note" entry (file "~/repos/sh++/notes.org")
          "* %^{Description} \n  Created: %U\n  Author:%n\n\n%?")
         ("e" "Email" entry (file "~/Documents/inbox.org")

@@ -31,6 +31,11 @@
 
 (defvar *current-package* nil)
 
+(defmacro with-package (package &rest body)
+  (declare (indent defun) (debug (sexp def-body)))
+  `(with-eval-after-load ,package
+     (lambda () ,@body)))
+
 (defmacro on-idle (&rest body)
   "Basic wrapper for a default `idle-timer' hook."
   (declare (indent defun))
@@ -47,10 +52,25 @@
   `(with-eval-after-load ,*current-package*
      ,@body))
 
-(defmacro with-package (package &rest body)
+(defmacro on-system (systype &rest body)
   (declare (indent defun) (debug (sexp def-body)))
-  `(with-eval-after-load ,package
-     (lambda () ,@body)))
+  `(when (eq ',system-type ',systype)
+     ,@body))
+
+(defmacro on-host (host &rest body)
+  (declare (indent defun) (debug (sexp def-body)))
+  `(when (equal ,system-name ,host)
+     ,@body))
+
+(defmacro in-directory (directory &rest body)
+  `(let ((default-directory ,directory))
+     ,@body))
+
+(progn
+  (message "%s" default-directory)
+  (in-directory (expand-file-name "~/blah/")
+    (message "%s" default-directory))
+  (message "%s" default-directory))
 
 (defmacro defkeys (mapname &rest body)
   (declare (indent defun) (debug (sexp def-body)))
@@ -65,16 +85,6 @@
                      (if `(keymapp (bound-and-true-p ,(cadr defs)))
                          (eval (cadr defs)))))
        (setq defs (cddr defs)))))
-
-(defmacro on-system (systype &rest body)
-  (declare (indent defun) (debug (sexp def-body)))
-  `(when (eq ',system-type ',systype)
-     ,@body))
-
-(defmacro on-host (host &rest body)
-  (declare (indent defun) (debug (sexp def-body)))
-  `(when (equal ,system-name ,host)
-     ,@body))
 
 ;; (defmacro on-init (&rest body)
 ;;   (declare (indent defun) (debug (sexp def-body)))

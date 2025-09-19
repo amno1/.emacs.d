@@ -217,6 +217,25 @@ column narrower."
       (bury-buffer)
     (kill-buffer (current-buffer))))
 
+(defmacro with-default-directory (directory &rest body)
+  "Use DIRECTORY as the default directory temporaryly.
+
+Restore the previous directory on exit."
+  (declare (debug t) (indent defun))
+  (let ((oldcwd (make-symbol "cwd")))
+    `(let ((,oldcwd ,default-directory))
+       (unwind-protect
+           (progn
+             (setq default-directory ,directory)
+             ,@body)
+         (setq default-directory ,oldcwd)))))
+
+(progn
+  (message "%s" default-directory)
+  (with-default-directory (expand-file-name "~/blah/")
+    (message "%s" default-directory))
+  (message "%s" default-directory))
+
 ;; https://xenodium.com/emacs-clone-git-repo-from-clipboard/
 ;; hacked by me - no deleting, do pull instead
 (defvar git-repository-dirs (expand-file-name "~/repos/"))
