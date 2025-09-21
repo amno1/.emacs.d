@@ -442,9 +442,7 @@
                                (buffer-substring-no-properties (point)
                                                                (line-end-position))))
                   (error "VC specified, but no URL given %s line %s"
-                         (package-name package) (1- (line-number-at-pos)))))))
-        ;;(goto-char header-beg)
-        )
+                         (package-name package) (1- (line-number-at-pos))))))))
       ;; pseudo package?
       (when (equal (package-pinned package) "none")
         (setf (package-pseudo package) t))
@@ -978,6 +976,11 @@
   (org-init-mode +1)
 #+end_src
 * Packages
+
+** [x] common-lisp-snippets
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] academic-phrases
 #+begin_src emacs-lisp
 #+end_src
@@ -1523,7 +1526,7 @@
 #+begin_src emacs-lisp
 #+end_src
 
-** [x] org-sidebar
+** [ ] org-sidebar
 #+begin_src emacs-lisp
 #+end_src
 ** [x] org-superstar
@@ -1545,7 +1548,7 @@
 #+begin_src emacs-lisp
 
 #+end_src
-** [x] polymode
+** [ ] polymode
 #+begin_src emacs-lisp
 #+end_src
 ** [x] posframe

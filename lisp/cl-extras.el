@@ -34,6 +34,7 @@
 (require 'autoinsert)
 (require 'helm-pages)
 (require 'page-break-lines)
+(require 'common-lisp-snippets)
 
 (defun cl-hooks ()  
   (setq fill-column 80)
