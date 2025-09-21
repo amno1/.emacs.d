@@ -493,9 +493,6 @@
            (package-enabled p)
            (install-package p))))
 
-  (dolist (p (get-package-list t))
-    (message "%S" p))
-
   (defun current-package ()
     "Return name of package the cursor is at the moment."
     (save-excursion
