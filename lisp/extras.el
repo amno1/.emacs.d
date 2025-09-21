@@ -108,17 +108,17 @@ always effectively nil."
   (delete-region beg end)
   (insert-char ?\s (- end beg)))
 
-;;;###autoload
-(defun screenshot-svg ()
-  "Save a screenshot of the current frame as an SVG image.
-Saves to a temp file and puts the filename in the kill ring."
-  (interactive)
-  (let* ((filename (make-temp-file "Emacs" nil ".svg"))
-         (data (x-export-frames nil 'svg)))
-    (with-temp-file filename
-      (insert data))
-    (kill-new filename)
-    (message filename)))
+;; ;;;###autoload
+;; (defun screenshot-svg ()
+;;   "Save a screenshot of the current frame as an SVG image.
+;; Saves to a temp file and puts the filename in the kill ring."
+;;   (interactive)
+;;   (let* ((filename (make-temp-file "Emacs" nil ".svg"))
+;;          (data (x-export-frames nil 'svg)))
+;;     (with-temp-file filename
+;;       (insert data))
+;;     (kill-new filename)
+;;     (message filename)))
 
 ;;;###autoload
 (defun only-current-buffer ()
@@ -578,5 +578,16 @@ If there is not a window to the right, open new one."
          (shell-command-switch "-c"))
     (shell-command-on-region
      beg end (format "gpg --homedir %s --receive-keys %s" dir key))))
+
+;; from https://www.reddit.com/r/emacs/comments/idz35e/emacs_27_can_take_svg_screenshots_of_itself/kie38k7/
+;;;###autoload
+(defun screenshot-svg ()
+  "Save a screenshot of the current frame as an SVG image.
+Saves to a temp file and puts the filename in the kill ring."
+  (interactive)
+  (let ((filename
+         (make-temp-file "Emacs" nil ".svg" (x-export-frames nil 'svg))))
+    (kill-new filename)
+    (message filename)))
 
 (provide 'extras)
