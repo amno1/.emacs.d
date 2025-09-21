@@ -1262,7 +1262,6 @@
     "M-x"     helm-M-x
     "C-z ,"   helm-pages
     "C-x C-b" helm-buffers-list
-    "C-z a"   helm-ag
     "C-z b"   helm-filtered-bookmarks
     ;;                    "C-z c"   helm-company
     "C-z d"   helm-dabbrev
@@ -1293,10 +1292,13 @@
 ** [ vc    ] [x] helm-rg 
 #+url https://github.com/cosmicexplorer/helm-rg
 #+begin_src emacs-lisp
-(on-package helm-ag
-  (setq helm-ag-use-agignore t
-        helm-ag-base-command 
-        "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*"))
+(on-package helm-rg
+  (defkeys global-map
+    "C-z a" helm-rg)
+  ;; (setq helm-ag-use-agignore t
+  ;;       helm-ag-base-command 
+  ;;       "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*")
+  )
 #+end_src
 ** [x] helm-c-yasnippet
 #+begin_src emacs-lisp
