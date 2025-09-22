@@ -48,8 +48,6 @@
   (defvar init-file--loadpaths-map (make-hash-table :test 'equal))
   (defvar init-file--need-package-refresh t)
 
-  ;; (load (expand-file-name "./lisp/package.el")) ;; use hacked-package.el
-
   ;; (if (equal system-name "HP-Laptop")
   ;;     (setq package-gnupghome-dir "/c/Users/HP/.emacs.d/elpa/gnupg"))
 
@@ -333,6 +331,7 @@
         (append-to-init-file (current-buffer))))
     ;; generate stuff
     (emit-packages)
+    (message "PACKAGES DONE")
     ;; do this after user init stuff
     (emit-hooks) ;; must be done after emiting packages
     (emit-load-paths);; must be done after emiting hooks
@@ -976,10 +975,28 @@
   (org-init-mode +1)
 #+end_src
 * Packages
-
-** [x] common-lisp-snippets
+** [ ] helm-dired-history
 #+begin_src emacs-lisp
-
+(on-package helm-dired-history
+  (require 'savehist)
+  (add-to-list 'savehist-additional-variables
+               'helm-dired-history-variable)
+  (savehist-mode 1)
+  (with-eval-after-load "dired"
+    (require 'helm-dired-history)
+    (define-key dired-mode-map "," 'dired)))
+#+end_src
+** [ ] helm-git-grep
+#+begin_src emacs-lisp
+#+end_src
+** [ ] helm-swoop 
+#+begin_src emacs-lisp
+#+end_src
+** [ ] org-sidebar
+#+begin_src emacs-lisp
+#+end_src
+** [ ] polymode
+#+begin_src emacs-lisp
 #+end_src
 ** [x] academic-phrases
 #+begin_src emacs-lisp
@@ -1036,6 +1053,10 @@
 #+end_src
 ** [x] checkdoc
 #+begin_src emacs-lisp
+#+end_src
+** [x] common-lisp-snippets
+#+begin_src emacs-lisp
+
 #+end_src
 ** [x] company
 #+begin_src emacs-lisp
@@ -1289,17 +1310,6 @@
   (diminish 'helm-mode)
   (helm-adaptive-mode 1))
 #+end_src
-** [ vc    ] [x] helm-rg 
-#+url https://github.com/cosmicexplorer/helm-rg
-#+begin_src emacs-lisp
-(on-package helm-rg
-  (defkeys global-map
-    "C-z a" helm-rg)
-  ;; (setq helm-ag-use-agignore t
-  ;;       helm-ag-base-command 
-  ;;       "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*")
-  )
-#+end_src
 ** [x] helm-c-yasnippet
 #+begin_src emacs-lisp
 (on-package helm-c-yasnippet
@@ -1311,24 +1321,10 @@
 ** [x] helm-descbinds
 #+begin_src emacs-lisp
 #+end_src
-** [ ] helm-dired-history
-#+begin_src emacs-lisp
-(on-package helm-dired-history
-  (require 'savehist)
-  (add-to-list 'savehist-additional-variables
-               'helm-dired-history-variable)
-  (savehist-mode 1)
-  (with-eval-after-load "dired"
-    (require 'helm-dired-history)
-    (define-key dired-mode-map "," 'dired)))
-#+end_src
 ** [x] helm-flyspell
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-fuzzier
-#+begin_src emacs-lisp
-#+end_src
-** [ ] helm-git-grep
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-make
@@ -1355,9 +1351,6 @@
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-smex 
-#+begin_src emacs-lisp
-#+end_src
-** [ ] helm-swoop 
 #+begin_src emacs-lisp
 #+end_src
 ** [x] helm-xref
@@ -1528,9 +1521,6 @@
 #+begin_src emacs-lisp
 #+end_src
 
-** [ ] org-sidebar
-#+begin_src emacs-lisp
-#+end_src
 ** [x] org-superstar
 #+begin_src emacs-lisp
 #+end_src
@@ -1549,9 +1539,6 @@
 ** [x] paxedit
 #+begin_src emacs-lisp
 
-#+end_src
-** [ ] polymode
-#+begin_src emacs-lisp
 #+end_src
 ** [x] posframe
 #+begin_src emacs-lisp
@@ -1581,9 +1568,6 @@
 ** [x] quick-peek
 #+begin_src emacs-lisp
 
-#+end_src
-** [ none  ] [x] recentf 
-#+begin_src emacs-lisp
 #+end_src
 ** [x] refine
 #+begin_src emacs-lisp
@@ -1735,6 +1719,23 @@
 #+begin_src emacs-lisp
 #+end_src
    
+** [ vc    ] [x] helm-rg 
+#+url https://github.com/cosmicexplorer/helm-rg
+#+begin_src emacs-lisp
+(on-package helm-rg
+  (defkeys global-map
+    "C-z a" helm-rg)
+  ;; (setq helm-ag-use-agignore t
+  ;;       helm-ag-base-command 
+  ;;       "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*")
+  )
+#+end_src
+** [ vc    ] [x] peep-dired
+#+url https://github.com/amno1/peep-dired
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [ none  ] [x] abbrev
 #+begin_src emacs-lisp
 (on-package abbrev
@@ -1761,66 +1762,7 @@
 ;;            (on-idle (require 'dired)))
 
 (on-package dired
-  (require 'dired-setup)
-  
-  ;; (on-system windows-nt
-  ;;   (setq ls-lisp-use-insert-directory-program "gls"))
-  
-  (on-system gnu/linux
-    (dolist (ext (list (list (openwith-make-extension-regexp
-                              '("xbm" "pbm" "pgm" "ppm" "pnm"
-                                "png" "gif" "bmp" "tif" "jpeg" "jpg"))
-                             "feh"
-                             '(file))
-                       (list (openwith-make-extension-regexp
-                              '("doc" "xls" "ppt" "odt" "ods" "odg" "odp" "rtf"))
-                             "libreoffice"
-                             '(file))
-                       (list (openwith-make-extension-regexp
-                              '("\\.lyx"))
-                             "lyx"
-                             '(file))
-                       (list (openwith-make-extension-regexp
-                              '("chm"))
-                             "kchmviewer"
-                             '(file))
-                       (list (openwith-make-extension-regexp
-                              '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi" "azw3"))
-                             "okular"
-                             '(file))))
-      (add-to-list 'openwith-associations ext)))
-  (defkeys dired-mode-map
-    "C-x <M-S-return>" dired-open-current-as-sudo
-    "r"                dired-do-rename
-    "C-S-r"            wdired-change-to-wdired-mode
-    "C-r C-s"          tmtxt/dired-async-get-files-size
-    "C-r C-r"          tda/rsync
-    "C-r C-z"          tda/zip
-    "C-r C-u"          tda/unzip
-    "C-r C-a"          tda/rsync-multiple-mark-file
-    "C-r C-e"          tda/rsync-multiple-empty-list
-    "C-r C-d"          tda/rsync-multiple-remove-item
-    "C-r C-v"          tda/rsync-multiple
-    "C-r C-s"          tda/get-files-size
-    "C-r C-q"          tda/download-to-current-dir
-    "C-x C-j"          dired-jump
-    "C-x 4 C-j"        dired-jump-other-window
-    "S-<return>"       dired-openwith
-    "C-'"              dired-collapse-mode
-    "n"                scroll-up-line
-    "p"                scroll-down-line
-    "M-m"              dired-mark-backward
-    "M-<"              dired-goto-first
-    "M->"              dired-goto-last
-    "M-<return>"       my-run
-    "C-S-f"            dired-narrow
-    "P"                peep-dired
-    "<f1>"             term-toggle
-    "TAB"              dired-subtree-toggle
-    "f"                dired-subtree-fold-all
-    "z"                dired-get-size
-    "e"                dired-subtree-expand-all)
-  )
+  (require 'dired-setup))
 
 (on-hook dired-omit-mode (diminish 'dired-omit-mode))
 (on-hook dired-mode
@@ -1876,7 +1818,7 @@
   (setq show-paren-style 'expression
         use-short-answers t
         auto-insert-query nil
-        message-log-max 10000 ;; oriignal 1000
+        message-log-max 10000 ;; original 1000
         undo-outer-limit 37000000
         shell-command-switch "-c"
         delete-exited-processes t
@@ -2298,6 +2240,9 @@
     "M-9" paredit-close-round-and-newline
     "C-." paredit-forward
     "C-," paredit-backward))
+#+end_src
+** [ none  ] [x] recentf 
+#+begin_src emacs-lisp
 #+end_src
 ** [ none  ] [x] term-toggle
 #+begin_src emacs-lisp

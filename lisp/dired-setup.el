@@ -32,6 +32,7 @@
 (require 'dired-x)
 (require 'openwith)
 (require 'dired-aux)
+(require 'config-macs)
 (require 'dired-async)
 (require 'markdown-mode)
 (require 'org-view-mode)
@@ -39,6 +40,7 @@
 (require 'org-pretty-table)
 (require 'dired-copy-paste)
 (require 'dired-git-log)
+(require 'term-toggle)
 (require 'dired-auto-readme)
 (require 'tmtxt-dired-async)
 
@@ -237,7 +239,7 @@
   (interactive)
   (unless (eq major-mode 'dired-mode)
     (error "This command runs only  in Dired mode."))
-  (when-let (filename (dired-file-name-at-point))
+  (when-let* ((filename (dired-file-name-at-point)))
     (dired-goto-next-file)
     (set-mark (point))
     (goto-char (line-end-position))
@@ -382,6 +384,29 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
   (dired-move-to-filename))
 
 ;; Setup
+(on-system gnu/linux
+    (dolist (ext (list (list (openwith-make-extension-regexp
+                              '("xbm" "pbm" "pgm" "ppm" "pnm"
+                                "png" "gif" "bmp" "tif" "jpeg" "jpg"))
+                             "feh"
+                             '(file))
+                       (list (openwith-make-extension-regexp
+                              '("doc" "xls" "ppt" "odt" "ods" "odg" "odp" "rtf"))
+                             "libreoffice"
+                             '(file))
+                       (list (openwith-make-extension-regexp
+                              '("\\.lyx"))
+                             "lyx"
+                             '(file))
+                       (list (openwith-make-extension-regexp
+                              '("chm"))
+                             "kchmviewer"
+                             '(file))
+                       (list (openwith-make-extension-regexp
+                              '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi" "azw3"))
+                             "okular"
+                             '(file))))
+      (add-to-list 'openwith-associations ext)))
 
 (setq dired-dwim-target t
       global-auto-revert-non-file-buffers nil
@@ -399,12 +424,42 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
                           "mpv"
                           '(file))
                     (list (openwith-make-extension-regexp
-                           '("html" "htm"))
+                           '("html" "htm" "pdf" "xml"))
                           (getenv "BROWSER")
                           '(file))))
   (add-to-list 'openwith-associations ext))
 
 (add-hook 'dired-mode-hook 'auto-revert-mode)
+
+(defkeys dired-mode-map
+    "C-x <M-S-return>" dired-open-current-as-sudo
+    "r"                dired-do-rename
+    "C-S-r"            wdired-change-to-wdired-mode
+    "C-r C-r"          tda/rsync
+    "C-r C-z"          tda/zip
+    "C-r C-u"          tda/unzip
+    "C-r C-a"          tda/rsync-multiple-mark-file
+    "C-r C-e"          tda/rsync-multiple-empty-list
+    "C-r C-d"          tda/rsync-multiple-remove-item
+    "C-r C-v"          tda/rsync-multiple
+    "C-r C-s"          tda/get-files-size
+    "C-r C-q"          tda/download-to-current-dir
+    "C-x C-j"          dired-jump
+    "C-x 4 C-j"        dired-jump-other-window
+    "S-<return>"       dired-openwith
+    "n"                scroll-up-line
+    "p"                scroll-down-line
+    "M-m"              dired-mark-backward
+    "M-<"              dired-goto-first
+    "M->"              dired-goto-last
+    "M-<return>"       my-run
+    "C-S-f"            dired-narrow
+    "P"                peep-dired
+    "<f1>"             term-toggle-term
+    "TAB"              dired-subtree-toggle
+    "f"                dired-subtree-fold-all
+    "z"                dired-get-size
+    "e"                dired-subtree-expand-all)
 
 (provide 'dired-setup)
 ;;; dired-setup.el ends here
