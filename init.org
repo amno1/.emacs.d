@@ -989,9 +989,6 @@
 ** [ ] helm-git-grep
 #+begin_src emacs-lisp
 #+end_src
-** [ ] helm-swoop 
-#+begin_src emacs-lisp
-#+end_src
 ** [ ] org-sidebar
 #+begin_src emacs-lisp
 #+end_src
@@ -1171,144 +1168,39 @@
 #+end_src
 ** [x] helm 
 #+begin_src emacs-lisp
-(on-hook after-init (on-idle
-                      (require 'helm)
-                      (require 'helm-files)
-                      (require 'helm-eshell)
-                      (require 'helm-buffers)
-                      (require 'helm-adaptive)
-                      (message "Helm loaded on idle.")))
-(on-hook eshell-mode
-  (defkeys eshell-mode-map
-    "C-c C-h" helm-eshell-history
-    "C-c C-r" helm-comint-input-ring
-    "C-c C-l" helm-minibuffer-history))
-(on-hook helm-ff-cache-mode
-  (diminish 'helm-ff-cache-mode))
-(on-package helm
-  (require 'helm-eshell)
-  (require 'helm-buffers)
-  (require 'helm-files)
-  
-  (defun helm-buffer-p (window new-buffer bury-or-kill)
-    "Returns T when NEW-BUFFER's name matches any regex in
-`helm-boring-buffer-regexp-list'."
-    (catch 'helm-p
-      (dolist (regex helm-boring-buffer-regexp-list)
-        (if (string-match-p regex (buffer-name new-buffer))
-            (throw 'helm-p t)))))
+(on-idle
+  (require 'helm-setup)
+  (message "Helm loaded on idle."))
 
-  (defvar helm-source-header-default-background (face-attribute
-                                                 'helm-source-header :background)) 
-  (defvar helm-source-header-default-foreground (face-attribute
-                                                 'helm-source-header :foreground)) 
-  (defvar helm-source-header-default-box (face-attribute
-                                          'helm-source-header :box))
-  (set-face-attribute 'helm-source-header nil :height 0.1)
-  (defun helm-toggle-header-line ()
-    (if (gt (length helm-sources) 1)
-        (set-face-attribute 'helm-source-header
-                            nil
-                            :foreground helm-source-header-default-foreground
-                            :background helm-source-header-default-background
-                            :box helm-source-header-default-box
-                            :height 1.0)
-      (set-face-attribute 'helm-source-header
-                          nil
-                          :foreground (face-attribute 'helm-selection :background)
-                          :background (face-attribute 'helm-selection :background)
-                          :box nil
-                          :height 0.1)))
-  
-  (setq helm-completion-style             'emacs
-        helm-display-header-line              nil
-        ;; helm-completion-in-region-fuzzy-match t
-        ;; helm-recentf-fuzzy-match              t
-        ;; helm-buffers-fuzzy-matching           t
-        ;; helm-locate-fuzzy-match               t
-        ;; helm-lisp-fuzzy-completion            t
-        ;; helm-session-fuzzy-match              t
-        ;; helm-apropos-fuzzy-match              t
-        ;; helm-imenu-fuzzy-match                t
-        ;; helm-semantic-fuzzy-match             t
-        ;; helm-M-x-fuzzy-match                  t
-        helm-split-window-inside-p            t
-        helm-move-to-line-cycle-in-source     t
-        helm-ff-search-library-in-sexp        t
-        helm-scroll-amount                    8
-        helm-ff-file-name-history-use-recentf t
-        helm-ff-auto-update-initial-value     nil
-        helm-net-prefer-curl                  t
-        helm-autoresize-max-height            0
-        helm-autoresize-min-height           30
-        helm-candidate-number-limit         100
-        helm-idle-delay                     0.0
-        helm-input-idle-delay               0.0
-        switch-to-prev-buffer-skip         'helm-buffer-p
-        helm-ff-cache-mode-lighter-sleep    nil
-        helm-ff-cache-mode-lighter-updating nil
-        helm-ff-cache-mode-lighter          nil
-        helm-ff-skip-boring-files            t)
-  
-  (dolist (regexp '("\\`\\*direnv" "\\`\\*straight" "\\`\\*xref"))
-    (push regexp helm-boring-buffer-regexp-list))
 
-  (helm-autoresize-mode 1)
-  (helm-adaptive-mode t)
-  (helm-mode 1)
-  (add-to-list 'helm-sources-using-default-as-input
-               'helm-source-man-pages)
-  (setq helm-mini-default-sources '(helm-source-buffers-list
-                                    helm-source-bookmarks
-                                    helm-source-recentf
-                                    helm-source-buffer-not-found
-                                    projectile-known-projects))
-  (defkeys helm-map
-    "M-i" helm-previous-line
-    "M-k" helm-next-line
-    "M-I" helm-previous-page
-    "M-K" helm-next-page
-    "M-h" helm-beginning-of-buffer
-    "M-H" helm-end-of-buffer)
+(defkeys global-map
+  "M-x"     helm-M-x
+  "C-z ,"   helm-pages
+  "C-x C-b" helm-buffers-list
+  "C-z a"   helm-rg
+  "C-z b"   helm-filtered-bookmarks
+  ;;                    "C-z c"   helm-company
+  "C-z d"   helm-dabbrev
+  "C-z e"   helm-calcul-expression
+  "C-z g"   helm-google-suggest
+  "C-z h"   helm-descbinds
+  "C-z i"   helm-imenu-anywhere
+  "C-z k"   helm-show-kill-ring
+  "C-z f"   helm-find-files
+  "C-z m"   helm-mini
+  "C-z o"   helm-occur
+  "C-z p"   helm-browse-project
+  "C-z q"   helm-apropos
+  "C-z r"   helm-recentf
+  "C-z s"   helm-swoop
+  "C-z C-c" helm-colors
+  "C-z x"   helm-M-x
+  "C-z y"   helm-yas-complete
+  "C-z SPC" helm-all-mark-rings)
+#+end_src
+** [x] helm-comint
+#+begin_src emacs-lisp
 
-  (defkeys shell-mode-map
-    "C-c C-l" helm-comint-input-ring)
-  
-  (defkeys helm-read-file-map
-    ;;"RET" my-helm-return
-    "C-o" my-helm-next-source))
-
-(on-hook after-init
-  (defkeys global-map
-    "M-x"     helm-M-x
-    "C-z ,"   helm-pages
-    "C-x C-b" helm-buffers-list
-    "C-z b"   helm-filtered-bookmarks
-    ;;                    "C-z c"   helm-company
-    "C-z d"   helm-dabbrev
-    "C-z e"   helm-calcul-expression
-    "C-z g"   helm-google-suggest
-    "C-z h"   helm-descbinds
-    "C-z i"   helm-imenu-anywhere
-    "C-z k"   helm-show-kill-ring
-    "C-z C-c" helm-git-local-branches
-    "C-z f"   helm-find-files
-    "C-z m"   helm-mini
-    "C-z o"   helm-occur
-    "C-z p"   helm-browse-project
-    "C-z q"   helm-apropos
-    "C-z r"   helm-recentf
-    "C-z s"   helm-swoop
-    "C-z C-c" helm-colors
-    "C-z x"   helm-M-x
-    "C-z y"   helm-yas-complete
-    "C-z C-g" helm-ls-git-ls
-    "C-z C-b" helm-git-local-branches
-    "C-z SPC" helm-all-mark-rings))
-(on-hook helm-mode
-  ;; (helm-flx-mode +1)
-  (diminish 'helm-mode)
-  (helm-adaptive-mode 1))
 #+end_src
 ** [x] helm-c-yasnippet
 #+begin_src emacs-lisp
@@ -1729,6 +1621,10 @@
   ;;       helm-ag-base-command 
   ;;       "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*")
   )
+#+end_src
+** [ vc    ] [x] helm-swoop 
+#+url https://github.com/emacsattic/helm-swoop
+#+begin_src emacs-lisp
 #+end_src
 ** [ vc    ] [x] peep-dired
 #+url https://github.com/amno1/peep-dired
