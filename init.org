@@ -1590,7 +1590,7 @@
 ** [x] yasnippet
 #+begin_src emacs-lisp
 (on-idle (require 'yasnippet))
-(on-idle (require 'yasnippet-snippets))
+
 (on-package yasnippet
   (require 'yasnippet-snippets)
   (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)

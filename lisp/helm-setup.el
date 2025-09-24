@@ -40,21 +40,8 @@
     (diminish 'helm-mode)
     (helm-adaptive-mode 1))
 
-(defkeys shell-mode-map
-  "C-c C-l" helm-comint-input-ring)
-
-(defkeys helm-read-file-map
-  ;;"RET" my-helm-return
-  "C-o" my-helm-next-source)
-
 (on-hook helm-ff-cache-mode
   (diminish 'helm-ff-cache-mode))
-
-(on-hook eshell-mode
-  (defkeys eshell-mode-map
-    "C-c C-h" helm-eshell-history
-    "C-c C-r" helm-comint-input-ring
-    "C-c C-l" helm-minibuffer-history))
 
 (defvar helm-source-header-default-background (face-attribute
                                                'helm-source-header :background)) 
@@ -221,9 +208,14 @@
 (with-eval-after-load 'shell
   (define-key shell-mode-map (kbd "C-c C-l") #'helm-comint-input-ring))
 
-(defkeys helm-read-file-map
-  ;;"RET" my-helm-return
-  "C-o" my-helm-next-source)
+(defkeys shell-mode-map
+  "C-c C-l" helm-comint-input-ring)
+
+(on-hook eshell-mode
+  (defkeys eshell-mode-map
+    "C-c C-h" helm-eshell-history
+    "C-c C-r" helm-comint-input-ring
+    "C-c C-l" helm-minibuffer-history))
 
 (on-hook helm-ff-cache-mode
   (diminish 'helm-ff-cache-mode))
@@ -232,6 +224,31 @@
   ;; (helm-flx-mode +1)
   (diminish 'helm-mode)
   (helm-adaptive-mode 1))
+
+(defkeys global-map
+  "M-x"     helm-M-x
+  "C-z ,"   helm-pages
+  "C-x C-b" helm-buffers-list
+  "C-z a"   helm-rg
+  "C-z b"   helm-filtered-bookmarks
+  ;;                    "C-z c"   helm-company
+  "C-z d"   helm-dabbrev
+  "C-z e"   helm-calcul-expression
+  "C-z g"   helm-google-suggest
+  "C-z h"   helm-descbinds
+  "C-z i"   helm-imenu-anywhere
+  "C-z k"   helm-show-kill-ring
+  "C-z f"   helm-find-files
+  "C-z m"   helm-mini
+  "C-z o"   helm-occur
+  "C-z p"   helm-browse-project
+  "C-z q"   helm-apropos
+  "C-z r"   helm-recentf
+  "C-z s"   helm-swoop
+  "C-z C-c" helm-colors
+  "C-z x"   helm-M-x
+  "C-z y"   helm-yas-complete
+  "C-z SPC" helm-all-mark-rings)
 
 (provide 'helm-setup)
 ;;; helm-setup.el ends here
