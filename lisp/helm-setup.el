@@ -225,30 +225,5 @@
   (diminish 'helm-mode)
   (helm-adaptive-mode 1))
 
-(defkeys global-map
-  "M-x"     helm-M-x
-  "C-z ,"   helm-pages
-  "C-x C-b" helm-buffers-list
-  "C-z a"   helm-rg
-  "C-z b"   helm-filtered-bookmarks
-  ;;                    "C-z c"   helm-company
-  "C-z d"   helm-dabbrev
-  "C-z e"   helm-calcul-expression
-  "C-z g"   helm-google-suggest
-  "C-z h"   helm-descbinds
-  "C-z i"   helm-imenu-anywhere
-  "C-z k"   helm-show-kill-ring
-  "C-z f"   helm-find-files
-  "C-z m"   helm-mini
-  "C-z o"   helm-occur
-  "C-z p"   helm-browse-project
-  "C-z q"   helm-apropos
-  "C-z r"   helm-recentf
-  "C-z s"   helm-swoop
-  "C-z C-c" helm-colors
-  "C-z x"   helm-M-x
-  "C-z y"   helm-yas-complete
-  "C-z SPC" helm-all-mark-rings)
-
 (provide 'helm-setup)
 ;;; helm-setup.el ends here

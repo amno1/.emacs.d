@@ -207,7 +207,7 @@
     (message "Emiting hooks ...")
     (dolist (hook init-file-hooks)
       (verbose "Hook: %s" (car hook))
-      (if (equal (symbol-name (car hook)) "early-init-hook")
+      (if (eq (car hook) 'early-init-hook)
           (dolist (elt (nreverse (cdr hook)))
             (append-to-init-file (prin1-to-string elt) "early-init.el"))
         (progn
@@ -331,7 +331,6 @@
         (append-to-init-file (current-buffer))))
     ;; generate stuff
     (emit-packages)
-    (message "PACKAGES DONE")
     ;; do this after user init stuff
     (emit-hooks) ;; must be done after emiting packages
     (emit-load-paths);; must be done after emiting hooks
@@ -1168,35 +1167,38 @@
 #+end_src
 ** [x] helm 
 #+begin_src emacs-lisp
-(on-idle
-  (require 'helm-setup)
-  (message "Helm loaded on idle."))
+(on-hook after-init
+  (on-idle
+    (require 'helm-setup)
+    (message "Helm loaded on idle.")))
 
+(eval-when-compile
+  (require 'helm-setup))
 
-(defkeys global-map
-  "M-x"     helm-M-x
-  "C-z ,"   helm-pages
-  "C-x C-b" helm-buffers-list
-  "C-z a"   helm-rg
-  "C-z b"   helm-filtered-bookmarks
-  ;;                    "C-z c"   helm-company
-  "C-z d"   helm-dabbrev
-  "C-z e"   helm-calcul-expression
-  "C-z g"   helm-google-suggest
-  "C-z h"   helm-descbinds
-  "C-z i"   helm-imenu-anywhere
-  "C-z k"   helm-show-kill-ring
-  "C-z f"   helm-find-files
-  "C-z m"   helm-mini
-  "C-z o"   helm-occur
-  "C-z p"   helm-browse-project
-  "C-z q"   helm-apropos
-  "C-z r"   helm-recentf
-  "C-z s"   helm-swoop
-  "C-z C-c" helm-colors
-  "C-z x"   helm-M-x
-  "C-z y"   helm-yas-complete
-  "C-z SPC" helm-all-mark-rings)
+(on-hook after-init
+  (defkeys global-map
+    "M-x"     helm-M-x
+    "C-z ,"   helm-pages
+    "C-x C-b" helm-buffers-list
+    "C-z a"   helm-rg
+    "C-z b"   helm-filtered-bookmarks
+    "C-z d"   helm-dabbrev
+    "C-z e"   helm-calcul-expression
+    "C-z g"   helm-google-suggest
+    "C-z h"   helm-descbinds
+    "C-z i"   helm-imenu-anywhere
+    "C-z k"   helm-show-kill-ring
+    "C-z f"   helm-find-files
+    "C-z m"   helm-mini
+    "C-z o"   helm-occur
+    "C-z p"   helm-browse-project
+    "C-z q"   helm-apropos
+    "C-z r"   helm-recentf
+    "C-z s"   helm-swoop
+    "C-z C-c" helm-colors
+    "C-z x"   helm-M-x
+    "C-z y"   helm-yas-complete
+    "C-z SPC" helm-all-mark-rings))
 #+end_src
 ** [x] helm-comint
 #+begin_src emacs-lisp
@@ -1589,23 +1591,27 @@
 #+end_src
 ** [x] yasnippet
 #+begin_src emacs-lisp
-(on-idle (require 'yasnippet))
 
-(on-package yasnippet
-  (require 'yasnippet-snippets)
-  (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
-  (setq yas-key-syntaxes '("w_" "w_." "^ ")
-        ;; yas-snippet-dirs (eval-when-compile
-        ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
-        yas-expand-only-for-last-commands nil)
-  (defkeys yas-minor-mode-map
-    "C-i" nil
-    "TAB" nil
-    "C-<tab>" yas-expand
-    "M-_" yas-undo-expand))
+  (eval-when-compile
+    (require 'yasnippet-snippets))
 
-(on-hook yas-minor-mode
- (diminish 'yas-mode 'yas-minor-mode))
+  (on-idle (require 'yasnippet))
+
+  (on-package yasnippet
+    (require 'yasnippet-snippets)
+    (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+    (setq yas-key-syntaxes '("w_" "w_." "^ ")
+          ;; yas-snippet-dirs (eval-when-compile
+          ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
+          yas-expand-only-for-last-commands nil)
+    (defkeys yas-minor-mode-map
+      "C-i" nil
+      "TAB" nil
+      "C-<tab>" yas-expand
+      "M-_" yas-undo-expand))
+
+  (on-hook yas-minor-mode
+    (diminish 'yas-mode 'yas-minor-mode))
 #+end_src
 ** [x] yasnippet-snippets
 #+begin_src emacs-lisp
