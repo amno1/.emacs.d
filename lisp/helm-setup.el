@@ -32,9 +32,6 @@
 (require 'helm-buffers)
 (require 'helm-adaptive)
 
-(on-hook helm-rg-mode
- (diminish 'helm-rg-mode))
-
 (on-hook helm-mode
     ;; (helm-flx-mode +1)    
     (diminish 'helm-mode)

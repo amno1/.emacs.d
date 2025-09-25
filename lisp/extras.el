@@ -590,4 +590,11 @@ Saves to a temp file and puts the filename in the kill ring."
     (kill-new filename)
     (message filename)))
 
+(cl-defun pplist (list &optional (buffer (current-buffer)))
+  "Pretty-print LIST to `current-buffer'"
+  (terpri)
+  (dolist (elt list)
+    (prin1 elt buffer)
+    (princ "\n" buffer)))
+    
 (provide 'extras)
