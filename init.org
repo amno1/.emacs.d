@@ -1878,13 +1878,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
 	  browse-url-galeon-program (getenv "BROWSER")
 	  browse-url-netscape-program browse-url-galeon-program)
 
-    (when (getenv "MSYSTEM") (setq package-gnupghome-dir ""))
-    
-    (when (or (equal (system-name) "EMMI")
-              (equal (system-name) "HP-Laptop"))
-      (autoload 'global-disable-mouse-mode "disable-mouse.el" nil nil nil)
-      (global-disable-mouse-mode 1)
-      (diminish 'disable-mouse-global-mode)))
+    (when (getenv "MSYSTEM") (setq package-gnupghome-dir "")))
 
   (setq 
         auto-insert-query nil
