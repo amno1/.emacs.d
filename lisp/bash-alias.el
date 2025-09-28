@@ -90,15 +90,15 @@
     (apply #'async-shell-command (bash-command-from-alias (pop args)) args)))
 
 (eval-when-compile
-  (require 'dired-x)
+  (require 'dired-x))
 
-  (defun dired-smart-shell-command-with-aliases ()
+(defun dired-smart-shell-command-with-aliases ()
     "Like `dired-smart-shell-command' but understands Bash aliases."
     (interactive)
-    (unless (bound-and-true-p dired-mode)
+    (unless (eq major-mode 'dired-mode)
       (user-error "This command runs only in Dired-mode."))
     (let ((args (eval (cadr (interactive-form 'dired-smart-shell-command)))))
-      (apply #'dired-smart-shell-command (bash-command-from-alias (pop args)) args))))
+      (apply #'dired-smart-shell-command (bash-command-from-alias (pop args)) args)))
 
 (defvar bash-alias-mode-map
   (let ((map (make-sparse-keymap)))
