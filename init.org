@@ -1927,10 +1927,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (bash-alias-mode +1)
   (which-key-mode +1)
   (super-save-mode +1)
-  
+
   (defkeys global-map
-    "C-<insert>"    term-toggle-term
-    "<insert>"      term-toggle-eshell
     "C-v C-t"       term-toggle-ielm
     [f9]            ispell-word
     [S-f10]         next-buffer
@@ -2001,6 +1999,18 @@ I wanted this to be simple to type and look at. The DSL is very simple
         		    "init.org"
         		    user-emacs-directory))))
 
+  (on-host "emmi"
+    ;; this laptop runs Arch Linux and translates numeric keypad somewhat differently
+    ;; than my desktop which runs both Arch Linux and Windows 10 (Razor keyboard)
+    (defkeys global-map
+      "C-0"      term-toggle-term
+      "S-0"      term-toggle-eshell))
+
+  (on-host "pascal"
+    (defkeys global-map
+      "C-<insert>"      term-toggle-term
+      "<insert"         term-toggle-eshell))
+  
   (on-idle (require 'which-key))
   (on-idle (require 'extras))
   (on-idle (require 'sv-kalender)
