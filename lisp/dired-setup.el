@@ -433,6 +433,9 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
 (defkeys dired-mode-map
     "C-x <M-S-return>" dired-open-current-as-sudo
     "r"                dired-do-rename
+    "C-w"              dired-copy-paste-do-cut
+    "C-y"              dired-copy-paste-do-paste
+    "M-w"              dired-copy-paste-do-copy
     "C-S-r"            wdired-change-to-wdired-mode
     "C-r C-r"          tda/rsync
     "C-r C-z"          tda/zip
