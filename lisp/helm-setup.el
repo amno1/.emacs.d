@@ -141,6 +141,7 @@
 (helm-mode 1)
 (add-to-list 'helm-sources-using-default-as-input
              'helm-source-man-pages)
+
 (setq helm-mini-default-sources '(helm-source-buffers-list
                                   helm-source-bookmarks
                                   helm-source-recentf

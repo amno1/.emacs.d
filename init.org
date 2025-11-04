@@ -1035,6 +1035,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (org-init-mode +1)
 #+end_src
 * Packages
+
 ** [ ] helm-dired-history
 #+begin_src emacs-lisp
 (on-package helm-dired-history
@@ -1482,6 +1483,16 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 #+end_src
 
+** [x] origami
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] outli
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] package-lint
 #+begin_src emacs-lisp
 #+end_src
@@ -1660,8 +1671,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (require 'yasnippet-snippets)
     (add-hook 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
     (setq yas-key-syntaxes '("w_" "w_." "^ ")
-          ;; yas-snippet-dirs (eval-when-compile
-          ;;                  (list (expand-file-name "~/.emacs.d/snippets")))
           yas-expand-only-for-last-commands nil)
     (defkeys yas-minor-mode-map
       "C-i" nil
@@ -1744,6 +1753,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (push "C:/msys64/usr/bin/" exec-path))
   
   (setq file-name-handler-alist nil
+        switch-to-buffer-obey-display-actions t
         debug-on-error t
         gc-cons-threshold most-positive-fixnum
         frame-inhibit-implied-resize t
@@ -1852,7 +1862,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 ** [ none  ] [x] emacs
 #+begin_src emacs-lisp
-(on-hook text-mode (setq fill-column 240))
+(on-hook text-mode
+  (auto-fill-mode -1)
+  (visual-line-mode +1))
 (on-hook abbrev-mode (diminish 'abbrev-mode))
 (on-hook auto-complete-mode (diminish 'auto-complete-mode))
 (on-hook auto-fill-mode (diminish 'auto-fill-function))
@@ -1865,6 +1877,10 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (on-hook subword-mode (diminish 'subword-mode))
 (on-hook wrap-region-mode (diminish 'wrap-region-mode))
 (on-hook winner-mode (diminish 'winner-mode))
+(on-hook term-mode-hook
+  (goto-address-mode)
+  (defkeys term-raw-map
+    "C-y" ansi-term-paste-string))
 
 (on-hook after-init
 
@@ -2216,6 +2232,10 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 ** [ none  ] [x] recentf 
 #+begin_src emacs-lisp
+(on-idle
+  (recentf-mode +1)
+  (diminish 'recentf-mode)
+  (setf recentf-max-saved-items 100))
 #+end_src
 ** [ none  ] [x] term-toggle
 #+begin_src emacs-lisp

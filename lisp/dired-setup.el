@@ -408,6 +408,7 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
       (add-to-list 'openwith-associations ext)))
 
 (setq dired-dwim-target t
+      auto-revert-verbose nil
       global-auto-revert-non-file-buffers nil
       dired-recursive-copies  'always
       dired-recursive-deletes 'always

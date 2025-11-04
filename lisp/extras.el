@@ -3,7 +3,6 @@
 (require 'recentf)
 (require 'windmove)
 (require 'ielm)
-
 (defmacro lex (pairs &rest body)
   "As let* but initializer list is like in setq/setf."
   (declare (indent defun))
@@ -42,53 +41,53 @@ always effectively nil."
   (interactive "p\ni\np")
   (let* ((window (selected-window))
          (original-window window)
-	 (function (and (not ignore-window-parameters)
-			(window-parameter window 'other-window)))
-	 old-window old-count)
+         (function (and (not ignore-window-parameters)
+                        (window-parameter window 'other-window)))
+         old-window old-count)
     (if (functionp function)
-	(funcall function count all-frames)
+        (funcall function count all-frames)
       ;; `next-window' and `previous-window' may return a window we are
       ;; not allowed to select.  Hence we need an exit strategy in case
       ;; all windows are non-selectable.
       (catch 'exit
-	(while (> count 0)
-	  (setq window (next-window window nil all-frames))
-	  (cond
-	   ((eq window old-window)
-	    (when (= count old-count)
-	      ;; Keep out of infinite loops.  When COUNT has not changed
-	      ;; since we last looked at `window' we're probably in one.
-	      (throw 'exit nil)))
-	   ((window-parameter window 'no-other-window)
-	    (unless old-window
-	      ;; The first non-selectable window `next-window' got us:
-	      ;; Remember it and the current value of COUNT.
-	      (setq old-window window)
-	      (setq old-count count)))
-	   (t
-	    (setq count (1- count)))))
-	(while (< count 0)
-	  (setq window (previous-window window nil all-frames))
-	  (cond
-	   ((eq window old-window)
-	    (when (= count old-count)
-	      ;; Keep out of infinite loops.  When COUNT has not changed
-	      ;; since we last looked at `window' we're probably in one.
-	      (throw 'exit nil)))
-	   ((window-parameter window 'no-other-window)
-	    (unless old-window
-	      ;; The first non-selectable window `previous-window' got
-	      ;; us: Remember it and the current value of COUNT.
-	      (setq old-window window)
-	      (setq old-count count)))
-	   (t
-	    (setq count (1+ count)))))
+        (while (> count 0)
+          (setq window (next-window window nil all-frames))
+          (cond
+           ((eq window old-window)
+            (when (= count old-count)
+              ;; Keep out of infinite loops.  When COUNT has not changed
+              ;; since we last looked at `window' we're probably in one.
+              (throw 'exit nil)))
+           ((window-parameter window 'no-other-window)
+            (unless old-window
+              ;; The first non-selectable window `next-window' got us:
+              ;; Remember it and the current value of COUNT.
+              (setq old-window window)
+              (setq old-count count)))
+           (t
+            (setq count (1- count)))))
+        (while (< count 0)
+          (setq window (previous-window window nil all-frames))
+          (cond
+           ((eq window old-window)
+            (when (= count old-count)
+              ;; Keep out of infinite loops.  When COUNT has not changed
+              ;; since we last looked at `window' we're probably in one.
+              (throw 'exit nil)))
+           ((window-parameter window 'no-other-window)
+            (unless old-window
+              ;; The first non-selectable window `previous-window' got
+              ;; us: Remember it and the current value of COUNT.
+              (setq old-window window)
+              (setq old-count count)))
+           (t
+            (setq count (1+ count)))))
         (when (and (eq window original-window)
                    interactive
                    (not (or executing-kbd-macro noninteractive)))
           (message "No other window to select"))
         ;; return the buffer
-	(window-buffer window)))))
+        (window-buffer window)))))
 
 ;; This was constantly throwing into debugger in latest versions because of
 ;; wrong argument nil; fix: change argument from &rest -> &optional
@@ -252,7 +251,7 @@ Restore the previous directory on exit."
          (buffer (generate-new-buffer (format "*%s*" command)))
          (proc))
     (if (file-exists-p project-dir)
-        (if (y-or-n-p (format "%s exists. Pull instead?" (file-name-base url)))          
+        (if (y-or-n-p (format "%s exists. Pull instead?" (file-name-base url)))
             (setq command "git pull" default-directory project-dir)
           (user-error "Aborted")))
     (setq proc (start-process-shell-command (nth 0 (split-string command)) buffer command))
@@ -501,7 +500,7 @@ If there is not a window to the left, open new one."
   (let ((wnd (or (windmove-find-other-window side)
                  (split-window nil nil side))))
     (set-window-buffer wnd (current-buffer))
-      (previous-buffer)))
+    (previous-buffer)))
 
 ;;;###autoload
 (defun send-to-window-up ()
@@ -596,5 +595,76 @@ Saves to a temp file and puts the filename in the kill ring."
   (dolist (elt list)
     (prin1 elt buffer)
     (princ "\n" buffer)))
-    
+
+(defun ansi-term-paste-string (&optional string)
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   (if string string (current-kill 0))))
+
+(defun system-process-p (name)
+  (rassoc name
+          (mapcar (lambda (p) (assoc 'comm p))
+                  (mapcar 'process-attributes (list-system-processes)))))
+
+
+(defun sly-mrepl-bookmark-make-record ()
+  "This implements the `bookmark-make-record-function' type (which see)
+for sly-mrepl files."
+  `(,@(bookmark-make-record-default 'no-file)
+    (filename . nil)
+    (buf . ,(buffer-name))
+    (position . ,(point-max))
+    (handler . sly-mrepl-bookmark-jump)))
+
+;;;###autoload
+(defun sly-mrepl-bookmark-jump (bmk)
+  "This implements the `handler' function interface for the record
+type returned by `sly-mrepl-bookmark-make-record', which see."
+  (let* ((buf (get-buffer (cdr (assoc 'buf bmk)))))
+    ;; Use bookmark-default-handler to move to the appropriate location
+    ;; within the node.
+    (bookmark-default-handler
+     `("" (buffer . ,buf) . ,(bookmark-get-bookmark-record bmk)))))
+
+(require 'persist)
+(persist-load 'activities-activities)
+
+(defun open-gage-project ()
+  (interactive)
+  (let ((project-directory (expand-file-name "~/repos/gage3/")))
+    (find-file-other-window
+     (expand-file-name "~/repos/gage3/tools/notes.org"))
+    (cd project-directory)
+    (add-to-list 'load-path (expand-file-name "tools/"))
+    (require 'emsrc2cl)
+    (unless (get-buffer "*gage-server*")
+      (ansi-term (executable-find "bash") "gage-server"))
+    (unless (system-process-p "elisp.exe")
+      (with-current-buffer (get-buffer "*gage-server*")
+        (let ((numtries 0)
+              (inhibit-read-only t))
+          (insert "make run-tests\n")
+          (goto-char (point-max))
+          (term-send-input)
+          (while (and (not (system-process-p "elisp.exe"))
+                      (< numtries 10))
+            (sleep-for 0.10)))))
+    (dired default-directory)
+    (delete-other-windows)
+    (sly-connect "localhost" 4008)
+    (while (not (sly-connected-p))
+      (sleep-for 0.1))
+    (when (boundp 'activities-names)
+      (unless (member "gage-project" (activities-names))
+        (activities-new "gage-project")))
+    ;; fixme - need a better way to find and rename sly-mrepl buffer
+    (sleep-for 0.5)
+    (with-current-buffer (call-interactively 'sly-mrepl)
+      (rename-buffer "*gage-repl*")
+      ;; (sly-mrepl--eval-for-repl
+      ;;  '(slynk-mrepl:guess-and-set-package "emacs-lisp-tests"))
+      (setq-local bookmark-make-record-function
+                  #'sly-mrepl-bookmark-make-record))))
+
 (provide 'extras)

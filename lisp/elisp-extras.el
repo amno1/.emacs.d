@@ -258,5 +258,14 @@
   (unless (defun-end)
     (end-of-defun)))
 
+(defun active-minor-modes (&optional buffer-or-buffer-name)
+  (let ((buffer (or buffer-or-buffer-name (current-buffer)))
+        active-modes)
+    (with-current-buffer (get-buffer buffer)
+      (dolist (mode minor-mode-list)
+        (and (boundp mode) (symbol-value mode)
+             (push mode active-modes))))
+    active-modes))
+
 (provide 'elisp-extras)
 ;;; elisp-extras.el ends here

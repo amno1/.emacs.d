@@ -1,8 +1,8 @@
 ;;; buffer-faces.el --- show all faces being used in a buffer -*- lexical-binding: t -*-
 
-;; Copyright (C) 2011  Jonathan Rockway
+;; Copyright (C) 2025 Arthur Miller
 
-;; Author: Jonathan Rockway <jon@jrock.us>
+;; Author: Arthur Miller <arthur.miller@live.com>
 ;; Keywords:
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -20,45 +20,46 @@
 
 ;;; Commentary:
 
-;; <2025-07-03 tor> AM: fixed som trivial warnings and added special mode 
-;; <2025-07-05 lör> AM: remove speliazied buffer and display in help buffer
+;; Inspired by the idea by J. Rockway:
+;; https://github.com/jrockway/elisp/blob/master/buffer-faces.el
+
+;; Completely re-worked to work with the built-in help-mode.
 
 ;;; Code:
 
-(defun collect-buffer-faces (buffer)
-  "Collect all faces found in BUFFER"
-  (let ((faces nil))
-    (save-excursion
-      (with-current-buffer buffer
-        (goto-char (point-min))
-        (while (< (point) (point-max))
-          (add-to-list 'faces (get-text-property (point) 'face))
-          (goto-char (next-property-change (point) nil (point-max))))))
-    (delete nil faces)))
-
 ;;;###autoload
-(defun show-buffer-faces (&optional buffer)
-  "Display faces used in the BUFFER in help window.
+(defun describe-buffer-faces (&optional buffer)
+  "Display list of font faces used in BUFFER.
 
 If not specified, or called interactively, BUFFER defaults to `current-buffer'"
   (interactive)
-  (let* ((buffer (or buffer (current-buffer)))
-         (help-buffer (or (help-buffer) (get-bufer-create "*Help*")))
-         (faces (collect-buffer-faces buffer))
-         (help-buffer-under-preparation t))
+  (let* ((help-buffer (or (help-buffer) (get-buffer-create "*Help*")))
+         (working-buffer (or buffer (current-buffer)))
+         (help-buffer-under-preparation t)
+         (faces nil))
+
     (help-setup-xref (list #'show-buffer-faces buffer)
-		     (called-interactively-p 'interactive))
+                     (called-interactively-p 'interactive))
+
+    (save-excursion
+      (with-current-buffer working-buffer
+        (goto-char (point-min))
+        (while (< (point) (point-max))
+          ;; add-to-list can not use lexical var faces ????
+          ;; (add-to-list 'faces (get-text-property (point) 'face))
+          (let ((face (get-text-property (point) 'face)))
+            (unless (member face faces)
+              (push face faces)))
+          (goto-char (next-property-change (point) nil (point-max))))))
+
     (with-help-window help-buffer
       (insert
-       (format "Faces found in buffer %s:\n\n" (buffer-name buffer)))
+       (format "Faces found in buffer '%s':\n\n" (buffer-name working-buffer)))
 
-      (let ((sort-start (point)))
-        (dolist (face faces)
-          (help-insert-xref-button
-           (propertize (format "  %s" face) 'face face)
-           'help-face face)
-          (insert "\n"))
-        (sort-lines t sort-start (point))))))
+      (dolist (face (delete nil faces))
+        (help-insert-xref-button
+         (propertize (format "  %s" face) 'face face) 'help-face face)
+        (insert "\n")))))
 
 (provide 'buffer-faces)
 ;;; buffer-faces.el ends here
