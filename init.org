@@ -1118,7 +1118,16 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 ** [x] company
 #+begin_src emacs-lisp
+(on-package company
+  (setf company-selection-wrap-around t
+        company-insertion-on-trigger t
+        company-idle-delay 0))
 #+end_src
+** [x] consult
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] crux
 #+begin_src emacs-lisp
 #+end_src
@@ -1700,6 +1709,12 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+url https://github.com/emacsattic/helm-swoop
 #+begin_src emacs-lisp
 #+end_src
+** [ vc    ] [x] help-extras
+#+url https://github.com/amno1/help-extras
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [ vc    ] [x] peep-dired
 #+url https://github.com/amno1/peep-dired
 #+begin_src emacs-lisp
@@ -1943,6 +1958,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (bash-alias-mode +1)
   (which-key-mode +1)
   (super-save-mode +1)
+  (help-details-mode +1)
+  (help-remote +1)
 
   (defkeys global-map
     "C-v C-t"       term-toggle-ielm
