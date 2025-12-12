@@ -40,7 +40,7 @@
 (require 'org-pretty-table)
 (require 'dired-copy-paste)
 (require 'dired-git-log)
-(require 'term-toggle)
+;;(require 'term-toggle)
 (require 'dired-auto-readme)
 (require 'tmtxt-dired-async)
 
@@ -458,7 +458,7 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
     "M-<return>"       my-run
     "C-S-f"            dired-narrow
     "P"                peep-dired
-    "<f1>"             term-toggle-term
+;;    "<f1>"             term-toggle-term
     "TAB"              dired-subtree-toggle
     "f"                dired-subtree-fold-all
     "z"                dired-get-size
