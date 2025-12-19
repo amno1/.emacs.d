@@ -24,8 +24,8 @@
 
 ;;; Code:
 
+(require 'cl-print)
 (require 'helm)
-(require 'helm-rg)
 (require 'helm-files)
 (require 'helm-eshell)
 (require 'helm-comint)

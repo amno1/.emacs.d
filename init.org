@@ -99,7 +99,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+NAME: onstartup
 #+begin_src emacs-lisp :results output silent
   (require 'files)
-  (require 'cl-macs)
+  (eval-when-compile
+    (require 'cl-macs)
+    (require 'comp))
   ;;(require 'comp)
   (require 'pp)
   (require 'pcase)
@@ -1127,6 +1129,12 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (org-init-mode +1)
 #+end_src
 * Packages
+
+** [ vc    ] [ ] slime-star
+#+url https://github.com/mmontone/slime-star
+#+begin_src emacs-lisp
+
+#+end_src
 ** [ ] helm-dired-history
 #+begin_src emacs-lisp
 (on-package helm-dired-history
@@ -1322,6 +1330,10 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 
 #+end_src
+** [x] elisp-benchmarks
+#+begin_src emacs-lisp
+
+#+end_src
 ** [x] elnode
 #+begin_src emacs-lisp
 #+end_src
@@ -1422,7 +1434,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     "M-x"     helm-M-x
     "C-z ,"   helm-pages
     "C-x C-b" helm-buffers-list
-    "C-z a"   helm-rg
+    "C-z a"   helm-do-grep-ag
     "C-z b"   helm-filtered-bookmarks
     "C-z d"   helm-dabbrev
     "C-z e"   helm-calcul-expression
@@ -1708,7 +1720,14 @@ I wanted this to be simple to type and look at. The DSL is very simple
 ** [x] slime
 #+begin_src emacs-lisp
 (on-package slime
-  (setf inferior-lisp-program "sbcl"))
+  (add-to-list 'load-path (expand-file-name "~/repos/el/emacs-configs/slime-star/"))
+  (setf inferior-lisp-program "sbcl"
+        slime-contribs '(slime-fancy slime-star))
+  (defkeys slime-mode-map
+    "M-n"   scroll-up-line
+    "M-S-n" scroll-up-command
+    "M-p"   scroll-down-line
+    "M-S-p" scroll-down-command))
 #+end_src
 
 ** [x] slime-company
@@ -1751,6 +1770,11 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 #+end_src
 
+** [x] window-layout
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] winum
 #+begin_src emacs-lisp
 #+end_src
@@ -1783,31 +1807,66 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 #+end_src
 
-** [ vc    ] [x] helm-rg
-#+url https://github.com/cosmicexplorer/helm-rg
+** [ vc    ] [ ] emacs-inspector
+#+url https://github.com/mmontone/emacs-inspector
 #+begin_src emacs-lisp
-(on-package helm-rg
-  (defkeys global-map
-    "C-z a" helm-rg)
-  ;; (setq helm-ag-use-agignore t
-  ;;       helm-ag-base-command
-  ;;       "ag --mmap --nocolor --nogroup --ignore-case --ignore=*terraform.tfstate.backup*")
-  )
-#+end_src
-** [ vc    ] [x] helm-swoop
-#+url https://github.com/emacsattic/helm-swoop
-#+begin_src emacs-lisp
+
 #+end_src
 ** [ vc    ] [x] help-extras
 #+url https://github.com/amno1/help-extras
 #+begin_src emacs-lisp
 
 #+end_src
+** [ vc    ] [ ] lisp-system-browser
+#+url https://github.com/mmontone/lisp-system-browser
+#+begin_src emacs-lisp
 
+#+end_src
 ** [ vc    ] [x] peep-dired
 #+url https://github.com/amno1/peep-dired
 #+begin_src emacs-lisp
 
+#+end_src
+
+** [ vc    ] [ ] quicklisp-apropos
+#+url https://github.com/mmontone/quicklisp-apropos
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ vc    ] [ ] quicklisp-systems
+#+url https://github.com/mmontone/quicklisp-systems/
+#+begin_src emacs-lisp
+(on-package quicklisp-systems
+  (defkeys quicklisp-systems-mode-map
+    "q" kill-buffer-and-window))
+#+end_src
+** [ vc    ] [ ] slime-breakbpoints
+#+url https://github.com/mmontone/slime-breakpoints
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ vc    ] [ ] slime-critic
+#+url https://github.com/mmontone/slime-critic
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ vc    ] [ ] slime-doc-contribs
+#+url https://github.com/mmontone/slime-doc-contribs
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ none  ] [ ] top-override-keymap
+#+begin_src emacs-lisp
+(on-package top-override-keymap
+  (defkeys top-override-keymap-mode-map
+    "M-n"   scroll-up-line
+    "M-p"   scroll-down-line
+    "M-S-n" scroll-up-command
+    "M-S-p" scroll-down-command))
 #+end_src
 
 ** [ none  ] [x] abbrev
@@ -1989,6 +2048,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
     "C-y" ansi-term-paste-string))
 
 (on-package init
+
+  (eval-when-compile (require 'cl-macs))
+  
   (when (eq system-type 'windows-nt)
     (setq w32-get-true-file-attributes nil
           w32-pipe-read-delay 0
@@ -2050,6 +2112,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (super-save-mode +1)
   (help-details-mode +1)
   (help-remote +1)
+  ;; (global-top-override-keymap-mode +1)
 
   (defkeys global-map
     ;;"C-v C-t"       term-toggle-ielm
@@ -2115,6 +2178,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     "C-v C-v" avy-goto-word-1
     "C-v C-w" avy-goto-word-0
     "C-v C-g" avy-goto-line
+    "C-z a"   helm-do-grep-ag
     ;; some random stuff
     "C-h C-i" (lambda()
                 (interactive)
@@ -2272,19 +2336,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 ** [ none  ] [x] lisp & elisp
 #+begin_src emacs-lisp
-(on-idle (require 'elisp-extras)
-  (defkeys emacs-lisp-mode-map
-    "\C-c a" emacs-lisp-byte-compile-and-load
-    "\C-c b" emacs-lisp-byte-compile
-    "\C-c c" emacs-lisp-native-compile-and-load
-    "\C-c d" eval-defun
-    "\C-c e" eval-buffer
-    "\C-c r" eval-region
-    "\C-c l" eval-last-sexp
-    "\C-c n" eval-next-sexp
-    "\C-c i" reindent-buffer
-    "\C-c p" fc-eval-and-replace
-    "\C-c s" eval-surrounding-sexp))
+(on-idle (require 'elisp-extras))
+(on-idle (require 'cl-extras))
 
 (on-package elisp-mode
   (require 'elisp-extras)
@@ -2311,7 +2364,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
            auto-mode-alist)))
 
 (on-package inf-lisp (require 'cl-extras))
-(on-package lisp-mode-hook
+(on-hook lisp-mode-hook
   (require 'cl-extras))
 (on-hook emacs-lisp-mode-hook (elisp-hooks))
 (on-hook inf-lisp-mode-hook (cl-hooks))
@@ -2354,7 +2407,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (diminish 'recentf-mode)
   (setf recentf-max-saved-items 100))
 #+end_src
-** [ none  ] [x] term-toggle
+** [ none  ] [x] term-toggle    
 #+begin_src emacs-lisp
 (on-package term-toggle
   (setq term-toggle-no-confirm-exit t
