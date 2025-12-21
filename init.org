@@ -1130,6 +1130,12 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 * Packages
 
+** [ vc    ] [x] elisp-ergo-mode
+#+url https://github.com/amno1/elisp-ergo-mode
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [ vc    ] [ ] slime-star
 #+url https://github.com/mmontone/slime-star
 #+begin_src emacs-lisp
