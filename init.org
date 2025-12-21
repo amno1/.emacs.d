@@ -1288,7 +1288,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 (on-package company
   (setf company-selection-wrap-around t
-        company-insertion-on-trigger t
         company-idle-delay 0))
 #+end_src
 ** [x] consult
@@ -2251,7 +2250,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
         smtpmail-default-smtp-server "smtp-mail.outlook.com"
         smtpmail-smtp-service 587
         smtpmail-stream-type 'starttls
-        smtpmail-local-domain "homepc")
+        smtpmail-local-domain "homepc"
+)
 
   (setq gnus-thread-sort-functions
         '(gnus-thread-sort-by-most-recent-date
@@ -2336,23 +2336,10 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 ** [ none  ] [x] lisp & elisp
 #+begin_src emacs-lisp
-(on-idle (require 'elisp-extras))
 (on-idle (require 'cl-extras))
 
 (on-package elisp-mode
-  (require 'elisp-extras)
-  (defkeys emacs-lisp-mode-map
-    "\C-c a" emacs-lisp-byte-compile-and-load
-    "\C-c b" emacs-lisp-byte-compile
-    "\C-c c" emacs-lisp-native-compile-and-load
-    "\C-c d" eval-defun
-    "\C-c e" eval-buffer
-    "\C-c r" eval-region
-    "\C-c l" eval-last-sexp
-    "\C-c n" eval-next-sexp
-    "\C-c i" reindent-buffer
-    "\C-c p" fc-eval-and-replace
-    "\C-c s" eval-surrounding-sexp))
+  (require 'elisp-ergo-mode))
 
 (on-package init
   (set-default
@@ -2364,9 +2351,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
            auto-mode-alist)))
 
 (on-package inf-lisp (require 'cl-extras))
-(on-hook lisp-mode-hook
-  (require 'cl-extras))
-(on-hook emacs-lisp-mode-hook (elisp-hooks))
+(on-hook lisp-mode-hook (require 'cl-extras))
+(on-hook emacs-lisp-mode-hook (elisp-ergo-mode +1))
 (on-hook inf-lisp-mode-hook (cl-hooks))
 (on-hook lisp-mode-hook (cl-hooks))
 #+end_src

@@ -384,7 +384,12 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
 
 ;; Setup
 (on-system gnu/linux
-    (dolist (ext (list (list (openwith-make-extension-regexp
+  (dolist (ext (list
+                (list (openwith-make-extension-regexp
+                       '("pdf"))
+                             "firefox-developer-edition"
+                             '(file))
+                (list (openwith-make-extension-regexp
                               '("xbm" "pbm" "pgm" "ppm" "pnm"
                                 "png" "gif" "bmp" "tif" "jpeg" "jpg"))
                              "feh"
@@ -402,7 +407,7 @@ Type \\`SPC' or \\`y' to overwrite file `%s',
                              "kchmviewer"
                              '(file))
                        (list (openwith-make-extension-regexp
-                              '("pdf" "ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi" "azw3"))
+                              '("ps" "ps.gz" "dvi" "epub" "djv" "djvu" "mobi" "azw3"))
                              "okular"
                              '(file))))
       (add-to-list 'openwith-associations ext)))
