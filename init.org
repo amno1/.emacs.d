@@ -1130,17 +1130,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 * Packages
 
-** [ vc    ] [x] elisp-ergo-mode
-#+url https://github.com/amno1/elisp-ergo-mode
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ vc    ] [ ] slime-star
-#+url https://github.com/mmontone/slime-star
-#+begin_src emacs-lisp
-
-#+end_src
 ** [ ] helm-dired-history
 #+begin_src emacs-lisp
 (on-package helm-dired-history
@@ -1817,22 +1806,11 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 
 #+end_src
-** [ vc    ] [x] help-extras
-#+url https://github.com/amno1/help-extras
-#+begin_src emacs-lisp
-
-#+end_src
 ** [ vc    ] [ ] lisp-system-browser
 #+url https://github.com/mmontone/lisp-system-browser
 #+begin_src emacs-lisp
 
 #+end_src
-** [ vc    ] [x] peep-dired
-#+url https://github.com/amno1/peep-dired
-#+begin_src emacs-lisp
-
-#+end_src
-
 ** [ vc    ] [ ] quicklisp-apropos
 #+url https://github.com/mmontone/quicklisp-apropos
 #+begin_src emacs-lisp
@@ -1860,6 +1838,34 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 ** [ vc    ] [ ] slime-doc-contribs
 #+url https://github.com/mmontone/slime-doc-contribs
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ vc    ] [ ] slime-star
+#+url https://github.com/mmontone/slime-star
+#+begin_src emacs-lisp
+
+#+end_src
+** [ vc    ] [x] edebug-x
+#+url https://github.com/amno1/edebug-x
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ vc    ] [x] elisp-ergo-mode
+#+url https://github.com/amno1/elisp-ergo-mode
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ vc    ] [x] help-extras
+#+url https://github.com/amno1/help-extras
+#+begin_src emacs-lisp
+
+#+end_src
+** [ vc    ] [x] peep-dired
+#+url https://github.com/amno1/peep-dired
 #+begin_src emacs-lisp
 
 #+end_src
@@ -2011,10 +2017,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (global-unset-key (kbd "C-v"))
   ;;define a setc function for use in init file
   (put 'setc 'byte-optimizer 'byte-compile-inline-expand))
-#+end_src
-** [ none  ] [x] edebug
-#+begin_src emacs-lisp
-;;(on-package edebug (require 'edebug-x))
 #+end_src
 ** [ none  ] [x] eglot
 #+begin_src emacs-lisp
