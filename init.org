@@ -1847,6 +1847,11 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 
 #+end_src
+** [ vc    ] [x] dired-setup
+#+url https://github.com/amno1/dired-setup
+#+begin_src emacs-lisp
+(on-package init (dired-setup))
+#+end_src
 ** [ vc    ] [x] edebug-x
 #+url https://github.com/amno1/edebug-x
 #+begin_src emacs-lisp
@@ -1896,27 +1901,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 ** [ none  ] [x] dap-java
 #+begin_src emacs-lisp
-#+end_src
-** [ none  ] [x] dired
-#+begin_src emacs-lisp
-  ;; (on-package init
-  ;;            (defkeys global-map
-  ;;                     "C-x C-j"   dired-jump
-  ;;                     "C-x 4 C-j" dired-jump-other-window)
-  ;;            (on-idle (require 'dired)))
-
-  (on-package dired
-    (require 'dired-setup))
-
-  (on-idle (require 'dired-setup))
-
-  (on-hook dired-omit-mode-hook (diminish 'dired-omit-mode))
-  (on-hook dired-mode-hook
-    (dired-omit-mode)
-    (dired-async-mode)
-    (dired-hide-details-mode)
-    ;;(dired-git-log-mode)
-    (dired-auto-readme-mode))
 #+end_src
 ** [ none  ] [x] early-init
 #+begin_src emacs-lisp
@@ -2306,7 +2290,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 (on-package
   ielm
-  (require 'elisp-extras)
+  (require 'elisp-ergo-mode)
   (advice-add 'ielm :around #'ielm-use-current-buffer)
   ;;(advice-add 'ielm-eval-inpu :after #'paredit-open-round)
   (defkeys ielm-map
