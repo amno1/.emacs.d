@@ -347,14 +347,17 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (defun init-file-load-paths ()
     (let ((packages (get-package-list))
           (default-directory package-user-dir))
+      (setf init-file-load-paths nil)
       (dolist (package packages)
         (let ((pkgdir (car (file-expand-wildcards (concat (package-name package) "*")))))
           (when (and (package-enabled package)
                      (not (package-pseudo package))
                      pkgdir)
             (setf pkgdir (expand-file-name pkgdir))
-            (unless (member pkgdir load-path)
-              (push pkgdir load-path)))))))
+  	  (message "PKGDIR %s" pkgdir)
+            (push pkgdir init-file-load-paths)
+  	  (setf load-path (append init-file-load-paths load-path))
+  	  init-file-load-paths)))))
 
   (defun macro-p (form)
     "Wether FORM is a macro definition."
@@ -364,24 +367,11 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (message "Emitting load-path")
     (let ((loadpath (car (read-from-string
                           (shell-command-to-string
-                           "emacs --batch --eval \"(prin1 load-path)\""))))
-          (default-directory package-user-dir))
-
-      (dolist (package (get-package-list))
-        (let* ((pkdir (car (file-expand-wildcards
-                            (concat (package-name package) "*")))))
-          
-          (when (and pkdir
-                     (file-directory-p pkdir)
-                     (package-enabled package)
-                     (not (package-pseudo package)))
-            (verbose "Collect load-path for pkg %s" (package-name package))
-            (push pkdir loadpath))))
-
+                           "emacs --batch --eval \"(prin1 load-path)\"")))))
       (push init-file-lisp-directory loadpath)
-      (setf init-file-load-paths loadpath)
       (let ((init-file-target init-file-early-init-file))
-        (append-to-file `(setf load-path (list ,@loadpath))))))
+        (append-to-file
+         `(setf load-path (list ,@init-file-load-paths ,@loadpath))))))
 
   (defun collect-autoloads (src)
     (verbose "Collecting autoloads for file: %s" src)
@@ -512,9 +502,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
         ;; always produce elc file
         (byte-compile-file tangled-file)
         (verbose "Byte compiled %s" tangled-file)
-        (when (featurep 'native-compile)
-          (native-compile tangled-file)
-          (verbose "Tangled and compiled %s" tangled-file))
+        ;; (when (featurep 'native-compile)
+        ;;   (native-compile tangled-file)
+        ;;   (verbose "Tangled and compiled %s" tangled-file))
         (verbose "Done.")
         (message "Compiling early-init.el ...")
         (byte-compile-file (expand-file-name "early-init.el"  user-emacs-directory))
@@ -610,13 +600,14 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (defun install-package (package)
     (let ((pkg (intern-soft (package-name package)))
           (url (package-url package)))
-      (unless (package-installed-p pkg)
-        (message "Installing package: %s" package)
-        (if (string-empty-p url)
-            (condition-case nil
-                (package-install pkg)
-              (error "Can't install ~s" (package-name pkg)))
-          (package-vc-install url)))))
+      (message "Installing package: %s" package)
+      (if (string-empty-p url)
+          (condition-case nil
+              (package-install pkg)
+            (error "Can't install ~s" (package-name pkg)))
+        (condition-case e
+            (package-vc-install url)
+          (error "Skipped %S, error %S" (package-name pkg) e)))))
 
   (defun install-packages (&optional packages)
     (interactive)
@@ -625,9 +616,11 @@ I wanted this to be simple to type and look at. The DSL is very simple
       (setq init-file--need-package-refresh nil))
     (dolist (p (or packages (get-package-list)))
       (verbose "Current package: %s" (package-name p))
-      (and (not (package-pseudo p))
-           (package-enabled p)
-           (install-package p))))
+      (verbose "Enabled %s" (package-enabled p))
+      (when (and (package-enabled p)
+                 (not (package-pseudo p))
+                 (not (package-installed-p p)))
+        (install-package p))))
 
   (defun current-package ()
     "Return name of package the cursor is at the moment."
@@ -1419,8 +1412,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 (on-package init
   (on-idle
-    (require 'helm-setup)
-    (message "Helm loaded on idle.")))
+    (require 'helm-setup)))
 
 (on-package init
   (require 'helm-setup)
@@ -1799,53 +1791,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 ** [x] yasnippet-snippets
 #+begin_src emacs-lisp
-#+end_src
-
-** [ vc    ] [ ] emacs-inspector
-#+url https://github.com/mmontone/emacs-inspector
-#+begin_src emacs-lisp
-
-#+end_src
-** [ vc    ] [ ] lisp-system-browser
-#+url https://github.com/mmontone/lisp-system-browser
-#+begin_src emacs-lisp
-
-#+end_src
-** [ vc    ] [ ] quicklisp-apropos
-#+url https://github.com/mmontone/quicklisp-apropos
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ vc    ] [ ] quicklisp-systems
-#+url https://github.com/mmontone/quicklisp-systems/
-#+begin_src emacs-lisp
-(on-package quicklisp-systems
-  (defkeys quicklisp-systems-mode-map
-    "q" kill-buffer-and-window))
-#+end_src
-** [ vc    ] [ ] slime-breakbpoints
-#+url https://github.com/mmontone/slime-breakpoints
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ vc    ] [ ] slime-critic
-#+url https://github.com/mmontone/slime-critic
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ vc    ] [ ] slime-doc-contribs
-#+url https://github.com/mmontone/slime-doc-contribs
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ vc    ] [ ] slime-star
-#+url https://github.com/mmontone/slime-star
-#+begin_src emacs-lisp
-
 #+end_src
 ** [ vc    ] [x] dired-setup
 #+url https://github.com/amno1/dired-setup
