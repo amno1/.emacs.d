@@ -32,7 +32,9 @@
                       top-override-keymap web-mode window-layout winum
                       with-simulated-input yasnippet yasnippet-snippets))
  '(package-vc-selected-packages
-   '((dired-setup :vc-backend Git :url "https://github.com/amno1/dired-setup")
+   '((emacs-calendar-hr :vc-backend Git :url
+                        "https://github.com/amno1/emacs-calendar-hr")
+     (dired-setup :vc-backend Git :url "https://github.com/amno1/dired-setup")
      (elisp-ergo-mode :vc-backend Git :url
                       "https://github.com/amno1/elisp-ergo-mode")
      (help-extras :vc-backend Git :url "https://github.com/amno1/help-extras"))))

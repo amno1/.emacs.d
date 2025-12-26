@@ -1131,6 +1131,12 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 * Packages
 
+** [ vc    ] [x] emacs-calendar-hr
+#+url https://github.com/amno1/emacs-calendar-hr
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [ ] helm-dired-history
 #+begin_src emacs-lisp
 (on-package helm-dired-history
