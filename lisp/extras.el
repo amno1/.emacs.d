@@ -693,5 +693,42 @@ Saves to a temp file and puts the filename in the kill ring."
     (condition-case _error
         (org-capture goto (substring label 0 1))
       ((error quit) (message "Capture aborted")))))
+
+;; scroll commands
+(defun scroll-up-paragraph ()
+  "Scroll view forward by one paragraph, keeping cursor at same screen position."
+  (interactive)
+  (let ((lines (save-excursion
+                 (let ((start (point)))
+                   (forward-paragraph)
+                   (count-lines start (point))))))
+    (scroll-up lines)))
+
+(defun scroll-down-paragraph ()
+  "Scroll view backward by one paragraph, keeping cursor at same screen position."
+  (interactive)
+  (let ((lines (save-excursion
+                 (let ((start (point)))
+                   (backward-paragraph)
+                   (count-lines (point) start)))))
+    (scroll-down lines)))
+
+(defun scroll-up-sexp ()
+  "Scroll view forward by one paragraph, keeping cursor at same screen position."
+  (interactive)
+  (let ((lines (save-excursion
+                 (let ((start (point)))
+                   (forward-sexp)
+                   (count-lines start (point))))))
+    (scroll-up lines)))
+
+(defun scroll-down-sexp ()
+  "Scroll view backward by one paragraph, keeping cursor at same screen position."
+  (interactive)
+  (let ((lines (save-excursion
+                 (let ((start (point)))
+                   (backward-sexp)
+                   (count-lines (point) start)))))
+    (scroll-down lines)))
 
 (provide 'extras)

@@ -138,8 +138,14 @@
          (major-mode (if info (intern-soft (concat info "-mode")) major-mode)))
     (yas-expand-from-trigger-key)))
 
+(defvar blog-root-dir "~/repos/blog/in-parenthesis/content/")
+(defun new-blog-post ()
+  (read-file-name "Project name: " blog-root-dir))
+
 (setq org-capture-templates
-      `(("p" "Protocol" entry (file+headline "~/Documents/notes.org" "Inbox")
+      `(("b" "Blog post" entry #'new-blog-post
+         "#+TITLE: %^g\n#+DATE: %<Y-%m-%d>\n#+DRAFT:false\n#+AUTHOR:%n\n#+TAGS[]:%^g" :empty-lines 2)
+        ("p" "Protocol" entry (file+headline "~/Documents/notes.org" "Inbox")
          "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
         ("L" "Protocol Link" entry (file+headline "~/Documents/notes.org" "Inbox")
          "* %? [[%:link][%(transform-square-brackets-to-round-ones\"%:description\")]]\n")

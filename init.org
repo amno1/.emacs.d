@@ -572,7 +572,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (when (equal (package-pinned package) "none")
       (setf (package-pseudo package) t))
     ;; enabled?
-    (when (looking-at-p "\\[ \\]")
+    (when (looking-at-p "\\[\s+\\]")
       (setf (package-enabled package) nil))
     ;; code start
     (re-search-forward "begin_src.*emacs-lisp")
@@ -582,7 +582,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (setf (package-code-end package) (- (point) 1))
     (goto-char (line-end-position))
     package))
-
+ 
 (defun get-package-list ()
   (with-current-buffer (get-buffer "init.org")
     (save-excursion
@@ -1130,6 +1130,16 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (org-init-mode +1)
 #+end_src
 * Packages
+
+** [x] vui
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] wgrep
+#+begin_src emacs-lisp
+
+#+end_src
 
 ** [ vc    ] [x] emacs-calendar-hr
 #+url https://github.com/amno1/emacs-calendar-hr
@@ -1832,16 +1842,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+url https://github.com/amno1/peep-dired
 #+begin_src emacs-lisp
 
-#+end_src
-
-** [ none  ] [ ] top-override-keymap
-#+begin_src emacs-lisp
-(on-package top-override-keymap
-  (defkeys top-override-keymap-mode-map
-    "M-n"   scroll-up-line
-    "M-p"   scroll-down-line
-    "M-S-n" scroll-up-command
-    "M-S-p" scroll-down-command))
 #+end_src
 
 ** [ none  ] [x] abbrev
