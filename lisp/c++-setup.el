@@ -86,12 +86,16 @@
   (define-key c-mode-map "["  'electric-pair)
   (define-key c-mode-map "{"  'electric-pair))
 
-(defun c-modes-keys ()
-  (define-key c-mode-base-map (kbd "C-c C-c") 'compile)
-  (define-key c-mode-base-map (kbd "C-c C-r") 'compile-again)
-  (define-key c-mode-base-map (kbd "C-c C-k") 'kill-compilation)
-  (define-key c-mode-base-map (kbd "C-<return>") 'yas-expand)
-  (define-key c-mode-base-map (kbd "M-<return>") 'helm-yas-complete))
+;; (progn
+;;   (define-key c-mode-base-map (kbd "C-.") 'forward-list)
+;;   (define-key c-mode-base-map (kbd "C-,") 'backward-list)
+;;   (define-key c-mode-base-map (kbd "C-c .") 'end-of-defun)
+;;   (define-key c-mode-base-map (kbd "C-c ,") 'beginning-of-defun)
+;;   (define-key c-mode-base-map (kbd "C-c C-c") 'compile)
+;;   (define-key c-mode-base-map (kbd "C-c C-r") 'compile-again)
+;;   (define-key c-mode-base-map (kbd "C-c C-k") 'kill-compilation)
+;;   (define-key c-mode-base-map (kbd "C-<return>") 'yas-expand)
+;;   (define-key c-mode-base-map (kbd "M-<return>") 'helm-yas-complete))
 
 ;;;###autoload
 (defun my-c-init ()
@@ -114,7 +118,6 @@
                  special-display-buffer-names))
   
   (add-hook 'c-mode-common-hook 'eglot-ensure)
-  (add-hook 'c-mode-hook 'c-modes-keys)
   (add-hook 'c-mode-hook 'hs-minor-mode)
   (add-hook 'c-mode-hook 'yas-minor-mode)
   (add-hook 'c-mode-hook 'hide-ifdef-mode)
@@ -138,7 +141,6 @@
   (message "Running c++-init")
   (require 'member-functions)
   ;; display-buffer-alist)
-  (add-hook 'c++-mode-hook 'c-modes-keys)
   (add-hook 'c++-mode-hook 'hs-minor-mode)
   (add-hook 'c++-mode-hook 'yas-minor-mode)
   (add-hook 'c++-mode-hook 'hide-ifdef-mode)

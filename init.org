@@ -1851,6 +1851,24 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+end_src
 ** [ none  ] [x] c/c++
 #+begin_src emacs-lisp
+(on-package cc-mode
+  ;; "Add some extra electric pairs to C and C++"
+  ;; (defkeys c-mode-map
+  ;;   "("  electric-pair
+  ;;   "["  electric-pair
+  ;;   "{"  'electric-pair)
+
+  (defkeys c-mode-base-map
+    "C-."        forward-list
+    "C-,"        backward-list
+    "C-c ."      end-of-defun
+    "C-c ,"      beginning-of-defun
+    "C-c C-c"    compile
+    "C-c C-r"    compile-again
+    "C-c C-k"    kill-compilation
+    "C-<return>" yas-expand
+    "M-<return>" helm-yas-complete))
+
 (on-package init
   (add-hook 'c-initialization-hook 'my-c-init)
   (add-hook 'c++-mode-hook 'my-c++-init)
@@ -2129,6 +2147,10 @@ I wanted this to be simple to type and look at. The DSL is very simple
     "C-v C-w" avy-goto-word-0
     "C-v C-g" avy-goto-line
     "C-z a"   helm-do-grep-ag
+    "C-c ,"   scroll-up-sexp
+    "C-c ."   scroll-down-sexp
+    "C-c i"   scroll-up-paragraph
+    "C-c k"   scroll-down-paragraph
     ;; some random stuff
     "C-h C-i" (lambda()
                 (interactive)
