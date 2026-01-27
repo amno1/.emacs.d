@@ -146,7 +146,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (pinned nil)
   (code-beg 0)
   (code-end 0)
-  (url ""))
+  (url nil))
 
 (defun on-buffer-change-hook (beg eng len)
   (setq init-file-package-list nil))
@@ -239,7 +239,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
         (buffer-substring-no-properties beg (point))))))
 
 (defun append-to-file (expression)
-  (write-region 
+  (write-region
    (if (stringp expression)
        expression
      (prin1-to-string expression))
@@ -248,13 +248,13 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (defun emit-defkeys (map definitions)
   (while definitions
     (let ((key (car definitions))
-    	  (command (cadr definitions)))
+          (command (cadr definitions)))
       (append-to-file
        `(define-key ,map ,(if (vectorp  key) key (kbd key))  #',command)))
     (setf definitions (cddr definitions))))
 
 (defun emit-on-idle (sexp)
-  (append-to-file 
+  (append-to-file
    `(run-with-idle-timer ,init-file-idle-interval nil (lambda () ,sexp))))
 
 (defun emit-on-hook (hook body)
@@ -266,7 +266,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (when (eq name 'company)
     (message "Body %S" body))
   (write-region (format "\n(with-eval-after-load '%s\n" name)
-    		nil init-file-target t 0)
+                nil init-file-target t 0)
   (dolist (expression body)
     (message "LB: %d" (length body))
     (emit-sexp-to-file expression)
@@ -289,8 +289,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
       (emit-defkeys (cadr sexp) (cddr sexp)))
     ('on-package
       (pcase (cadr sexp)
-    	('init (emit-init (cddr sexp)))
-    	('early-init (emit-early-init (cddr sexp)))
+        ('init (emit-init (cddr sexp)))
+        ('early-init (emit-early-init (cddr sexp)))
         (_
          (emit-package (cadr sexp) (cddr sexp)))))
     ('on-hook
@@ -327,8 +327,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (verbose "Hook: %s" (car hook))
     (progn
       (append-to-file (concat "(add-hook '"
-          		      (symbol-name (car hook))
-          		      " #'(lambda nil\n"))
+                              (symbol-name (car hook))
+                              " #'(lambda nil\n"))
       (dolist (s (cdr hook))
         (emit-to-init-file s))
       (append-to-file "))"))))
@@ -354,10 +354,10 @@ I wanted this to be simple to type and look at. The DSL is very simple
                    (not (package-pseudo package))
                    pkgdir)
           (setf pkgdir (expand-file-name pkgdir))
-  	  (message "PKGDIR %s" pkgdir)
+          (message "PKGDIR %s" pkgdir)
           (push pkgdir init-file-load-paths)
-  	  (setf load-path (append init-file-load-paths load-path))
-  	  init-file-load-paths)))))
+          (setf load-path (append init-file-load-paths load-path))
+          init-file-load-paths)))))
 
 (defun macro-p (form)
   "Wether FORM is a macro definition."
@@ -388,7 +388,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
                   file (file-name-nondirectory src))
             (unless (listp (cadr sym))
               (push (list 'autoload sym file nil interactive macro)
-          	    expressions)))))
+                    expressions)))))
       expressions)))
 
 (defun package-name-from-elpa-dir ()
@@ -413,10 +413,10 @@ I wanted this to be simple to type and look at. The DSL is very simple
                    (setf expr (ignore-errors (read (current-buffer))))
                    (unless expr (setf search nil))
                    (when (and expr (listp expr))
-          	     (pcase (car expr)
-          	       ('add-to-list #'ignore)
-          	       ('provide (setf search nil))
-          	       (_ (push expr autoloads))))
+                     (pcase (car expr)
+                       ('add-to-list #'ignore)
+                       ('provide (setf search nil))
+                       (_ (push expr autoloads))))
                    finally
                    (cl-return autoloads)))))))
 
@@ -563,11 +563,11 @@ I wanted this to be simple to type and look at. The DSL is very simple
                  "VC specified without URL keyword: %s line %s"
                  (package-name package) (1- (line-number-at-pos)))
               (unless (setf (package-url package)
-          		    (string-trim
-          		     (buffer-substring-no-properties (point)
-          						     (line-end-position))))
+                            (string-trim
+                             (buffer-substring-no-properties (point)
+                                                             (line-end-position))))
                 (error "VC specified, but no URL given %s line %s"
-          	       (package-name package) (1- (line-number-at-pos))))))))
+                       (package-name package) (1- (line-number-at-pos))))))))
     ;; pseudo package?
     (when (equal (package-pinned package) "none")
       (setf (package-pseudo package) t))
@@ -582,7 +582,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (setf (package-code-end package) (- (point) 1))
     (goto-char (line-end-position))
     package))
- 
+
 (defun get-package-list ()
   (with-current-buffer (get-buffer "init.org")
     (save-excursion
@@ -656,8 +656,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (defun org-init-update-packages ()
   (interactive)
   (package-refresh-contents)
-  (let ((package-list (get-package-list)))
-    (dolist (package package-activated-list)      
+  (let ((package-list (get-package-list))
+        (window-state (current-window-configuration)))
+    (dolist (package package-activated-list)
       (let* ((new (cadr (assq package package-archive-contents)))
              (old (cadr (assq package package-alist)))
              (pkg (and new
@@ -665,6 +666,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
                                 package-list :test #'equal :key #'package-name)))
              (to-install (and new old (vlt (package-desc-version old)
                                            (package-desc-version new)))))
+        ;; (when (package-url package)
+        ;;   (package-vc-update new))
         (when (and to-install
                    (or (not pkg)
                        (and pkg (not (package-url pkg)))))
@@ -675,7 +678,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
           (message "Removed package: %S" (package-desc-dir old))
           (and (file-directory-p (package-desc-dir old))
                (not (file-symlink-p (package-desc-dir old)))
-               (delete-directory (package-desc-dir old) t)))))))
+               (delete-directory (package-desc-dir old) t)))))
+    (package-vc-upgrade-all)
+    (set-window-configuration window-state)))
 
   ;; init paths
 (init-file-load-paths)
@@ -729,7 +734,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (save-excursion
       (beginning-of-line)
       (replace-string "[ ]" "[x]" nil (line-beginning-position)
-          	      (line-end-position)))))
+                      (line-end-position)))))
 
 (defun org-init--checkbox-disable ()
   "Disable checkbox for heading at point."
@@ -738,7 +743,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (save-excursion
       (beginning-of-line)
       (replace-string "[x]" "[ ]" nil (line-beginning-position)
-          	      (line-end-position)))))
+                      (line-end-position)))))
 
 (defun org-init--checkbox-toggle ()
   "Toggle state of checkbox at heading under the point."
@@ -788,9 +793,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
       (goto-char (org-init--packages))
       (forward-line 1)
       (insert (concat "\n** [x] " package
-          	      "\n#+GIT: " url
-          	      "\n#+begin_src emacs-lisp\n"
-          	      "\n#+end_src\n"))
+                      "\n#+GIT: " url
+                      "\n#+begin_src emacs-lisp\n"
+                      "\n#+end_src\n"))
       (forward-line -2))))
 
 (defun org-init--package-enabled-p ()
@@ -962,8 +967,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (let ((todo-sequences alist))
       (dolist (sequence todo-sequences)
         (let* ((sequence (or (run-hook-with-args-until-success
-          		      'org-todo-setup-filter-hook sequence)
-          		     sequence))
+                              'org-todo-setup-filter-hook sequence)
+                             sequence))
                (sequence-type (car sequence))
                (keywords (cdr sequence))
                (sep (member "|" keywords))
@@ -990,9 +995,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
             (setq org-todo-key-alist
                   (append org-todo-key-alist
                           (and alist
-          		       (append '((:startgroup))
-          			       (nreverse alist)
-          			       '((:endgroup))))))
+                               (append '((:startgroup))
+                                       (nreverse alist)
+                                       '((:endgroup))))))
             (dolist (k names) (push (cons k tail) org-todo-kwd-alist))))))
     (setq org-todo-sets (nreverse org-todo-sets)
           org-todo-kwd-alist (nreverse org-todo-kwd-alist)
@@ -1082,9 +1087,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
               (add-text-properties
                beg end `(cursor-sensor-functions
                          ((lambda (win prev-pos sym)
-          		    ;; This simulates a mouse click and makes a menu change
-          		    ;; (org-mouse-down-mouse nil)
-          		    ))))))))))
+                            ;; This simulates a mouse click and makes a menu change
+                            ;; (org-mouse-down-mouse nil)
+                            ))))))))))
 
 (define-minor-mode org-init-mode ""
   :global nil :lighter " init-file"
@@ -1827,8 +1832,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 #+end_src
 
-** [ vc    ] [x] elisp-ergo-mode
-#+url https://github.com/amno1/elisp-ergo-mode
+** [ vc    ] [x] elisp-extras
+#+url https://github.com/amno1/elisp-extras
 #+begin_src emacs-lisp
 
 #+end_src
@@ -2018,7 +2023,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (on-package init
 
   (eval-when-compile (require 'cl-macs))
-  
+  (require 'elisp-extras)
+
   (when (eq system-type 'windows-nt)
     (setq w32-get-true-file-attributes nil
           w32-pipe-read-delay 0
@@ -2271,7 +2277,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
 #+begin_src emacs-lisp
 (on-package
   ielm
-  (require 'elisp-ergo-mode)
+  (require 'elisp-extras)
   (advice-add 'ielm :around #'ielm-use-current-buffer)
   ;;(advice-add 'ielm-eval-inpu :after #'paredit-open-round)
   (defkeys ielm-map
@@ -2309,10 +2315,12 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 ** [ none  ] [x] lisp & elisp
 #+begin_src emacs-lisp
-(on-idle (require 'cl-extras))
+(on-idle
+  (require 'cl-extras)
+  (require 'elisp-extras))
 
 (on-package elisp-mode
-  (require 'elisp-ergo-mode))
+  (require 'elisp-extras))
 
 (on-package init
   (set-default
@@ -2366,7 +2374,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (diminish 'recentf-mode)
   (setf recentf-max-saved-items 100))
 #+end_src
-** [ none  ] [x] term-toggle    
+** [ none  ] [x] term-toggle
 #+begin_src emacs-lisp
 (on-package term-toggle
   (setq term-toggle-no-confirm-exit t
