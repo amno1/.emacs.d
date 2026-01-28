@@ -2346,11 +2346,11 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (yas-minor-mode 1))
 
   (on-package org
-    (require 'org-extras))
+    (require 'org-extras)
 
-(defkeys org-mode-map
-  "C-c ." nil
-  "C-c ," nil))
+    (defkeys org-mode-map
+      "C-c ." nil
+      "C-c ," nil))
  #+end_src
 ** [ none  ] [x] paredit
 #+begin_src emacs-lisp
