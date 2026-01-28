@@ -1135,7 +1135,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (org-init-mode +1)
 #+end_src
 * Packages
-
 ** [x] vui
 #+begin_src emacs-lisp
 
@@ -2153,8 +2152,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
     "C-v C-w" avy-goto-word-0
     "C-v C-g" avy-goto-line
     "C-z a"   helm-do-grep-ag
-    "C-c ,"   scroll-up-sexp
-    "C-c ."   scroll-down-sexp
+    "C-c ,"   scroll-down-sexp
+    "C-c ."   scroll-up-sexp
     "C-c i"   scroll-up-paragraph
     "C-c k"   scroll-down-paragraph
     ;; some random stuff
@@ -2191,7 +2190,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
         ;;gc-cons-percentage      0.1
         file-name-handler-alist old-file-name-handler))
 #+end_src
-
 ** [ none  ] [x] emacs-director
 #+begin_src emacs-lisp
 #+end_src
