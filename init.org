@@ -1133,22 +1133,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
 (org-init-mode +1)
 #+end_src
 * Packages
-** [x] vui
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [x] wgrep
-#+begin_src emacs-lisp
-
-#+end_src
-
-** [ vc    ] [x] emacs-calendar-hr
-#+url https://github.com/amno1/emacs-calendar-hr
-#+begin_src emacs-lisp
-
-#+end_src
-
 ** [ ] helm-dired-history
 #+begin_src emacs-lisp
 (on-package helm-dired-history
@@ -1772,7 +1756,17 @@ I wanted this to be simple to type and look at. The DSL is very simple
                   emacs-lisp-native-compile-and-load))))
 (on-hook super-save-mode-hook (diminish 'super-save))
 #+end_src
+** [x] vui
+#+begin_src emacs-lisp
+
+#+end_src
+
 ** [x] web-mode
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [x] wgrep
 #+begin_src emacs-lisp
 
 #+end_src
@@ -1818,6 +1812,25 @@ I wanted this to be simple to type and look at. The DSL is very simple
 ** [x] yasnippet-snippets
 #+begin_src emacs-lisp
 #+end_src
+** [ vc    ] [x] cl-setup
+#+url https://github.com/amno1/cl-setup
+#+begin_src emacs-lisp
+(on-idle (require 'cl-setup))
+
+(on-package init
+  (set-default
+   'auto-mode-alist
+   (append '(("\\.lisp" . lisp-mode)
+             ("\\.lsp" . lisp-mode)
+             ("\\.asd" . lisp-mode)
+             ("\\.cl" . lisp-mode))
+           auto-mode-alist)))
+
+(on-package inf-lisp (require 'cl-setup))
+(on-hook lisp-mode-hook (require 'cl-setup))
+(on-hook inf-lisp-mode-hook (cl-hooks))
+(on-hook lisp-mode-hook (cl-hooks))
+#+end_src
 ** [ vc    ] [x] dired-setup
 #+url https://github.com/amno1/dired-setup
 #+begin_src emacs-lisp
@@ -1831,6 +1844,12 @@ I wanted this to be simple to type and look at. The DSL is very simple
 
 ** [ vc    ] [x] elisp-extras
 #+url https://github.com/amno1/elisp-extras
+#+begin_src emacs-lisp
+
+#+end_src
+
+** [ vc    ] [x] emacs-calendar-hr
+#+url https://github.com/amno1/emacs-calendar-hr
 #+begin_src emacs-lisp
 
 #+end_src
@@ -2191,6 +2210,15 @@ I wanted this to be simple to type and look at. The DSL is very simple
 ** [ none  ] [x] emacs-director
 #+begin_src emacs-lisp
 #+end_src
+** [ none  ] [x] emacs-lisp
+#+begin_src emacs-lisp
+(on-idle (require 'elisp-extras))
+
+(on-package elisp-mode
+  (require 'elisp-extras))
+
+(on-hook emacs-lisp-mode-hook (elisp-ergo-mode +1))
+#+end_src
 ** [ none  ] [x] emacs-run-command
 #+begin_src emacs-lisp
 #+end_src
@@ -2309,30 +2337,6 @@ I wanted this to be simple to type and look at. The DSL is very simple
     "M-n" nil))
 #+end_src
 
-** [ none  ] [x] lisp & elisp
-#+begin_src emacs-lisp
-(on-idle
-  (require 'cl-extras)
-  (require 'elisp-extras))
-
-(on-package elisp-mode
-  (require 'elisp-extras))
-
-(on-package init
-  (set-default
-   'auto-mode-alist
-   (append '(("\\.lisp" . lisp-mode)
-             ("\\.lsp" . lisp-mode)
-             ("\\.asd" . lisp-mode)
-             ("\\.cl" . lisp-mode))
-           auto-mode-alist)))
-
-(on-package inf-lisp (require 'cl-extras))
-(on-hook lisp-mode-hook (require 'cl-extras))
-(on-hook emacs-lisp-mode-hook (elisp-ergo-mode +1))
-(on-hook inf-lisp-mode-hook (cl-hooks))
-(on-hook lisp-mode-hook (cl-hooks))
-#+end_src
 ** [ none  ] [x] org
 #+begin_src emacs-lisp
   (on-hook org-mode-hook
