@@ -354,14 +354,9 @@ I wanted this to be simple to type and look at. The DSL is very simple
                    (not (package-pseudo package))
                    pkgdir)
           (setf pkgdir (expand-file-name pkgdir))
-          (message "PKGDIR %s" pkgdir)
           (push pkgdir init-file-load-paths)
           (setf load-path (append init-file-load-paths load-path))
           init-file-load-paths)))))
-
-(defun macro-p (form)
-  "Wether FORM is a macro definition."
-  (eq (car form) 'defmacro))
 
 (defun emit-load-paths ()
   (message "Emitting load-path")
@@ -384,7 +379,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
           (when (and expression (listp expression))
             (setq sym (quotedp (cadr expression))
                   interactive (interactivep expression)
-                  macro (macro-p expression)
+                  macro (macrop expression)
                   file (file-name-nondirectory src))
             (unless (listp (cadr sym))
               (push (list 'autoload sym file nil interactive macro)
@@ -597,17 +592,22 @@ I wanted this to be simple to type and look at. The DSL is very simple
   init-file-package-list)
 
 ;; Install packages
+(defun package-vc-installed-p (package-name)
+  (car (file-expand-wildcards (concat package-user-dir "/" package-name "*"))))
+
 (defun install-package (package)
   (let ((pkg (intern-soft (package-name package)))
         (url (package-url package)))
-    (message "Installing package: %s" package)
-    (if (string-empty-p url)
-        (condition-case nil
-            (package-install pkg)
-          (error "Can't install ~s" (package-name pkg)))
-      (condition-case e
-          (package-vc-install url)
-        (error "Skipped %S, error %S" (package-name pkg) e)))))
+    (unless (or (package-installed-p pkg)
+                (package-vc-installed-p (package-name package)))
+      (message "Installing package: %s" package)
+      (if (string-empty-p url)
+          (condition-case nil
+              (package-install pkg)
+            (error "Can't install ~s" (package-name pkg)))
+        (condition-case e
+            (package-vc-install url)
+          (error "Skipped %S, error %S" (package-name pkg) e))))))
 
 (defun install-packages (&optional packages)
   (interactive)
@@ -616,10 +616,8 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (setq init-file--need-package-refresh nil))
   (dolist (p (or packages (get-package-list)))
     (verbose "Current package: %s" (package-name p))
-    (verbose "Enabled %s" (package-enabled p))
     (when (and (package-enabled p)
-               (not (package-pseudo p))
-               (not (package-installed-p p)))
+               (not (package-pseudo p)))
       (install-package p))))
 
 (defun current-package ()
@@ -682,7 +680,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
     (package-vc-upgrade-all)
     (set-window-configuration window-state)))
 
-  ;; init paths
+;; init paths
 (init-file-load-paths)
 (require 'diminish)
 (require 'helm-easymenu)
