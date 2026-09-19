@@ -24,8 +24,8 @@
 
 ;;; Code:
 ;;(require 'org)  
-(require 'ob-core)
-(require 'org-protocol)
+;;(require 'ob-core)
+;;(require 'org-protocol)
 (require 'org-pretty-table)
 (require 'yasnippet)
 
@@ -140,7 +140,7 @@
 
 (defvar blog-root-dir "~/repos/blog/in-parenthesis/content/")
 (defun new-blog-post ()
-  (read-file-name "Project name: " blog-root-dir))
+  (list file '(read-file-name "Project name: " blog-root-dir)))
 
 (setq org-capture-templates
       `(("b" "Blog post" entry #'new-blog-post
@@ -196,7 +196,7 @@
        ;; org-ditaa-jar-path "/usr/bin/ditaa"
        org-todo-keywords '((sequence "TODO" "INPROGRESS" "DONE"))
        org-todo-keyword-faces '(("INPROGRESS" . (:foreground "blue" :weight bold)))
-       org-directory (expand-file-name "~/Dokucuments/")
+       org-directory (expand-file-name "~/Dokument/")
        org-default-notes-file (expand-file-name "notes.org" org-directory)
        org-use-speed-commands       t
        org-src-preserve-indentation t

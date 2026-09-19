@@ -1,8 +1,10 @@
 ;;; extras.el --- Some extra extensions  -*- lexical-binding: t -*-
 ;;(require 'corfu)
-(require 'recentf)
+;;(require 'recentf)
+(recentf-mode +1)
 (require 'windmove)
 (require 'ielm)
+
 (defmacro lex (pairs &rest body)
   "As let* but initializer list is like in setq/setf."
   (declare (indent defun))
@@ -15,7 +17,7 @@
 
 (defun ielm-use-current-buffer (fn &rest args)
   (let ((working-buffer (current-buffer)))
-    (funcall fn args)
+    (apply fn args)
     (ielm-change-working-buffer working-buffer)))
 
 (defun other-window-buffer (count &optional all-frames interactive)
@@ -458,7 +460,7 @@ is no `other-window' to switch to."
     (if (one-window-p) (funcall split-window-preferred-function))
     (other-window 1)
     (set-window-buffer (selected-window) cur)
-    (other-window 0)
+    (other-window -1)
     (remove-hook 'pre-command-hook 'other-pre-hook-w-buffer)))
 
 (defun other-post-hook ()
@@ -731,5 +733,22 @@ Saves to a temp file and puts the filename in the kill ring."
                    (count-lines (point) start)))))
     (scroll-down lines)))
 
+(defun longest-line ()
+  "Return width (in columns) of the longest line in buffer"
+  (save-excursion
+    (goto-char 1)
+    (cl-loop while (not (eobp))
+             maximize (- (line-end-position) (line-beginning-position))
+             into max-width
+             do (forward-line)
+             finally (cl-return max-width))))
+
+(defun run-avx-lisp ()
+  (interactive)
+  (let ((sbcl-root (expand-file-name "~/repos/sb-simd-sap/"))
+        (inferior-lisp-program (expand-file-name "run-sbcl.sh"
+                                                 "~/repos/sb-simd-sap/")))
+    (setenv "SBCL_HOME" (expand-file-name  "contrib/" sbcl-root))      
+    (slime)))
 
 (provide 'extras)

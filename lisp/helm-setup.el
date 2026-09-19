@@ -24,8 +24,10 @@
 
 ;;; Code:
 
+(require 'config-macs)
 (require 'cl-print)
 (require 'helm)
+(require 'eshell)
 (require 'helm-files)
 (require 'helm-eshell)
 (require 'helm-comint)
@@ -37,8 +39,8 @@
     (diminish 'helm-mode)
     (helm-adaptive-mode 1))
 
-(on-hook helm-ff-cache-mode
-  (diminish 'helm-ff-cache-mode))
+;; (on-hook helm-ff-cache-mode
+;;   (diminish 'helm-ff-cache-mode))
 
 (defvar helm-source-header-default-background (face-attribute
                                                'helm-source-header :background)) 
@@ -49,7 +51,7 @@
 (set-face-attribute 'helm-source-header nil :height 0.1)
 
 (defun helm-toggle-header-line ()
-  (if (gt (length helm-sources) 1)
+  (if (> (length helm-sources) 1)
       (set-face-attribute 'helm-source-header
                           nil
                           :foreground helm-source-header-default-foreground
@@ -181,19 +183,18 @@
 (dolist (regexp '("\\`\\*direnv" "\\`\\*straight" "\\`\\*xref"))
   (push regexp helm-boring-buffer-regexp-list))
   
-  (dolist (regexp '("\\`\\*direnv" "\\`\\*straight" "\\`\\*xref"))
-    (push regexp helm-boring-buffer-regexp-list))
 
-  (helm-autoresize-mode 1)
-  (helm-adaptive-mode t)
-  (helm-mode 1)
-  (add-to-list 'helm-sources-using-default-as-input
-               'helm-source-man-pages)
-  (setq helm-mini-default-sources '(helm-source-buffers-list
-                                    helm-source-bookmarks
-                                    helm-source-recentf
-                                    helm-source-buffer-not-found
-                                    projectile-known-projects))
+(helm-autoresize-mode 1)
+(helm-adaptive-mode t)
+(helm-mode 1)
+(add-to-list 'helm-sources-using-default-as-input
+             'helm-source-man-pages)
+
+(setq helm-mini-default-sources '(helm-source-buffers-list
+                                  helm-source-bookmarks
+                                  helm-source-recentf
+                                  helm-source-buffer-not-found
+                                  projectile-known-projects))
 
 (defkeys helm-map
   "M-i" helm-previous-line
@@ -206,22 +207,34 @@
 (with-eval-after-load 'shell
   (define-key shell-mode-map (kbd "C-c C-l") #'helm-comint-input-ring))
 
-(defkeys shell-mode-map
-  "C-c C-l" helm-comint-input-ring)
-
-(on-hook eshell-mode
-  (defkeys eshell-mode-map
-    "C-c C-h" helm-eshell-history
-    "C-c C-r" helm-comint-input-ring
-    "C-c C-l" helm-minibuffer-history))
-
-(on-hook helm-ff-cache-mode
-  (diminish 'helm-ff-cache-mode))
-
 (on-hook helm-mode-hook
   ;; (helm-flx-mode +1)
   (diminish 'helm-mode)
   (helm-adaptive-mode 1))
+
+(defun helm-follow--kill-orphan-timer ()
+  "Cancel `helm-follow-mode' idle timer if it is still around."
+  (when (bound-and-true-p helm-follow--timer)
+    (when (timerp helm-follow--timer)
+      (cancel-timer helm-follow--timer))
+    (setq helm-follow--timer nil)))
+
+(add-hook 'helm-cleanup-hook #'helm-follow--kill-orphan-timer)
+(add-hook 'helm-end-hook     #'helm-follow--kill-orphan-timer)
+
+(defun helm-execute-persistent-action--guard (orig &rest args)
+  (if (and (bound-and-true-p helm-buffer)
+           (buffer-live-p helm-buffer)
+           (get-buffer-window helm-buffer))
+      (apply orig args)
+    ;; We're outside a live helm session — kill the orphan and stay quiet.
+    (helm-follow--kill-orphan-timer)))
+
+;; (advice-add 'helm-execute-persistent-action :around
+;;             #'helm-execute-persistent-action--guard)
+
+;; (advice-remove 'helm-execute-persistent-action
+;;                #'helm-execute-persistent-action--guard)
 
 (provide 'helm-setup)
 ;;; helm-setup.el ends here

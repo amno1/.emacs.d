@@ -163,5 +163,5 @@
                                            (format "make -f %s"
                                                    (get-nearest-compilation-file))))))
 
-  (provide 'c++-setup)
+(provide 'c++-setup)
 ;;; c++-setup.el ends here

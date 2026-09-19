@@ -123,9 +123,6 @@
 ;;
 ;;; Code:
 
-(provide 'primes)
-
-
 (defconst primes-version "1.01"
   "Version number of primes library.")
 
@@ -138,7 +135,7 @@
   "Return the Greatest Common Divisor of integers M and N, or nil if
 they are invalid.
 
-\[cost: O((12(ln 2)/pi^2)ln max(M,N)) == O(0.8427659... max(M,N))]"
+[cost: O((12(ln 2)/pi^2)ln max(M,N)) == O(0.8427659... max(M,N))]"
   ;; For details of this 2300-year algorithm due to Euclid, see, e.g.
   ;; Ronald L. Graham, Donald E. Knuth and Oren Patashnik, ``Concrete
   ;; Mathematics'' (Addison-Wesley, Reading, MA, USA, 1989, ISBN
@@ -167,7 +164,7 @@ they are invalid.
 they are invalid, or the result is not representable (e.g., the
 product M*N overflows).
 
-\[cost: O((12(ln 2)/pi^2)ln max(M,N)) == O(0.8427659... max(M,N))]"
+[cost: O((12(ln 2)/pi^2)ln max(M,N)) == O(0.8427659... max(M,N))]"
   (cond
    ((and (integerp m) (integerp n))	; check for integer args
     (let ((mn) (the-gcd) (the-lcm))
@@ -211,7 +208,7 @@ is 1, N is prime.
 Otherwise, if N is not an integer greater than 1, the return value is
 nil, equivalent to an empty list.
 
-\[cost: O(N)]"
+[cost: O(N)]"
   (interactive)
   (let ((result-list nil)
 	(n-original n))
@@ -251,18 +248,18 @@ nil, equivalent to an empty list.
 Because Emacs integers are usually more limited in size than the host
 word size would suggest, e.g.,
 
-	\[-2^{27}, 2^{27} - 1] == [-134217728, 134217727]
+	[-2^{27}, 2^{27} - 1] == [-134217728, 134217727]
 
 on a 32-bit machine, avoid passing excessively large integers to this
 function, otherwise you may experience this failure:
 
-	\(next-prime 134217689)
+	(next-prime 134217689)
 	Arithmetic domain error: \"sqrt\", -134217728.0
 
 While you may be able to use larger integers on some 64-bit machines,
 the required run time for this function is then likely to be excessive.
 
-\[cost: O(sqrt(N))]"
+[cost: O(sqrt(N))]"
   (interactive)
   (if (integerp n)
       (cond ((< n 2) nil)		;there are no primes below 2
@@ -282,7 +279,7 @@ the required run time for this function is then likely to be excessive.
 (defun next-prime (n)
   "Return the next prime number after N, or else nil.
 
-\[cost: O(sqrt(N))]"
+[cost: O(sqrt(N))]"
   (if (integerp n)
     (cond
      ((> n 1)
@@ -301,7 +298,7 @@ the required run time for this function is then likely to be excessive.
 
 The first prime number is 2.
 
-\[cost: O(N*sqrt(N))]"
+[cost: O(N*sqrt(N))]"
   (if (integerp n)
       (cond
        ((<= n 0) nil)			;non-positive args are invalid
@@ -318,7 +315,7 @@ The first prime number is 2.
 (defun prev-prime (n)
   "Return the prime number before (i.e., less than) N, or else nil.
 
-\[cost: O(sqrt(N))]"
+[cost: O(sqrt(N))]"
   (if (integerp n)
       (cond ((<= n 2) nil)		;invalid: there are no primes before 2
 	    ((= n 3) 2)			;special case: 2 is the only even prime
@@ -335,7 +332,7 @@ The first prime number is 2.
 (defun primes-between (from to)
   "Return a list of prime numbers between FROM and TO, inclusive, else nil.
 
-\[cost: O((to - from + 1)*sqrt(N)/2)]"
+[cost: O((to - from + 1)*sqrt(N)/2)]"
   (if (and (integerp from) (integerp to))
       (let ((k)
 	    (primes '()))
@@ -355,7 +352,7 @@ The first prime number is 2.
   "Return N if it is prime, else return the next prime number after N,
 else nil in N is invalid.
 
-\[cost: O(sqrt(N))]"
+[cost: O(sqrt(N))]"
   (or (prime-p n)
       (next-prime n)))
 
@@ -364,8 +361,9 @@ else nil in N is invalid.
   "Return N if it is prime, else return the prime number before
 (i.e., less than) N.
 
-\[cost: O(sqrt(N))]"
+[cost: O(sqrt(N))]"
   (or (prime-p n)
       (prev-prime n)))
 
+(provide 'primes)
 ;;; primes.el ends here

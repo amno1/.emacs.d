@@ -1,4 +1,4 @@
-;; Manipulating windows, ie. the squares with buffers in them
+;; Manipulating windows, ie. the squares with buffers in them  -*- lexical-binding: t -*-
 ;; Taken out from S. Magnars setup:
 ;; https://github.com/magnars/emacsd-reboot and tweaked a bit
 
@@ -6,10 +6,12 @@
 ;;(global-set-key (kbd "C-x -") 'toggle-window-split)
 ;;(global-set-key (kbd "C-c -") 'rotate-windows)
 
-(defcustom window-split-prefer-direction 'vertical
-  "Whether to prefer vertical or horizontal splits."
-  :group 'convenience
-  :type 'symbol)
+(require 'cl-lib)
+
+;; (defcustom window-split-prefer-direction 'vertical
+;;   "Whether to prefer vertical or horizontal splits."
+;;   :group 'convenience
+;;   :type 'symbol)
 
 (defun toggle-window-split ()
   (interactive)
@@ -51,7 +53,7 @@ argument makes the windows rotate backwards."
     (cond ((not (> num-windows 1))
            (message "You can't rotate a single window!"))
           (t
-           (dotimes (counter (- num-windows 1))
+           (dotimes (_counter (- num-windows 1))
              (let* ((next-i (% (+ step i) num-windows))
 
                     (w1 (elt non-dedicated-windows i))
