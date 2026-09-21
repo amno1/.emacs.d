@@ -2,8 +2,13 @@
 ;;(require 'corfu)
 ;;(require 'recentf)
 (recentf-mode +1)
-(require 'windmove)
 (require 'ielm)
+(require 'xref)
+(require 'windmove)
+
+(defvar org-capture-templates)
+(declare-function org-capture "org-capture" (&optional goto keys))
+
 
 (defmacro lex (pairs &rest body)
   "As let* but initializer list is like in setq/setf."
@@ -387,10 +392,15 @@ minibuffer window or is dedicated to its buffer."
       (select-window current)))))
 
 ;;;###autoload
+;;;###autoload
 (defun xref-find-definitions-other-pane (identifier)
   "Like `xref-find-definitions-other-window' but only create new window if there
 is no `other-window' to switch to."
-  (interactive (list (xref--read-identifier "Find definitions of: ")))
+  (interactive
+   (list (if (fboundp 'xref-read-identifier)
+             (xref-read-identifier "Find definitions of: ")
+           (with-no-warnings
+             (xref--read-identifier "Find definitions of: ")))))
   (cond
    ((one-window-p t)
     (xref-find-definitions-other-window identifier))
@@ -555,17 +565,17 @@ If there is not a window to the right, open new one."
   (let ((inhibit-read-only t))
     (erase-buffer)))
 
-;;;###autoload
-(defun corfu-enable-always-in-minibuffer ()
-  "Enable Corfu in the minibuffer if Vertico/Mct are not active."
-  (unless (or (bound-and-true-p helm-alive-p)
-              (bound-and-true-p mct--active)
-              (bound-and-true-p vertico--input)
-              (eq (current-local-map) read-passwd-map))
-    ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
-    (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
-                corfu-popupinfo-delay nil)
-    (corfu-mode 1)))
+;; ;;;###autoload
+;; (defun corfu-enable-always-in-minibuffer ()
+;;   "Enable Corfu in the minibuffer if Vertico/Mct are not active."
+;;   (unless (or (bound-and-true-p helm-alive-p)
+;;               (bound-and-true-p mct--active)
+;;               (bound-and-true-p vertico--input)
+;;               (eq (current-local-map) read-passwd-map))
+;;     ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+;;     (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+;;                 corfu-popupinfo-delay nil)
+;;     (corfu-mode 1)))
 
 ;;;###autoload
 (defun import-rsa-key (&optional beg end)
@@ -732,16 +742,6 @@ Saves to a temp file and puts the filename in the kill ring."
                    (backward-sexp)
                    (count-lines (point) start)))))
     (scroll-down lines)))
-
-(defun longest-line ()
-  "Return width (in columns) of the longest line in buffer"
-  (save-excursion
-    (goto-char 1)
-    (cl-loop while (not (eobp))
-             maximize (- (line-end-position) (line-beginning-position))
-             into max-width
-             do (forward-line)
-             finally (cl-return max-width))))
 
 (defun run-avx-lisp ()
   (interactive)
@@ -752,3 +752,24 @@ Saves to a temp file and puts the filename in the kill ring."
     (slime)))
 
 (provide 'extras)
+
+;; Xephyr
+
+(defun launch-emacs-in-xephyr (&optional display)
+  "Launch the custom Emacs build inside the Xephyr X11 server."
+  (interactive)
+  (let* ((target-display (or display ":1"))
+         (emacs-bin (expand-file-name "~/repos/emacs-september/src/emacs"))
+         (process-environment
+          (append (list (format "DISPLAY=%s" target-display)
+                        "GDK_BACKEND=x11"
+                        "WAYLAND_DISPLAY="
+                        "QT_QPA_PLATFORM=xcb")
+                  process-environment)))
+    (if (file-executable-p emacs-bin)
+        (let ((proc (start-process "xephyr-emacs"
+                                   "*xephyr-emacs-output*"
+                                   emacs-bin)))
+          (set-process-query-on-exit-flag proc nil)
+          (message "Spawned Emacs on %s (PID: %d)" target-display (process-id proc)))
+      (user-error "Emacs executable not found at: %s" emacs-bin))))

@@ -34,6 +34,8 @@
 (require 'helm-buffers)
 (require 'helm-adaptive)
 
+(eval-when-compile (require 'helm))
+
 (on-hook helm-mode
     ;; (helm-flx-mode +1)    
     (diminish 'helm-mode)
@@ -124,20 +126,7 @@
 (defvar helm-source-header-default-box (face-attribute
                                         'helm-source-header :box))
 (set-face-attribute 'helm-source-header nil :height 0.1)
-(defun helm-toggle-header-line ()
-  (if (> (length helm-sources) 1)
-      (set-face-attribute 'helm-source-header
-                          nil
-                          :foreground helm-source-header-default-foreground
-                          :background helm-source-header-default-background
-                          :box helm-source-header-default-box
-                          :height 1.0)
-    (set-face-attribute 'helm-source-header
-                        nil
-                        :foreground (face-attribute 'helm-selection :background)
-                        :background (face-attribute 'helm-selection :background)
-                        :box nil
-                        :height 0.1)))
+
 (helm-autoresize-mode 1)
 (helm-adaptive-mode t)
 (helm-mode 1)
@@ -223,18 +212,15 @@
 (add-hook 'helm-end-hook     #'helm-follow--kill-orphan-timer)
 
 (defun helm-execute-persistent-action--guard (orig &rest args)
-  (if (and (bound-and-true-p helm-buffer)
-           (buffer-live-p helm-buffer)
-           (get-buffer-window helm-buffer))
-      (apply orig args)
-    ;; We're outside a live helm session — kill the orphan and stay quiet.
-    (helm-follow--kill-orphan-timer)))
+  (let ((buf (and (bound-and-true-p helm-buffer)
+                  (get-buffer helm-buffer))))
+    (if (and buf (buffer-live-p buf) (get-buffer-window buf))
+        (apply orig args)
+      (when (fboundp 'helm-follow--kill-orphan-timer)
+        (helm-follow--kill-orphan-timer)))))
 
-;; (advice-add 'helm-execute-persistent-action :around
-;;             #'helm-execute-persistent-action--guard)
-
-;; (advice-remove 'helm-execute-persistent-action
-;;                #'helm-execute-persistent-action--guard)
+(advice-add 'helm-execute-persistent-action :around
+            #'helm-execute-persistent-action--guard)
 
 (provide 'helm-setup)
 ;;; helm-setup.el ends here

@@ -2597,6 +2597,7 @@ I wanted this to be simple to type and look at. The DSL is very simple
   (setf recentf-max-saved-items 100))
 #+end_src
 ** [ none  ] [x] term-toggle
+#+url 
 #+begin_src emacs-lisp
 (on-package term-toggle
   (setq term-toggle-no-confirm-exit t
