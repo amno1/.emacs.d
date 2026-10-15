@@ -4,6 +4,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("00445e6f15d31e9afaa23ed0d765850e9cd5e929be5e8e63b114a3346236c44c" default))
  '(package-selected-packages
    '(Draft-of-ANSI-Common-Lisp-Standard academic-phrases ace-window activities
                                         ascii-table beacon buttercup cl-setup
@@ -35,7 +37,14 @@
                                         rjsx-mode sentex slime-company
                                         solarized-theme super-save vterm
                                         web-mode wgrep-helm window-layout winum
-                                        with-simulated-input yasnippet-snippets)))
+                                        with-simulated-input yasnippet-snippets))
+ '(package-vc-selected-packages
+   '((term-toggle :vc-backend Git :url "https://www.github.com/amno1/term-toggle")))
+ '(safe-local-variable-values
+   '((Package . DEMO-3D) (Package . DEMO-ANIMATOR) (Package . DEMO-ANGLE)
+     (Package . COMMON-LISP-USER) (Package . GEM) (Syntax . Common-Lisp)
+     (Lowercase . YES) (Syntax . COMMON-LISP) (Lowercase . Yes) (Base . 10)
+     (Package . XLIB) (Syntax . Common-lisp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

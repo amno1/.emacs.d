@@ -773,3 +773,5 @@ Saves to a temp file and puts the filename in the kill ring."
           (set-process-query-on-exit-flag proc nil)
           (message "Spawned Emacs on %s (PID: %d)" target-display (process-id proc)))
       (user-error "Emacs executable not found at: %s" emacs-bin))))
+
+;; GH too
